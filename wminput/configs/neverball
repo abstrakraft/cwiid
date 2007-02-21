@@ -1,0 +1,4 @@
+# neverball
+
+Plugin.acc.Roll = ABS_X
+Plugin.acc.Pitch = -ABS_Y

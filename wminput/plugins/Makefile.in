@@ -1,0 +1,28 @@
+#Copyright (C) 2007 L. Donnie Smith
+
+COMMON = @top_builddir@/common
+include $(COMMON)/include/defs.mak
+
+PLUGINS = ir_ptr acc nunchuk_acc
+
+all install clean distclean uninstall: TARGET += $(MAKECMDGOALS)
+
+all install clean distclean uninstall: $(PLUGINS)
+
+$(PLUGINS):
+	$(MAKE) $(TARGET) -C $@
+
+ifeq  ($(MAKECMDGOALS), install)
+$(PLUGINS): $(GLOBAL_CWIID_DIR)/plugins
+endif
+
+$(GLOBAL_CWIID_DIR)/plugins:
+	mkdir -p $(GLOBAL_CWIID_DIR)/plugins
+
+distclean: clean
+	rm Makefile
+
+uninstall: $(PLUGINS)
+	rmdir $(GLOBAL_CWIID_DIR)/plugins; true
+
+.PHONY: all install clean distclean uninstall $(PLUGINS)
