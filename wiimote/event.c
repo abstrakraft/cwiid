@@ -78,8 +78,8 @@
 #include "wiimote_internal.h"
 #include "queue.h"
 
-int process_status(struct wiimote *wiimote, unsigned char *data,
-                   struct mesg_array *mesg_array)
+static int process_status(struct wiimote *wiimote, unsigned char *data,
+                          struct mesg_array *mesg_array)
 {
 	struct wiimote_status_mesg *mesg;
 
@@ -102,8 +102,8 @@ int process_status(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-int process_btn(struct wiimote *wiimote, unsigned char *data,
-                struct mesg_array *mesg_array)
+static int process_btn(struct wiimote *wiimote, unsigned char *data,
+                       struct mesg_array *mesg_array)
 {
 	struct wiimote_btn_mesg *mesg;
 	unsigned short buttons;
@@ -129,8 +129,8 @@ int process_btn(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-int process_acc(struct wiimote *wiimote, unsigned char *data,
-                struct mesg_array *mesg_array)
+static int process_acc(struct wiimote *wiimote, unsigned char *data,
+                       struct mesg_array *mesg_array)
 {
 	struct wiimote_acc_mesg *mesg;
 
@@ -151,8 +151,8 @@ int process_acc(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-int process_ir10(struct wiimote *wiimote, unsigned char *data,
-                 struct mesg_array *mesg_array)
+static int process_ir10(struct wiimote *wiimote, unsigned char *data,
+                        struct mesg_array *mesg_array)
 {
 	struct wiimote_ir_mesg *mesg;
 	int i;
@@ -198,8 +198,8 @@ int process_ir10(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-int process_ir12(struct wiimote *wiimote, unsigned char *data,
-                struct mesg_array *mesg_array)
+static int process_ir12(struct wiimote *wiimote, unsigned char *data,
+                        struct mesg_array *mesg_array)
 {
 	struct wiimote_ir_mesg *mesg;
 	int i;
@@ -233,8 +233,8 @@ int process_ir12(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-int process_ext(struct wiimote *wiimote, unsigned char *data, int len,
-                struct mesg_array *mesg_array)
+static int process_ext(struct wiimote *wiimote, unsigned char *data, int len,
+                       struct mesg_array *mesg_array)
 {
 	struct wiimote_nunchuk_mesg *nunchuk_mesg;
 	struct wiimote_classic_mesg *classic_mesg;
@@ -499,7 +499,7 @@ void *int_listen(struct wiimote *wiimote)
 }
 
 /* cleanup func */
-void free_dispatch_queue(struct queue *queue)
+static void free_dispatch_queue(struct queue *queue)
 {
 	if (queue_free(queue, (free_func_t *)free_mesg_array)) {
 		wiimote_err("Error freeing dispatch queue");
