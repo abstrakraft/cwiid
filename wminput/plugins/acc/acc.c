@@ -38,7 +38,7 @@ int plugin_id;
 wmplugin_info_t wmplugin_info;
 wmplugin_init_t wmplugin_init;
 wmplugin_exec_t wmplugin_exec;
-void process_acc(struct wiimote_acc_mesg *mesg);
+static void process_acc(struct wiimote_acc_mesg *mesg);
 
 struct wmplugin_info *wmplugin_info() {
 	if (!info_init) {

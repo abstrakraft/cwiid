@@ -40,7 +40,7 @@ wmplugin_info_t wmplugin_info;
 wmplugin_init_t wmplugin_init;
 wmplugin_exec_t wmplugin_exec;
 
-void process_nunchuk(struct wiimote_nunchuk_mesg *mesg);
+static void process_nunchuk(struct wiimote_nunchuk_mesg *mesg);
 
 struct wmplugin_info *wmplugin_info() {
 	if (!info_init) {

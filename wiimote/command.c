@@ -45,8 +45,6 @@ struct write_seq ir_disable_seq[] = {
 	{WRITE_SEQ_RPT, RPT_IR_ENABLE2, (unsigned char *)"\x00", 1, 0}
 };
 
-int update_rpt_mode(struct wiimote *wiimote, int flags);
-
 #define CMD_BUF_LEN	21
 int wiimote_command(struct wiimote *wiimote, enum wiimote_command command,
                     unsigned char flags) {

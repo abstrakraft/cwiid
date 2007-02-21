@@ -438,8 +438,7 @@ struct plugin *get_plugin(struct conf *conf, char *name)
 			snprintf(pathname, PLUGIN_PATHNAME_LEN, "%s/%s.so",
 			         conf->plugin_search_dirs[i], name);
 			if (!stat(pathname, &buf)) {
-				if (!(plugin->handle = dlopen(pathname,
-				                              RTLD_NOW | RTLD_DEEPBIND))) {
+				if (!(plugin->handle = dlopen(pathname, RTLD_NOW))) {
 					wminput_err(dlerror());
 				}
 				break;
