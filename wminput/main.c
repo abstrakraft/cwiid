@@ -53,7 +53,7 @@ int init;
 
 #define DEFAULT_CONFIG_FILE	"default"
 
-#define USAGE "usage:%s [-h] [-t tracking_plugin] [BDADDR]\n"
+#define USAGE "usage:%s [-h] [-c config] [bdaddr]\n"
 
 #define GLOBAL_CONFIG_DIR	GLOBAL_CWIID_DIR "/wminput"
 #define GLOBAL_PLUGIN_DIR	GLOBAL_CWIID_DIR "/plugins"
