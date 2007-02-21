@@ -1,0 +1,56 @@
+#Copyright (C) 2007 L. Donnie Smith
+
+COMMON = @top_builddir@/common
+include $(COMMON)/include/defs.mak
+
+APP_NAME = wminput
+
+SOURCES = main.c conf.c uinput.c action_enum.c parser.c lexer.c util.c
+
+CFLAGS += -I@top_builddir@/wiimote
+LDLIBS = -lwiimote -ldl
+LDFLAGS = -L@top_builddir@/wiimote -rdynamic
+INST_DIR = @bindir@
+
+YFLAGS = -d
+
+include $(COMMON)/include/app.mak
+
+all install clean distclean uninstall: make_plugins
+
+install: install_configs
+
+uninstall: uninstall_configs
+
+make_plugins:
+	$(MAKE) $(MAKECMDGOALS) -C plugins
+
+install_configs:
+	mkdir -p $(GLOBAL_CWIID_DIR)/wminput
+	cp configs/* $(GLOBAL_CWIID_DIR)/wminput
+	ln -sf $(GLOBAL_CWIID_DIR)/wminput/acc_ptr \
+		$(GLOBAL_CWIID_DIR)/wminput/default
+
+uninstall_configs:
+	rm -f $(GLOBAL_CWIID_DIR)/wminput/default
+	for c in `ls configs`; do					\
+		rm -f $(GLOBAL_CWIID_DIR)/wminput/$$c;	\
+	done
+	rmdir $(GLOBAL_CWIID_DIR)/wminput; true
+
+action_enum.c: action_enum.awk action_enum.txt
+	./action_enum.awk action_enum.txt > action_enum.c
+
+conf.o lexer.c: y.tab.h
+
+y.tab.h: parser.c
+
+clean: clean_gen
+
+clean_gen:
+	rm -f action_enum.c parser.c lexer.c y.tab.h
+
+distclean: clean
+	rm Makefile
+
+.PHONY: all install clean distclean uninstall make_plugins clean_gen

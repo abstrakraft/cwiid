@@ -1,0 +1,37 @@
+#Copyright (C) 2007 L. Donnie Smith
+
+COMMON = @top_builddir@/common
+include $(COMMON)/include/defs.mak
+
+LIB_DIRS = wiimote
+BIN_DIRS = wmgui wminput
+
+all install clean distclean uninstall: TARGET += $(MAKECMDGOALS)
+
+all install clean distclean uninstall: $(BIN_DIRS) $(LIB_DIRS)
+
+all clean distclean: wmdemo
+
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
+$(BIN_DIRS): $(LIB_DIRS)
+endif
+endif
+
+ifeq ($(MAKECMDGOALS),install)
+$(BIN_DIRS) $(LIB_DIRS): $(GLOBAL_CWIID_DIR)
+endif
+
+$(LIB_DIRS) $(BIN_DIRS) wmdemo:
+	$(MAKE) $(TARGET) -C $@
+
+$(GLOBAL_CWIID_DIR):
+	mkdir -p $(GLOBAL_CWIID_DIR)
+
+distclean:
+	rm -rf Makefile config.log config.status autom4te.cache $(COMMON)/include/defs.mak
+
+uninstall:
+	rm -rf $(GLOBAL_CWIID_DIR); true
+
+.PHONY: all install clean distclean uninstall $(LIB_DIRS) $(BIN_DIRS) wmdemo

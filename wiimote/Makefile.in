@@ -1,0 +1,32 @@
+#Copyright (C) 2006 L. Donnie Smith
+
+COMMON = @top_builddir@/common
+include $(COMMON)/include/defs.mak
+
+LIB_NAME = wiimote
+MAJOR_VER = 0
+MINOR_VER = 1
+SOURCES = connect.c command.c event.c rw.c util.c queue.c
+LDLIBS = -lbluetooth -lpthread -lrt
+LIB_INST_DIR = @libdir@
+INC_INST_DIR = @includedir@
+
+include $(COMMON)/include/lib.mak
+
+$(SHARED_LIB): $(SO_NAME) $(LINK_NAME)
+
+$(SO_NAME):
+	ln -sf $(SHARED_LIB) $(SO_NAME)
+
+$(LINK_NAME):
+	ln -sf $(SO_NAME) $(LINK_NAME)
+
+clean: remove_links
+
+remove_links:
+	rm -f $(SO_NAME) $(LINK_NAME)
+
+distclean: clean
+	rm Makefile
+
+.PHONY: distclean clean make_links remove_links

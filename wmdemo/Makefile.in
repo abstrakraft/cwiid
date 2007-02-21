@@ -1,0 +1,20 @@
+#Copyright (C) 2007 L. Donnie Smith
+
+COMMON = @top_builddir@/common
+include $(COMMON)/include/defs.mak
+
+APP_NAME = wmdemo
+
+SOURCES = main.c
+
+CFLAGS += -I@top_builddir@/wiimote
+LDFLAGS = -L@top_builddir@/wiimote
+LDLIBS = -lwiimote
+INST_DIR = @bindir@
+
+include $(COMMON)/include/app.mak
+
+distclean: clean
+	rm Makefile
+
+.PHONY: distclean
