@@ -7,7 +7,7 @@ PLUGIN_NAME = nunchuk_acc
 SOURCES = nunchuk_acc.c
 CFLAGS += -I@top_builddir@/wminput -I@top_builddir@/wiimote
 LDLIBS = -lm
-INST_DIR = $(GLOBAL_CWIID_DIR)/plugins
+INST_DIR = $(CWIID_PLUGINS_DIR)
 
 include $(COMMON)/include/plugin.mak
 

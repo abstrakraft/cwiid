@@ -47,16 +47,9 @@ void process_plugin(struct plugin *, int, union wiimote_mesg * []);
 wiimote_t *wiimote;
 int init;
 
-#ifndef GLOBAL_CWIID_DIR
-#error Global plugin directory macro undefined
-#endif
-
 #define DEFAULT_CONFIG_FILE	"default"
 
 #define USAGE "usage:%s [-h] [-c config] [bdaddr]\n"
-
-#define GLOBAL_CONFIG_DIR	GLOBAL_CWIID_DIR "/wminput"
-#define GLOBAL_PLUGIN_DIR	GLOBAL_CWIID_DIR "/plugins"
 
 #define HOME_DIR_LEN	128
 int main(int argc, char *argv[])
@@ -96,8 +89,8 @@ int main(int argc, char *argv[])
 	/* Load Config */
 	if ((tmp = getenv("HOME")) == NULL) {
 		wminput_err("unable to find home directory");
-		config_search_dirs[0] = GLOBAL_CONFIG_DIR;
-		plugin_search_dirs[0] = GLOBAL_PLUGIN_DIR;
+		config_search_dirs[0] = WMINPUT_CONFIG_DIR;
+		plugin_search_dirs[0] = CWIID_PLUGINS_DIR;
 		config_search_dirs[1] = plugin_search_dirs[1] = NULL;
 	}
 	else {
@@ -105,8 +98,8 @@ int main(int argc, char *argv[])
 		snprintf(home_plugin_dir, HOME_DIR_LEN, "%s/.CWiid/plugins", tmp);
 		config_search_dirs[0] = home_config_dir;
 		plugin_search_dirs[0] = home_plugin_dir;
-		config_search_dirs[1] = GLOBAL_CONFIG_DIR;
-		plugin_search_dirs[1] = GLOBAL_PLUGIN_DIR;
+		config_search_dirs[1] = WMINPUT_CONFIG_DIR;
+		plugin_search_dirs[1] = CWIID_PLUGINS_DIR;
 		config_search_dirs[2] = plugin_search_dirs[2] = NULL;
 	}
 

@@ -34,6 +34,24 @@ AC_CHECK_HEADER([linux/uinput.h],,
 
 AC_ISC_POSIX
 
+AC_ARG_WITH(cwiid-config-dir,AC_HELP_STRING([--with-cwiid-config-dir],
+	[CWiid configuration directory, default to $(sysconfdir)/cwiid]))
+if test -z $with_cwiid_config_dir; then
+	CWIID_CONFIG_DIR='${sysconfdir}/cwiid'
+else
+	CWIID_CONFIG_DIR=$with_cwiid_config_dir
+fi
+AC_SUBST(CWIID_CONFIG_DIR)
+
+AC_ARG_WITH(cwiid-plugins-dir,AC_HELP_STRING([--with-cwiid-plugins-dir],
+	[CWiid plugins directory, default to $(libdir)/cwiid/plugins]))
+if test -n $with_cwiid_plugins_dir; then
+	CWIID_PLUGINS_DIR='${libdir}/cwiid/plugins'
+else
+	CWIID_PLUGINS_DIR=$with_cwiid_plugins_dir
+fi
+AC_SUBST(CWIID_PLUGINS_DIR)
+
 pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)

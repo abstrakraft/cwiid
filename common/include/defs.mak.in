@@ -3,16 +3,18 @@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-datarootdir = @datarootdir@
-datadir = @datadir@
+sysconfdir = @sysconfdir@
+libdir = @libdir@
 
 CC = @CC@
 AWK = @AWK@
 LEX = @LEX@
 YACC = @YACC@
 
-GLOBAL_CWIID_DIR = $(datadir)/CWiid
+CWIID_CONFIG_DIR = @CWIID_CONFIG_DIR@
+CWIID_PLUGINS_DIR = @CWIID_PLUGINS_DIR@
 
-CFLAGS = -g -Wall -DGLOBAL_CWIID_DIR=\"$(GLOBAL_CWIID_DIR)\" \
-	-DCWIID_VERSION=\"@PACKAGE_VERSION@\"
+CFLAGS = -g -Wall -DCWIID_VERSION=\"@PACKAGE_VERSION@\" \
+	-DCWIID_PLUGINS_DIR=\"$(CWIID_PLUGINS_DIR)\" \
+	-DCWIID_CONFIG_DIR=\"$(CWIID_CONFIG_DIR)\"
 
