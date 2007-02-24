@@ -7,10 +7,12 @@ APP_NAME = wminput
 
 SOURCES = main.c conf.c uinput.c action_enum.c parser.c lexer.c util.c
 
-CFLAGS += -I@top_builddir@/wiimote
+CFLAGS += -I@top_builddir@/wiimote \
+	-DWMINPUT_CONFIG_DIR=\"$(WMINPUT_CONFIG_DIR)\"
 LDLIBS = -lwiimote -ldl
 LDFLAGS = -L@top_builddir@/wiimote -rdynamic
 INST_DIR = @bindir@
+WMINPUT_CONFIG_DIR = $(CWIID_CONFIG_DIR)/wminput
 
 YFLAGS = -d
 
@@ -20,23 +22,24 @@ all install clean distclean uninstall: make_plugins
 
 install: install_configs
 
-uninstall: uninstall_configs
+#DON'T UNINSTALL CONFIGS
+#uninstall: uninstall_configs
 
 make_plugins:
 	$(MAKE) $(MAKECMDGOALS) -C plugins
 
 install_configs:
-	mkdir -p $(GLOBAL_CWIID_DIR)/wminput
-	cp configs/* $(GLOBAL_CWIID_DIR)/wminput
-	ln -sf $(GLOBAL_CWIID_DIR)/wminput/acc_ptr \
-		$(GLOBAL_CWIID_DIR)/wminput/default
+	mkdir -p $(WMINPUT_CONFIG_DIR)
+	cp configs/* $(WMINPUT_CONFIG_DIR)
+	ln -sf $(WMINPUT_CONFIG_DIR)/acc_ptr \
+		$(WMINPUT_CONFIG_DIR)/default
 
-uninstall_configs:
-	rm -f $(GLOBAL_CWIID_DIR)/wminput/default
-	for c in `ls configs`; do					\
-		rm -f $(GLOBAL_CWIID_DIR)/wminput/$$c;	\
-	done
-	rmdir $(GLOBAL_CWIID_DIR)/wminput; true
+#uninstall_configs:
+#	rm -f $(WMINPUT_CONFIG_DIR)/default
+#	for c in `ls configs`; do				\
+#		rm -f $(WMINPUT_CONFIG_DIR)/$$c;	\
+#	done
+#	rmdir $(WMINPUT_CONFIG_DIR); true
 
 action_enum.c: action_enum.awk action_enum.txt
 	./action_enum.awk action_enum.txt > action_enum.c

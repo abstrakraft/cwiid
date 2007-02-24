@@ -12,17 +12,7 @@ all install clean distclean uninstall: $(PLUGINS)
 $(PLUGINS):
 	$(MAKE) $(TARGET) -C $@
 
-ifeq  ($(MAKECMDGOALS), install)
-$(PLUGINS): $(GLOBAL_CWIID_DIR)/plugins
-endif
-
-$(GLOBAL_CWIID_DIR)/plugins:
-	mkdir -p $(GLOBAL_CWIID_DIR)/plugins
-
 distclean: clean
 	rm Makefile
-
-uninstall: $(PLUGINS)
-	rmdir $(GLOBAL_CWIID_DIR)/plugins; true
 
 .PHONY: all install clean distclean uninstall $(PLUGINS)

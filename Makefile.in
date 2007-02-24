@@ -19,19 +19,26 @@ endif
 endif
 
 ifeq ($(MAKECMDGOALS),install)
-$(BIN_DIRS) $(LIB_DIRS): $(GLOBAL_CWIID_DIR)
+$(BIN_DIRS) $(LIB_DIRS): $(CWIID_CONFIG_DIR) $(CWIID_PLUGINS_DIR)
 endif
 
 $(LIB_DIRS) $(BIN_DIRS) wmdemo:
 	$(MAKE) $(TARGET) -C $@
 
-$(GLOBAL_CWIID_DIR):
-	mkdir -p $(GLOBAL_CWIID_DIR)
+$(CWIID_CONFIG_DIR):
+	mkdir -p $(CWIID_CONFIG_DIR)
+
+$(CWIID_PLUGINS_DIR):
+	mkdir -p $(CWIID_PLUGINS_DIR)
 
 distclean:
 	rm -rf Makefile config.log config.status autom4te.cache $(COMMON)/include/defs.mak
 
 uninstall:
-	rm -rf $(GLOBAL_CWIID_DIR); true
+	rm -r $(CWIID_PLUGINS_DIR); true
 
-.PHONY: all install clean distclean uninstall $(LIB_DIRS) $(BIN_DIRS) wmdemo
+uninstall_config:
+	rm -rf $(CWIID_CONFIG_DIR)
+
+.PHONY: all install clean distclean uninstall uninstall_config $(LIB_DIRS) \
+	$(BIN_DIRS) wmdemo

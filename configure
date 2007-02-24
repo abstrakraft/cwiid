@@ -667,6 +667,8 @@ YFLAGS
 CPP
 GREP
 EGREP
+CWIID_CONFIG_DIR
+CWIID_PLUGINS_DIR
 PKG_CONFIG
 PACKAGE_CFLAGS
 PACKAGE_LIBS
@@ -1253,6 +1255,15 @@ if test -n "$ac_init_help"; then
      short | recursive ) echo "Configuration of CWiid 0.5.00:";;
    esac
   cat <<\_ACEOF
+
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-cwiid-config-dir CWiid configuration directory, default to
+                          $(sysconfdir)/cwiid
+  --with-cwiid-plugins-dir
+                          CWiid plugins directory, default to
+                          $(libdir)/cwiid/plugins
 
 Some influential environment variables:
   CC          C compiler command
@@ -4269,6 +4280,32 @@ if test "$ac_res" != no; then
 fi
 
 
+
+# Check whether --with-cwiid-config-dir was given.
+if test "${with_cwiid_config_dir+set}" = set; then
+  withval=$with_cwiid_config_dir;
+fi
+
+if test -z $with_cwiid_config_dir; then
+	CWIID_CONFIG_DIR='${sysconfdir}/cwiid'
+else
+	CWIID_CONFIG_DIR=$with_cwiid_config_dir
+fi
+
+
+
+# Check whether --with-cwiid-plugins-dir was given.
+if test "${with_cwiid_plugins_dir+set}" = set; then
+  withval=$with_cwiid_plugins_dir;
+fi
+
+if test -n $with_cwiid_plugins_dir; then
+	CWIID_PLUGINS_DIR='${libdir}/cwiid/plugins'
+else
+	CWIID_PLUGINS_DIR=$with_cwiid_plugins_dir
+fi
+
+
 pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"
 
 
@@ -5196,6 +5233,8 @@ YFLAGS!$YFLAGS$ac_delim
 CPP!$CPP$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
+CWIID_CONFIG_DIR!$CWIID_CONFIG_DIR$ac_delim
+CWIID_PLUGINS_DIR!$CWIID_PLUGINS_DIR$ac_delim
 PKG_CONFIG!$PKG_CONFIG$ac_delim
 PACKAGE_CFLAGS!$PACKAGE_CFLAGS$ac_delim
 PACKAGE_LIBS!$PACKAGE_LIBS$ac_delim
@@ -5203,7 +5242,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 58; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 60; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

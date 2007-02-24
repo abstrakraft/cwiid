@@ -6,7 +6,7 @@ include $(COMMON)/include/defs.mak
 PLUGIN_NAME = ir_ptr
 SOURCES = ir_ptr.c
 CFLAGS += -I@top_builddir@/wminput -I@top_builddir@/wiimote
-INST_DIR = $(GLOBAL_CWIID_DIR)/plugins
+INST_DIR = $(CWIID_PLUGINS_DIR)
 
 include $(COMMON)/include/plugin.mak
 
