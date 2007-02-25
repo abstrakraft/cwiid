@@ -1,3 +1,6 @@
+#Note: this is a list of button and axis IDs, and is not a valid configuration
+#file
+
 # Wiimote Buttons
 Wiimote.Up
 Wiimote.Down
