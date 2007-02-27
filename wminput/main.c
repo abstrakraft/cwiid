@@ -94,8 +94,8 @@ int main(int argc, char *argv[])
 		config_search_dirs[1] = plugin_search_dirs[1] = NULL;
 	}
 	else {
-		snprintf(home_config_dir, HOME_DIR_LEN, "%s/.CWiid/wminput", tmp);
-		snprintf(home_plugin_dir, HOME_DIR_LEN, "%s/.CWiid/plugins", tmp);
+		snprintf(home_config_dir, HOME_DIR_LEN, "%s/.cwiid/wminput", tmp);
+		snprintf(home_plugin_dir, HOME_DIR_LEN, "%s/.cwiid/plugins", tmp);
 		config_search_dirs[0] = home_config_dir;
 		plugin_search_dirs[0] = home_plugin_dir;
 		config_search_dirs[1] = WMINPUT_CONFIG_DIR;

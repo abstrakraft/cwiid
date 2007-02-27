@@ -44,7 +44,7 @@ int conf_load(struct conf *conf, char *conf_name, char *config_search_dirs[],
 
 	cur_conf->config_search_dirs = config_search_dirs;
 	cur_conf->plugin_search_dirs = plugin_search_dirs;
-	if (!(yyin = conf_open_config(cur_conf, conf_name))) {
+	if (!(yyin = conf_push_config(cur_conf, conf_name, NULL))) {
 		return -1;
 	}
 
@@ -290,6 +290,11 @@ void conf_init(struct conf *conf)
 	conf->fd = -1;
 	conf->config_search_dirs = NULL;
 	conf->plugin_search_dirs = NULL;
+	conf->current_config_filename = NULL;
+	conf->stack_index = -1;
+	for (i=0; i < CONF_MAX_INCLUDE_DEPTH; i++) {
+		conf->config_filename_stack[i] = NULL;
+	}
 	conf->rpt_mode_flags = 0;
 	memset(&conf->dev, 0, sizeof conf->dev);
 	strncpy(conf->dev.name, UINPUT_NAME, UINPUT_MAX_NAME_SIZE);
@@ -363,17 +368,24 @@ void conf_init(struct conf *conf)
 }
 
 #define CONF_PATHNAME_LEN	128
-FILE *conf_open_config(struct conf *conf, char *filename)
+FILE *conf_push_config(struct conf *conf, char *filename, YYLTYPE *yyloc)
 {
 	int i;
 	FILE *file;
 	char pathname[CONF_PATHNAME_LEN];
+	char *stackname;
+
+	if (conf->stack_index+1 >= CONF_MAX_INCLUDE_DEPTH) {
+		wminput_err("maximum include depth exceeded: %s", filename);
+		return NULL;
+	}
 
 	/* filename == / or ./ or ../ */
 	if ((filename[0] == '/') ||
 	    ((filename[0] == '.') &&
 	      ((filename[1] == '/') ||
 	      ((filename[1] == '.') && (filename[2] == '/'))))) {
+		stackname = filename;
 		file = fopen(filename, "r");
 	}
 	else {
@@ -381,6 +393,7 @@ FILE *conf_open_config(struct conf *conf, char *filename)
 			snprintf(pathname, CONF_PATHNAME_LEN, "%s/%s",
 			         conf->config_search_dirs[i], filename);
 			if ((file = fopen(pathname, "r"))) {
+				stackname = pathname;
 				break;
 			}
 		}
@@ -391,7 +404,39 @@ FILE *conf_open_config(struct conf *conf, char *filename)
 		return NULL;
 	}
 
+	conf->stack_index++;
+	if ((conf->config_filename_stack[conf->stack_index] =
+	  malloc(strlen(stackname) + 1)) == NULL) {
+		wminput_err("out of memory");
+		conf->stack_index--;
+		return NULL;
+	}
+	strcpy(conf->config_filename_stack[conf->stack_index], stackname);
+	if (yyloc) {
+		conf->yyloc_stack[conf->stack_index] = *yyloc;
+	}
+
+	conf->current_config_filename =
+		conf->config_filename_stack[conf->stack_index];
+
 	return file;
+}
+
+int conf_pop_config(struct conf *conf, YYLTYPE *yyloc)
+{
+	if (conf->stack_index == -1) {
+		return -1;
+	}
+
+	free(conf->config_filename_stack[conf->stack_index]);
+	*yyloc = conf->yyloc_stack[conf->stack_index];
+
+	conf->stack_index--;
+
+	conf->current_config_filename =
+		conf->config_filename_stack[conf->stack_index];
+
+	return 0;
 }
 
 int lookup_action(char *str_action)

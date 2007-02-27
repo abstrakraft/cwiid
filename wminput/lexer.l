@@ -64,17 +64,17 @@ BLANK		[[:blank:]]+
 <inc>{FILENAME}	{
 					FILE *file;
 					step;
-					if ((file = conf_open_config(cur_conf, yytext)) == NULL) {
-						wminput_err("file not found: %s", yytext);
-					}
-					else {
+					if ((file = conf_push_config(cur_conf, yytext, &yylloc))) {
 						yypush_buffer_state(yy_create_buffer(file,
 						                                     YY_BUF_SIZE));
+						yylloc.first_line = yylloc.last_line = 0;
+						yylloc.first_column = yylloc.last_column = 0;
 					}
 					BEGIN(INITIAL);
 				}
 <<EOF>>			{
 					yypop_buffer_state();
+					conf_pop_config(cur_conf, &yylloc);
 					if (YY_CURRENT_BUFFER) {
 						BEGIN(postinc);
 					}
