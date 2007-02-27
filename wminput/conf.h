@@ -23,6 +23,7 @@
 
 #include "wiimote.h"
 #include "wmplugin.h"
+#include "y.tab.h"
 
 #define CONF_WM	1
 #define CONF_NC	2
@@ -125,10 +126,16 @@ struct plugin {
 	struct axis_map amap[WMPLUGIN_MAX_AXIS_COUNT];
 };
 
+#define CONF_MAX_INCLUDE_DEPTH	10
+
 struct conf {
 	int fd;
 	char **config_search_dirs;
 	char **plugin_search_dirs;
+	char **current_config_filename;
+	int stack_index;
+	char *config_filename_stack[CONF_MAX_INCLUDE_DEPTH];
+	YYLTYPE yyloc_stack[CONF_MAX_INCLUDE_DEPTH];
 	unsigned char rpt_mode_flags;
 	struct uinput_user_dev dev;
 	int ff;
@@ -158,7 +165,8 @@ int conf_plugin_axis(struct conf *conf, char *name, char *axis, int axis_type,
                      int action, int flags);
 
 void conf_init(struct conf *conf);
-FILE *conf_open_config(struct conf *conf, char *filename);
+FILE *conf_push_config(struct conf *conf, char *filename, YYLTYPE *yyloc);
+int conf_pop_config(struct conf *conf, YYLTYPE *yyloc);
 int lookup_action(char *str_action);
 
 int uinput_open(struct conf *conf);

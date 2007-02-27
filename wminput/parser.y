@@ -94,7 +94,8 @@ void yyerror(char const *s, ...)
     va_list ap;
 
     va_start(ap, s);
-    wminput_err("line %d, column %d:", yylloc.first_line, yylloc.first_column);
+    wminput_err("%s: line %d, column %d:", cur_conf->current_config_filename,
+	            yylloc.first_line, yylloc.first_column);
     wminput_err((char *)s, ap);
     va_end(ap);
 }
