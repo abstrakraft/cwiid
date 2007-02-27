@@ -37,15 +37,13 @@ INSTALLATION
 make
 sudo make install
 
-While CWiid is still in the early development stages, installation directories and filenames are changed more often than in a mature, stable package.  In order to prevent the collection of obselete directories and files, it is recommended that you run 'make uninstall && make uninstall_config' from your current CWiid source directory before installing a new one.
+While CWiid is still in the early development stages, installation directories and filenames are changed more often than in a mature, stable package.  In order to prevent the collection of obselete directories and files, it is recommended that you run 'make uninstall && make uninstall_config' from your current CWiid source directory before installing a new one.  Files are currently installed to the following directories: /usr/local/{bin,etc,lib,lib/cwiid}.  Recently, but no longer, used directories include /usr/share/CWiid - this directory may be deleted.
 
 Many distributions do not have /usr/local/lib in the library search path, and on many of these same distributions, the library installation directory (as determined by autoconf) is /usr/local/lib, creating a problem when you try to run programs depending on libraries installed there. There are two clean ways to fix this:
 1.Add a --prefix=/usr argument to ./configure
 2.Add /usr/local/lib to /etc/ld.so.conf, then run ldconfig. 
 
 I prefer the second method since it keeps local software in the local directory where it should be, and it fixes the problem for every package using /usr/local/lib, not just CWiid.  Until someone offers a convincing argument for the omission of /usr/local/lib from /etc/ld.so.conf, I consider this to be a distribution bug, and method #2 above is the fix.
-
-Previous versions of CWiid installed plugins and configuration files in /usr/local/lib/CWiid.  This directory is no longer used and may be deleted.
 
 Please report any compilation errors to <wiimote@abstrakraft.org>.
 

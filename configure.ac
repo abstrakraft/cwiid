@@ -1,4 +1,4 @@
-AC_INIT(CWiid,0.5.00,wiimote@abstrakraft.org)
+AC_INIT(CWiid,0.5.01,wiimote@abstrakraft.org)
 
 AC_PROG_CC
 AC_PROG_AWK
