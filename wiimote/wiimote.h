@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,11 +13,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
 #ifndef WIIMOTE_H
 #define WIIMOTE_H
 
+#include <stdint.h>
 #include <bluetooth/bluetooth.h>	/* bdaddr_t */
 
 /* Report Mode Flags */
@@ -120,27 +126,27 @@ enum wiimote_ext_type {
 
 struct wiimote_status_mesg {
 	enum wiimote_mesg_type type;
-	unsigned char battery;
+	uint8_t battery;
 	enum wiimote_ext_type extension;
 };	
 
 struct wiimote_btn_mesg {
 	enum wiimote_mesg_type type;
-	unsigned short buttons;
+	uint16_t buttons;
 };
 
 struct wiimote_acc_mesg {
 	enum wiimote_mesg_type type;
-	unsigned short x;
-	unsigned short y;
-	unsigned short z;
+	uint8_t x;
+	uint8_t y;
+	uint8_t z;
 };
 
 struct wiimote_ir_src {
 	int valid;
-	unsigned short x;
-	unsigned short y;
-	char size;
+	uint16_t x;
+	uint16_t y;
+	int8_t size;
 };
 
 struct wiimote_ir_mesg {
@@ -150,23 +156,23 @@ struct wiimote_ir_mesg {
 
 struct wiimote_nunchuk_mesg {
 	enum wiimote_mesg_type type;
-	unsigned char stick_x;
-	unsigned char stick_y;
-	unsigned char acc_x;
-	unsigned char acc_y;
-	unsigned char acc_z;
-	unsigned char buttons;
+	uint8_t stick_x;
+	uint8_t stick_y;
+	uint8_t acc_x;
+	uint8_t acc_y;
+	uint8_t acc_z;
+	uint8_t buttons;
 };
 
 struct wiimote_classic_mesg {
 	enum wiimote_mesg_type type;
-	unsigned char l_stick_x;
-	unsigned char l_stick_y;
-	unsigned char r_stick_x;
-	unsigned char r_stick_y;
-	unsigned char l;
-	unsigned char r;
-	unsigned short buttons;
+	uint8_t l_stick_x;
+	uint8_t l_stick_y;
+	uint8_t r_stick_x;
+	uint8_t r_stick_y;
+	uint8_t l;
+	uint8_t r;
+	uint16_t buttons;
 };
 
 union wiimote_mesg {
@@ -192,11 +198,11 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
                            int *id);
 int wiimote_disconnect(wiimote_t *wiimote);
 int wiimote_command(wiimote_t *wiimote, enum wiimote_command command,
-                    unsigned char flags);
-int wiimote_read(wiimote_t *wiimote, unsigned int flags,
-                 unsigned int offset, unsigned int len, unsigned char *data);
-int wiimote_write(wiimote_t *wiimote, unsigned int flags,
-                  unsigned int offset, unsigned int len, unsigned char *data);
+                    uint8_t flags);
+int wiimote_read(wiimote_t *wiimote, uint8_t flags, uint32_t offset,
+                 uint16_t len, void *data);
+int wiimote_write(wiimote_t *wiimote, uint8_t flags, uint32_t offset,
+                  uint16_t len, const void *data);
 /* int wiimote_beep(wiimote_t *wiimote); */
 int wiimote_findfirst(bdaddr_t *bdaddr);
 

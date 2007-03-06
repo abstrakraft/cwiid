@@ -13,11 +13,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/04/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
 #ifndef WMPLUGIN_H
 #define WMPLUGIN_H
 
+#include <stdint.h>
+#include <linux/input.h>
 #include <wiimote.h>
 
 #define WMPLUGIN_MAX_BUTTON_COUNT	16
@@ -32,7 +39,7 @@ struct wmplugin_button_info {
 
 struct wmplugin_axis_info {
 	char *name;
-	int type;
+	__u16 type;
 	int max;
 	int min;
 	int fuzz;
@@ -40,27 +47,28 @@ struct wmplugin_axis_info {
 };
 
 struct wmplugin_info {
-	unsigned int button_count;
+	unsigned char button_count;
 	struct wmplugin_button_info button_info[WMPLUGIN_MAX_BUTTON_COUNT];
-	unsigned int axis_count;
+	unsigned char axis_count;
 	struct wmplugin_axis_info axis_info[WMPLUGIN_MAX_AXIS_COUNT];
 };
 
 struct wmplugin_axis {
-	int valid;
-	int value;
+	char valid;
+	__s32 value;
 };
 
 struct wmplugin_data {
-	unsigned short buttons;
+	uint16_t buttons;
 	struct wmplugin_axis axes[WMPLUGIN_MAX_AXIS_COUNT];
 };
 
 typedef struct wmplugin_info *wmplugin_info_t(void);
-typedef int wmplugin_init_t(int id, wiimote_t *wiimote);
+typedef int wmplugin_init_t(int, wiimote_t *);
 typedef struct wmplugin_data *wmplugin_exec_t(int, union wiimote_mesg * []);
 
-int wmplugin_set_report_mode(int id, unsigned int flags);
+int wmplugin_set_report_mode(int id, uint8_t flags);
 void wmplugin_err(int id, char *str, ...);
 
 #endif
+

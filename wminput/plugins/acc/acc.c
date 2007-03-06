@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,6 +13,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/04/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * type audit (stdint, const, char booleans)
+ *
+ *  03/01/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Initial ChangeLog
+ *  * made global variables static
  */
 
 #include <math.h>
@@ -22,18 +30,18 @@
 #define PI	3.14159265358979323
 
 struct acc {
-	unsigned char x;
-	unsigned char y;
-	unsigned char z;
+	uint8_t x;
+	uint8_t y;
+	uint8_t z;
 };
 
-int info_init = 0;
-struct wmplugin_info info;
-struct wmplugin_data data;
+static unsigned char info_init = 0;
+static struct wmplugin_info info;
+static struct wmplugin_data data;
 
-struct acc acc_zero, acc_one;
+static struct acc acc_zero, acc_one;
 
-int plugin_id;
+static int plugin_id;
 
 wmplugin_info_t wmplugin_info;
 wmplugin_init_t wmplugin_init;
@@ -119,7 +127,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 	return ret;
 }
 
-void process_acc(struct wiimote_acc_mesg *mesg)
+static void process_acc(struct wiimote_acc_mesg *mesg)
 {
 	double a_x, a_y, a_z, a;
 	double roll, pitch;

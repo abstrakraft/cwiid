@@ -1,4 +1,9 @@
-AC_INIT(CWiid,0.5.01,wiimote@abstrakraft.org)
+# ChangeLog:
+# 03/01/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+# * Initial ChangeLog
+# * Check for stdint.h
+
+AC_INIT(CWiid,0.5.01,cwiid@abstrakraft.org)
 
 AC_PROG_CC
 AC_PROG_AWK
@@ -24,6 +29,8 @@ AC_CHECK_LIB([dl], [dlopen],,
 #	AC_MSG_ERROR([rt lib not found]))
 
 AC_HEADER_STDC
+AC_CHECK_HEADER([stdint.h],,
+	AC_MSG_ERROR([stdint.h not found]))
 AC_CHECK_HEADER([bluetooth/bluetooth.h],,
 	AC_MSG_ERROR([bluetooth/bluetooth.h not found]))
 AC_CHECK_HEADERS([bluetooth/l2cap.h bluetooth/hci.h],,

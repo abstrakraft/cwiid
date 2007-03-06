@@ -13,8 +13,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/03/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -45,7 +51,7 @@ void process_plugin(struct plugin *, int, union wiimote_mesg * []);
 
 /* Globals */
 wiimote_t *wiimote;
-int init;
+char init;
 
 #define DEFAULT_CONFIG_FILE	"default"
 
@@ -67,7 +73,7 @@ int main(int argc, char *argv[])
 	struct uinput_listen_data uinput_listen_data;
 	pthread_t uinput_listen_thread;
 
-	init = -1;
+	init = 1;
 
 	/* Parse Options */
 	while ((c = getopt(argc, argv, OPTSTRING)) != -1) {
@@ -203,7 +209,7 @@ int main(int argc, char *argv[])
 	return ret;
 }
 
-int wmplugin_set_report_mode(int id, unsigned int flags)
+int wmplugin_set_report_mode(int id, uint8_t flags)
 {
 	conf.plugins[id].rpt_mode_flags = flags;
 
@@ -260,26 +266,28 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
 
 void process_btn_mesg(struct wiimote_btn_mesg *mesg)
 {
-	static unsigned short prev_buttons = 0;
-	unsigned short pressed, released;
-	int axis_value;
+	static uint16_t prev_buttons = 0;
+	uint16_t pressed, released;
+	__s32 axis_value;
 	int i;
 
 	/* Wiimote Button/Key Events */
 	pressed = mesg->buttons & ~prev_buttons;
 	released = ~mesg->buttons & prev_buttons;
 	for (i=0; i < CONF_WM_BTN_COUNT; i++) {
-		if (pressed & conf.wiimote_bmap[i].mask) {
-			send_event(&conf, EV_KEY, conf.wiimote_bmap[i].action, 1);
-		}
-		else if (released & conf.wiimote_bmap[i].mask) {
-			send_event(&conf, EV_KEY, conf.wiimote_bmap[i].action, 0);
+		if (conf.wiimote_bmap[i].active) {
+			if (pressed & conf.wiimote_bmap[i].mask) {
+				send_event(&conf, EV_KEY, conf.wiimote_bmap[i].action, 1);
+			}
+			else if (released & conf.wiimote_bmap[i].mask) {
+				send_event(&conf, EV_KEY, conf.wiimote_bmap[i].action, 0);
+			}
 		}
 	}
 	prev_buttons = mesg->buttons;
 
 	/* Wiimote.Dpad.X */
-	if (conf.amap[CONF_WM_AXIS_DPAD_X].action != -1) {
+	if (conf.amap[CONF_WM_AXIS_DPAD_X].active) {
 		axis_value = 0;
 		if (mesg->buttons & WIIMOTE_BTN_LEFT) {
 			axis_value = -1;
@@ -295,7 +303,7 @@ void process_btn_mesg(struct wiimote_btn_mesg *mesg)
 	}
 
 	/* Wiimote.Dpad.Y */
-	if (conf.amap[CONF_WM_AXIS_DPAD_Y].action != -1) {
+	if (conf.amap[CONF_WM_AXIS_DPAD_Y].active) {
 		axis_value = 0;
 		if (mesg->buttons & WIIMOTE_BTN_DOWN) {
 			axis_value = -1;
@@ -313,26 +321,28 @@ void process_btn_mesg(struct wiimote_btn_mesg *mesg)
 
 void process_nunchuk_mesg(struct wiimote_nunchuk_mesg *mesg)
 {
-	static unsigned char prev_buttons = 0;
-	unsigned char pressed, released;
-	int axis_value;
+	static uint8_t prev_buttons = 0;
+	uint8_t pressed, released;
+	__s32 axis_value;
 	int i;
 
 	/* Nunchuk Button/Key Events */
 	pressed = mesg->buttons & ~prev_buttons;
 	released = ~mesg->buttons & prev_buttons;
 	for (i=0; i < CONF_NC_BTN_COUNT; i++) {
-		if (pressed & conf.nunchuk_bmap[i].mask) {
-			send_event(&conf, EV_KEY, conf.nunchuk_bmap[i].action, 1);
-		}
-		else if (released & conf.nunchuk_bmap[i].mask) {
-			send_event(&conf, EV_KEY, conf.nunchuk_bmap[i].action, 0);
+		if (conf.nunchuk_bmap[i].active) {
+			if (pressed & conf.nunchuk_bmap[i].mask) {
+				send_event(&conf, EV_KEY, conf.nunchuk_bmap[i].action, 1);
+			}
+			else if (released & conf.nunchuk_bmap[i].mask) {
+				send_event(&conf, EV_KEY, conf.nunchuk_bmap[i].action, 0);
+			}
 		}
 	}
 	prev_buttons = mesg->buttons;
 
 	/* Nunchuk.Stick.X */
-	if (conf.amap[CONF_NC_AXIS_STICK_X].action != -1) {
+	if (conf.amap[CONF_NC_AXIS_STICK_X].active) {
 		axis_value = mesg->stick_x;
 		if (conf.amap[CONF_NC_AXIS_STICK_X].flags & CONF_INVERT) {
 			axis_value = 0xFF - axis_value;
@@ -342,7 +352,7 @@ void process_nunchuk_mesg(struct wiimote_nunchuk_mesg *mesg)
 	}
 
 	/* Nunchuk.Stick.Y */
-	if (conf.amap[CONF_NC_AXIS_STICK_Y].action != -1) {
+	if (conf.amap[CONF_NC_AXIS_STICK_Y].active) {
 		axis_value = mesg->stick_y;
 		if (conf.amap[CONF_NC_AXIS_STICK_Y].flags & CONF_INVERT) {
 			axis_value = 0xFF - axis_value;
@@ -354,26 +364,28 @@ void process_nunchuk_mesg(struct wiimote_nunchuk_mesg *mesg)
 
 void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 {
-	static unsigned short prev_buttons = 0;
-	unsigned short pressed, released;
-	int axis_value;
+	static uint16_t prev_buttons = 0;
+	uint16_t pressed, released;
+	__s32 axis_value;
 	int i;
 
 	/* Classic Button/Key Events */
 	pressed = mesg->buttons & ~prev_buttons;
 	released = ~mesg->buttons & prev_buttons;
 	for (i=0; i < CONF_CC_BTN_COUNT; i++) {
-		if (pressed & conf.classic_bmap[i].mask) {
-			send_event(&conf, EV_KEY, conf.classic_bmap[i].action, 1);
-		}
-		else if (released & conf.classic_bmap[i].mask) {
-			send_event(&conf, EV_KEY, conf.classic_bmap[i].action, 0);
+		if (conf.classic_bmap[i].active) {
+			if (pressed & conf.classic_bmap[i].mask) {
+				send_event(&conf, EV_KEY, conf.classic_bmap[i].action, 1);
+			}
+			else if (released & conf.classic_bmap[i].mask) {
+				send_event(&conf, EV_KEY, conf.classic_bmap[i].action, 0);
+			}
 		}
 	}
 	prev_buttons = mesg->buttons;
 
 	/* Classic.Dpad.X */
-	if (conf.amap[CONF_CC_AXIS_DPAD_X].action != -1) {
+	if (conf.amap[CONF_CC_AXIS_DPAD_X].active) {
 		axis_value = 0;
 		if (mesg->buttons & WIIMOTE_CLASSIC_BTN_LEFT) {
 			axis_value = -1;
@@ -389,7 +401,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	}
 
 	/* Classic.Dpad.Y */
-	if (conf.amap[CONF_CC_AXIS_DPAD_Y].action != -1) {
+	if (conf.amap[CONF_CC_AXIS_DPAD_Y].active) {
 		axis_value = 0;
 		if (mesg->buttons & WIIMOTE_CLASSIC_BTN_DOWN) {
 			axis_value = -1;
@@ -405,7 +417,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	}
 
 	/* Classic.LStick.X */
-	if (conf.amap[CONF_CC_AXIS_L_STICK_X].action != -1) {
+	if (conf.amap[CONF_CC_AXIS_L_STICK_X].active) {
 		axis_value = mesg->l_stick_x;
 		if (conf.amap[CONF_CC_AXIS_L_STICK_X].flags & CONF_INVERT) {
 			axis_value = WIIMOTE_CLASSIC_L_STICK_MAX - axis_value;
@@ -415,7 +427,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	}
 
 	/* Classic.LStick.Y */
-	if (conf.amap[CONF_CC_AXIS_L_STICK_Y].action != -1) {
+	if (conf.amap[CONF_CC_AXIS_L_STICK_Y].active) {
 		axis_value = mesg->l_stick_y;
 		if (conf.amap[CONF_CC_AXIS_L_STICK_Y].flags & CONF_INVERT) {
 			axis_value = WIIMOTE_CLASSIC_L_STICK_MAX - axis_value;
@@ -425,7 +437,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	}
 
 	/* Classic.RStick.X */
-	if (conf.amap[CONF_CC_AXIS_R_STICK_X].action != -1) {
+	if (conf.amap[CONF_CC_AXIS_R_STICK_X].active) {
 		axis_value = mesg->r_stick_x;
 		if (conf.amap[CONF_CC_AXIS_R_STICK_X].flags & CONF_INVERT) {
 			axis_value = WIIMOTE_CLASSIC_R_STICK_MAX - axis_value;
@@ -435,7 +447,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	}
 
 	/* Classic.RStick.Y */
-	if (conf.amap[CONF_CC_AXIS_R_STICK_Y].action != -1) {
+	if (conf.amap[CONF_CC_AXIS_R_STICK_Y].active) {
 		axis_value = mesg->r_stick_y;
 		if (conf.amap[CONF_CC_AXIS_R_STICK_Y].flags & CONF_INVERT) {
 			axis_value = WIIMOTE_CLASSIC_R_STICK_MAX - axis_value;
@@ -445,7 +457,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	}
 
 	/* Classic.LAnalog */
-	if (conf.amap[CONF_CC_AXIS_L].action != -1) {
+	if (conf.amap[CONF_CC_AXIS_L].active) {
 		axis_value = mesg->l;
 		if (conf.amap[CONF_CC_AXIS_L].flags & CONF_INVERT) {
 			axis_value = WIIMOTE_CLASSIC_LR_MAX - axis_value;
@@ -455,7 +467,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	}
 
 	/* Classic.RAnalog */
-	if (conf.amap[CONF_CC_AXIS_R].action != -1) {
+	if (conf.amap[CONF_CC_AXIS_R].active) {
 		axis_value = mesg->r;
 		if (conf.amap[CONF_CC_AXIS_R].flags & CONF_INVERT) {
 			axis_value = WIIMOTE_CLASSIC_LR_MAX - axis_value;
@@ -471,10 +483,10 @@ void process_plugin(struct plugin *plugin, int mesg_count,
 	union wiimote_mesg *plugin_mesg[WIIMOTE_MAX_MESG_COUNT];
 	int plugin_mesg_count = 0;
 	int i;
-	unsigned short flag;
+	uint8_t flag;
 	struct wmplugin_data *data;
-	unsigned int pressed, released;
-	int axis_value;
+	uint16_t pressed, released;
+	__s32 axis_value;
 
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg[i]->type) {
@@ -513,19 +525,20 @@ void process_plugin(struct plugin *plugin, int mesg_count,
 		pressed = data->buttons & ~plugin->prev_buttons;
 		released = ~data->buttons & plugin->prev_buttons;
 		for (i=0; i < plugin->info->button_count; i++) {
-			if (pressed & 1<<i) {
-				send_event(&conf, EV_KEY, plugin->bmap[i].action, 1);
-			}
-			else if (released & 1<<i) {
-				send_event(&conf, EV_KEY, plugin->bmap[i].action, 0);
+			if (plugin->bmap[i].active) {
+				if (pressed & 1<<i) {
+					send_event(&conf, EV_KEY, plugin->bmap[i].action, 1);
+				}
+				else if (released & 1<<i) {
+					send_event(&conf, EV_KEY, plugin->bmap[i].action, 0);
+				}
 			}
 		}
 		plugin->prev_buttons = data->buttons;
 
 		/* Plugin Axis Events */
 		for (i=0; i < plugin->info->axis_count; i++) {
-			if ((plugin->amap[i].action != -1) && data->axes &&
-			  data->axes[i].valid) {
+			if (plugin->amap[i].active && data->axes && data->axes[i].valid) {
 				axis_value = data->axes[i].value;
 				if (plugin->amap[i].flags & CONF_INVERT) {
 					axis_value = plugin->info->axis_info[i].max +

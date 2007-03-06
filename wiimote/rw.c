@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,39 +13,44 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
+#include <stdint.h>
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
 #include "wiimote_internal.h"
 
 struct write_seq speaker_enable_seq[] = {
-	{WRITE_SEQ_RPT, RPT_SPEAKER_ENABLE, (unsigned char *)"\x04", 1, 0},
-	{WRITE_SEQ_RPT,   RPT_SPEAKER_MUTE, (unsigned char *)"\x04", 1, 0},
-	{WRITE_SEQ_MEM, 0xA20009, (unsigned char *)"\x01", 1, WIIMOTE_RW_REG},
-	{WRITE_SEQ_MEM, 0xA20001, (unsigned char *)"\x08", 1, WIIMOTE_RW_REG},
-	{WRITE_SEQ_MEM, 0xA20001, (unsigned char *)"\x00\x00\x00\x0C\x40\x00\x00",
+	{WRITE_SEQ_RPT, RPT_SPEAKER_ENABLE, (const void *)"\x04", 1, 0},
+	{WRITE_SEQ_RPT,   RPT_SPEAKER_MUTE, (const void *)"\x04", 1, 0},
+	{WRITE_SEQ_MEM, 0xA20009, (const void *)"\x01", 1, WIIMOTE_RW_REG},
+	{WRITE_SEQ_MEM, 0xA20001, (const void *)"\x08", 1, WIIMOTE_RW_REG},
+	{WRITE_SEQ_MEM, 0xA20001, (const void *)"\x00\x00\x00\x0C\x40\x00\x00",
 	                          7, WIIMOTE_RW_REG},
-	{WRITE_SEQ_MEM, 0xA20008, (unsigned char *)"\x01", 1, WIIMOTE_RW_REG},
-	{WRITE_SEQ_RPT,   RPT_SPEAKER_MUTE, (unsigned char *)"\x00", 1, 0}
+	{WRITE_SEQ_MEM, 0xA20008, (const void *)"\x01", 1, WIIMOTE_RW_REG},
+	{WRITE_SEQ_RPT,   RPT_SPEAKER_MUTE, (const void *)"\x00", 1, 0}
 };
 
 struct write_seq speaker_disable_seq[] = {
-	{WRITE_SEQ_RPT,   RPT_SPEAKER_MUTE, (unsigned char *)"\x04", 1, 0},
-	{WRITE_SEQ_RPT, RPT_SPEAKER_ENABLE, (unsigned char *)"\x00", 1, 0}
+	{WRITE_SEQ_RPT,   RPT_SPEAKER_MUTE, (const void *)"\x04", 1, 0},
+	{WRITE_SEQ_RPT, RPT_SPEAKER_ENABLE, (const void *)"\x00", 1, 0}
 };
 
 
-
 #define RPT_READ_REQ_LEN 6
-int wiimote_read(struct wiimote *wiimote, unsigned int flags,
-                 unsigned int offset, unsigned int len, unsigned char *data)
+int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
+                 uint16_t len, void *data)
 {
 	unsigned char buf[RPT_READ_REQ_LEN];
 	int ret = 0;
 	int i;
-	unsigned char address_flags;
+	uint8_t address_flags;
 
 	/* Lock wiimote rw access */
 	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
@@ -112,7 +117,7 @@ int wiimote_read(struct wiimote *wiimote, unsigned int flags,
 
 	if (flags & WIIMOTE_RW_DECODE) {
 		for (i=0; i < len; i++) {
-			data[i] = DECODE(data[i]);
+			((unsigned char *)data)[i] = DECODE(((unsigned char *)data)[i]);
 		}
 	}
 
@@ -120,11 +125,11 @@ int wiimote_read(struct wiimote *wiimote, unsigned int flags,
 }
 
 #define RPT_WRITE_LEN 21
-int wiimote_write(struct wiimote *wiimote, unsigned int flags,
-                  unsigned int offset, unsigned int len, unsigned char *data)
+int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
+                  uint16_t len, const void *data)
 {
 	unsigned char buf[RPT_WRITE_LEN];
-	unsigned int sent=0;
+	uint16_t sent=0;
 	int ret = 0;
 
 	/* Lock wiimote rw access */

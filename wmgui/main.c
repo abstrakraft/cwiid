@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,17 +13,23 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/01/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  * Initial Changelog
+ *  * type audit (stdint, const, char booleans)
  */
 
 #define APP_NAME		"CWiid wmgui"
 #define APP_COPYRIGHT	"Copyright (C) 2007 L. Donnie Smith " \
-                        "<wiimote@abstrakraft.org>"
+                        "<cwiid@abstrakraft.org>"
 #define APP_COMMENTS	"Wiimote GUI"
 
 #include <ctype.h>
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -40,16 +46,16 @@
 #define PI	3.14159265358979323
 
 struct acc {
-	unsigned char x;
-	unsigned char y;
-	unsigned char z;
+	uint8_t x;
+	uint8_t y;
+	uint8_t z;
 };
 
 struct stick {
-	int valid;
-	unsigned char x;
-	unsigned char y;
-	unsigned char max;
+	char valid;
+	uint8_t x;
+	uint8_t y;
+	uint8_t max;
 };
 
 /* Globals */
@@ -696,7 +702,7 @@ void chkExt_toggled(void)
 
 void chkLED_toggled(void)
 {
-	unsigned char LED_state;
+	uint8_t LED_state;
 
 	if (wiimote) {
 		LED_state =
@@ -860,8 +866,9 @@ void btnWrite_clicked(void)
 {
 	static unsigned char buf[MAX_WRITE_LEN];
 	char *cursor, *data;
-	unsigned int offset, len;
-	int flags;
+	uint32_t offset;
+	uint16_t len;
+	uint8_t flags;
 
 	/* Decode arguments */
 	offset = strtol(gtk_entry_get_text(GTK_ENTRY(txtWriteOffset)), &cursor, 16);
@@ -943,7 +950,7 @@ void btnBeep_clicked(void)
 
 void set_report_mode(void)
 {
-	unsigned char rpt_mode;
+	uint8_t rpt_mode;
 	
 	rpt_mode = WIIMOTE_RPT_STATUS | WIIMOTE_RPT_BTN;
 
