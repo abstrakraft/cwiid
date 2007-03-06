@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,8 +13,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
+#include <stdint.h>
 #include <unistd.h>
 #include "wiimote_internal.h"
 
@@ -23,31 +29,31 @@ unsigned char ir_block1[] = CLIFF_IR_BLOCK_1;
 unsigned char ir_block2[] = CLIFF_IR_BLOCK_2;
 
 struct write_seq ir_enable10_seq[] = {
-	{WRITE_SEQ_RPT, RPT_IR_ENABLE1, (unsigned char *)"\x04", 1, 0},
-	{WRITE_SEQ_RPT, RPT_IR_ENABLE2, (unsigned char *)"\x04", 1, 0},
-	{WRITE_SEQ_MEM, 0xB00030, (unsigned char *)"\x08", 1,     WIIMOTE_RW_REG},
+	{WRITE_SEQ_RPT, RPT_IR_ENABLE1, (const void *)"\x04", 1, 0},
+	{WRITE_SEQ_RPT, RPT_IR_ENABLE2, (const void *)"\x04", 1, 0},
+	{WRITE_SEQ_MEM, 0xB00030, (const void *)"\x08", 1,     WIIMOTE_RW_REG},
 	{WRITE_SEQ_MEM, 0xB00000, ir_block1, sizeof(ir_block1)-1, WIIMOTE_RW_REG},
 	{WRITE_SEQ_MEM, 0xB0001A, ir_block2, sizeof(ir_block2)-1, WIIMOTE_RW_REG},
-	{WRITE_SEQ_MEM, 0xB00033, (unsigned char *)"\x01", 1,     WIIMOTE_RW_REG}
+	{WRITE_SEQ_MEM, 0xB00033, (const void *)"\x01", 1,     WIIMOTE_RW_REG}
 };
 
 struct write_seq ir_enable12_seq[] = {
-	{WRITE_SEQ_RPT, RPT_IR_ENABLE1, (unsigned char *)"\x04", 1, 0},
-	{WRITE_SEQ_RPT, RPT_IR_ENABLE2, (unsigned char *)"\x04", 1, 0},
-	{WRITE_SEQ_MEM, 0xB00030, (unsigned char *)"\x08", 1,     WIIMOTE_RW_REG},
+	{WRITE_SEQ_RPT, RPT_IR_ENABLE1, (const void *)"\x04", 1, 0},
+	{WRITE_SEQ_RPT, RPT_IR_ENABLE2, (const void *)"\x04", 1, 0},
+	{WRITE_SEQ_MEM, 0xB00030, (const void *)"\x08", 1,     WIIMOTE_RW_REG},
 	{WRITE_SEQ_MEM, 0xB00000, ir_block1, sizeof(ir_block1)-1, WIIMOTE_RW_REG},
 	{WRITE_SEQ_MEM, 0xB0001A, ir_block2, sizeof(ir_block2)-1, WIIMOTE_RW_REG},
-	{WRITE_SEQ_MEM, 0xB00033, (unsigned char *)"\x03", 1,     WIIMOTE_RW_REG}
+	{WRITE_SEQ_MEM, 0xB00033, (const void *)"\x03", 1,     WIIMOTE_RW_REG}
 };
 
 struct write_seq ir_disable_seq[] = {
-	{WRITE_SEQ_RPT, RPT_IR_ENABLE1, (unsigned char *)"\x00", 1, 0},
-	{WRITE_SEQ_RPT, RPT_IR_ENABLE2, (unsigned char *)"\x00", 1, 0}
+	{WRITE_SEQ_RPT, RPT_IR_ENABLE1, (const void *)"\x00", 1, 0},
+	{WRITE_SEQ_RPT, RPT_IR_ENABLE2, (const void *)"\x00", 1, 0}
 };
 
 #define CMD_BUF_LEN	21
 int wiimote_command(struct wiimote *wiimote, enum wiimote_command command,
-                    unsigned char flags) {
+                    uint8_t flags) {
 	int ret = 0;
 	unsigned char buf[CMD_BUF_LEN];
 
@@ -90,10 +96,10 @@ int wiimote_command(struct wiimote *wiimote, enum wiimote_command command,
 }
 
 #define RPT_MODE_BUF_LEN 2
-int update_rpt_mode(struct wiimote *wiimote, int flags)
+int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 {
 	unsigned char buf[RPT_MODE_BUF_LEN];
-	unsigned char rpt_mode;
+	uint8_t rpt_mode;
 	struct write_seq *ir_enable_seq;
 	int seq_len;
 

@@ -13,11 +13,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/02/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
 #ifndef CONF_H
 #define CONF_H
 
+#include <stdint.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
 
@@ -99,19 +105,21 @@
 #define UINPUT_VERSION	0x0001
 
 struct lookup_enum {
-	char *name;
-	int value;
+	const char *name;
+	__u16 value;
 };
 
 struct btn_map {
-	int mask;
-	int action;
+	unsigned char active;
+	uint16_t mask;
+	__u16 action;
 };
 
 struct axis_map {
-	int axis_type;
-	int action;
-	int flags;
+	unsigned char active;
+	__u16 axis_type;
+	__u16 action;
+	uint8_t flags;
 };
 
 struct plugin {
@@ -120,8 +128,8 @@ struct plugin {
 	void *handle;
 	wmplugin_init_t *init;
 	wmplugin_exec_t *exec;
-	unsigned char rpt_mode_flags;
-	unsigned short prev_buttons;
+	uint8_t rpt_mode_flags;
+	uint16_t prev_buttons;
 	struct btn_map bmap[WMPLUGIN_MAX_BUTTON_COUNT];
 	struct axis_map amap[WMPLUGIN_MAX_AXIS_COUNT];
 };
@@ -132,13 +140,13 @@ struct conf {
 	int fd;
 	char **config_search_dirs;
 	char **plugin_search_dirs;
-	char **current_config_filename;
+	char *current_config_filename;
 	int stack_index;
 	char *config_filename_stack[CONF_MAX_INCLUDE_DEPTH];
 	YYLTYPE yyloc_stack[CONF_MAX_INCLUDE_DEPTH];
-	unsigned char rpt_mode_flags;
+	uint8_t rpt_mode_flags;
 	struct uinput_user_dev dev;
-	int ff;
+	unsigned char ff;
 	struct btn_map wiimote_bmap[CONF_WM_BTN_COUNT];
 	struct btn_map nunchuk_bmap[CONF_NC_BTN_COUNT];
 	struct btn_map classic_bmap[CONF_CC_BTN_COUNT];
@@ -151,27 +159,28 @@ struct uinput_listen_data {
 	struct conf *conf;
 };
 
-int conf_load(struct conf *conf, char *conf_name, char *config_search_dirs[],
-              char *plugin_search_dirs[]);
+int conf_load(struct conf *conf, const char *conf_name,
+              char *config_search_dirs[], char *plugin_search_dirs[]);
 int conf_unload(struct conf *conf);
 
-int conf_button(struct conf *conf, int source, int button, int action);
-int conf_ff(struct conf *conf, int enabled);
-int conf_axis(struct conf *conf, int axis, int axis_type, int action,
-              int flags);
-int conf_plugin_button(struct conf *conf, char *name, char *button,
-                       int action);
-int conf_plugin_axis(struct conf *conf, char *name, char *axis, int axis_type,
-                     int action, int flags);
+int conf_ff(struct conf *conf, unsigned char enabled);
+int conf_button(struct conf *conf, int source, __u16 button, __u16 action);
+int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
+              char flags);
+int conf_plugin_button(struct conf *conf, const char *name, const char *button,
+                       __u16 action);
+int conf_plugin_axis(struct conf *conf, const char *name, const char *axis,
+                     __u16 axis_type, __u16 action, char flags);
 
 void conf_init(struct conf *conf);
-FILE *conf_push_config(struct conf *conf, char *filename, YYLTYPE *yyloc);
+FILE *conf_push_config(struct conf *conf, const char *filename, YYLTYPE *yyloc);
 int conf_pop_config(struct conf *conf, YYLTYPE *yyloc);
-int lookup_action(char *str_action);
+int lookup_action(const char *str_action);
 
 int uinput_open(struct conf *conf);
 int uinput_close(struct conf *conf);
-int send_event(struct conf *conf, int type, int code, int value);
+int send_event(struct conf *conf, __u16 type, __u16 code, __s32 value);
 void *uinput_listen(struct uinput_listen_data *data);
 
 #endif
+

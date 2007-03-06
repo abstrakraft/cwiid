@@ -13,31 +13,39 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/04/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * type audit (stdint, const, char booleans)
+ *
+ *  03/01/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Initial ChangeLog
+ *  * made global variables static
  */
 
 #include "wmplugin.h"
 
-wmplugin_info_t wmplugin_info;
-wmplugin_init_t wmplugin_init;
-wmplugin_exec_t wmplugin_exec;
-
 wiimote_t *wiimote;
 
 struct cursor {
-	int valid;
-	int x;
-	int y;
+	unsigned char valid;
+	uint16_t x;
+	uint16_t y;
 };
 
 /* static objects are initialized to 0 by default */
-int a_index = -1, b_index = -1;
-struct wiimote_ir_src a, b, prev_a, prev_b;
+static int a_index = -1, b_index = -1;
+static struct wiimote_ir_src a, b, prev_a, prev_b;
 
-int info_init = 0;
-struct wmplugin_info info;
-struct wmplugin_data data;
+static unsigned char info_init = 0;
+static struct wmplugin_info info;
+static struct wmplugin_data data;
 
-struct cursor c, prev_c;
+static struct cursor c, prev_c;
+
+wmplugin_info_t wmplugin_info;
+wmplugin_init_t wmplugin_init;
+wmplugin_exec_t wmplugin_exec;
 
 struct wmplugin_info *wmplugin_info() {
 	if (!info_init) {
@@ -76,8 +84,8 @@ int wmplugin_init(int id, wiimote_t *arg_wiimote)
 struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 {
 	int i;
-	unsigned char flags;
-	static unsigned char old_flags;
+	uint8_t flags;
+	static uint8_t old_flags;
 	struct wiimote_ir_mesg *ir_mesg;
 
 	ir_mesg = NULL;

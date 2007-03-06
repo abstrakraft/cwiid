@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,8 +13,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/03/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,10 +40,10 @@ extern int yyparse();
 extern struct lookup_enum action_enum[];
 struct conf *cur_conf;
 
-struct plugin *get_plugin(struct conf *conf, char *name);
+struct plugin *get_plugin(struct conf *conf, const char *name);
 
-int conf_load(struct conf *conf, char *conf_name, char *config_search_dirs[],
-              char *plugin_search_dirs[])
+int conf_load(struct conf *conf, const char *conf_name,
+              char *config_search_dirs[], char *plugin_search_dirs[])
 {
 	conf_init(conf);
 	cur_conf = conf;
@@ -81,10 +87,10 @@ int conf_unload(struct conf *conf)
 	return 0;
 }
 
-int conf_ff(struct conf *conf, int enabled)
+int conf_ff(struct conf *conf, unsigned char enabled)
 {
 	if (enabled) {
-		conf->ff = -1;
+		conf->ff = 1;
 		conf->dev.ff_effects_max = 1;
 	}
 	else {
@@ -95,19 +101,22 @@ int conf_ff(struct conf *conf, int enabled)
 	return 0;
 }
 
-int conf_button(struct conf *conf, int source, int button, int action)
+int conf_button(struct conf *conf, int source, __u16 button, __u16 action)
 {
 	switch (source) {
 	case CONF_WM:
 		conf->rpt_mode_flags |= WIIMOTE_RPT_BTN;
+		conf->wiimote_bmap[button].active = 1;
 		conf->wiimote_bmap[button].action = action;
 		break;
 	case CONF_NC:
 		conf->rpt_mode_flags |= WIIMOTE_RPT_NUNCHUK;
+		conf->nunchuk_bmap[button].active = 1;
 		conf->nunchuk_bmap[button].action = action;
 		break;
 	case CONF_CC:
 		conf->rpt_mode_flags |= WIIMOTE_RPT_CLASSIC;
+		conf->nunchuk_bmap[button].active = 1;
 		conf->classic_bmap[button].action = action;
 		break;
 	}
@@ -115,9 +124,10 @@ int conf_button(struct conf *conf, int source, int button, int action)
 	return 0;
 }
 
-int conf_axis(struct conf *conf, int axis, int axis_type, int action,
-              int flags)
+int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
+              char flags)
 {
+	conf->amap[axis].active = 1;
 	conf->amap[axis].axis_type = axis_type;
 	conf->amap[axis].action = action;
 	conf->amap[axis].flags = flags;
@@ -195,11 +205,12 @@ int conf_axis(struct conf *conf, int axis, int axis_type, int action,
 	return 0;
 }
 
-int conf_plugin_button(struct conf *conf, char *name, char *button, int action)
+int conf_plugin_button(struct conf *conf, const char *name, const char *button,
+                       __u16 action)
 {
 	struct plugin *plugin;
 	int i;
-	int button_found = 0;
+	unsigned char button_found = 0;
 
 	if ((plugin = get_plugin(conf, name)) == NULL) {
 		return -1;
@@ -217,19 +228,20 @@ int conf_plugin_button(struct conf *conf, char *name, char *button, int action)
 		return -1;
 	}
 	else {
+		plugin->bmap[i].active = 1;
 		plugin->bmap[i].action = action;
 	}
 
 	return 0;
 }
 
-int conf_plugin_axis(struct conf *conf, char *name, char *axis, int axis_type,
-                     int action, int flags)
+int conf_plugin_axis(struct conf *conf, const char *name, const char *axis,
+                     __u16 axis_type, __u16 action, char flags)
 {
 	struct plugin *plugin;
 	int i;
-	int axis_found = 0;
-	int mismatch = 0;
+	unsigned char axis_found = 0;
+	unsigned char mismatch = 0;
 
 	if ((plugin = get_plugin(conf, name)) == NULL) {
 		return -1;
@@ -250,12 +262,12 @@ int conf_plugin_axis(struct conf *conf, char *name, char *axis, int axis_type,
 		switch (axis_type) {
 		case CONF_ABS:
 			if (!(plugin->info->axis_info[i].type & WMPLUGIN_ABS)) {
-				mismatch = -1;
+				mismatch = 1;
 			}
 			break;
 		case CONF_REL:
 			if (!(plugin->info->axis_info[i].type & WMPLUGIN_REL)) {
-				mismatch = -1;
+				mismatch = 1;
 			}
 			break;
 		}
@@ -263,6 +275,7 @@ int conf_plugin_axis(struct conf *conf, char *name, char *axis, int axis_type,
 			wminput_err("Warning: axis type mismatch - %s.%s", name, axis);
 		}
 
+		plugin->amap[i].active = 1;
 		plugin->amap[i].axis_type = axis_type;
 		plugin->amap[i].action = action;
 		plugin->amap[i].flags = flags;
@@ -338,15 +351,16 @@ void conf_init(struct conf *conf)
 	conf->classic_bmap[CONF_CC_BTN_L].mask = WIIMOTE_CLASSIC_BTN_L;
 	conf->classic_bmap[CONF_CC_BTN_R].mask = WIIMOTE_CLASSIC_BTN_R;
 	for (i=0; i < CONF_WM_BTN_COUNT; i++) {
-		conf->wiimote_bmap[i].action = -1;
+		conf->wiimote_bmap[i].active = 0;
 	}
 	for (i=0; i < CONF_NC_BTN_COUNT; i++) {
-		conf->nunchuk_bmap[i].action = -1;
+		conf->nunchuk_bmap[i].active = 0;
 	}
 	for (i=0; i < CONF_CC_BTN_COUNT; i++) {
-		conf->classic_bmap[i].action = -1;
+		conf->classic_bmap[i].active = 0;
 	}
 	for (i=0; i < CONF_AXIS_COUNT; i++) {
+		conf->amap[i].active = 0;
 		conf->amap[i].axis_type = -1;
 		conf->amap[i].action = -1;
 		conf->amap[i].flags = 0;
@@ -356,10 +370,12 @@ void conf_init(struct conf *conf)
 		conf->plugins[i].rpt_mode_flags = 0;
 		conf->plugins[i].prev_buttons = 0;
 		for (j=0; j < WMPLUGIN_MAX_BUTTON_COUNT; j++) {
+			conf->plugins[i].bmap[j].active = 0;
 			conf->plugins[i].bmap[j].mask = 1<<i;
 			conf->plugins[i].bmap[j].action = -1;
 		}
 		for (j=0; j < WMPLUGIN_MAX_AXIS_COUNT; j++) {
+			conf->plugins[i].amap[j].active = 0;
 			conf->plugins[i].amap[j].axis_type = -1;
 			conf->plugins[i].amap[j].action = -1;
 			conf->plugins[i].amap[j].flags = 0;
@@ -368,12 +384,12 @@ void conf_init(struct conf *conf)
 }
 
 #define CONF_PATHNAME_LEN	128
-FILE *conf_push_config(struct conf *conf, char *filename, YYLTYPE *yyloc)
+FILE *conf_push_config(struct conf *conf, const char *filename, YYLTYPE *yyloc)
 {
 	int i;
 	FILE *file;
 	char pathname[CONF_PATHNAME_LEN];
-	char *stackname;
+	const char *stackname;
 
 	if (conf->stack_index+1 >= CONF_MAX_INCLUDE_DEPTH) {
 		wminput_err("maximum include depth exceeded: %s", filename);
@@ -439,7 +455,7 @@ int conf_pop_config(struct conf *conf, YYLTYPE *yyloc)
 	return 0;
 }
 
-int lookup_action(char *str_action)
+int lookup_action(const char *str_action)
 {
 	int i=0;
 
@@ -454,7 +470,7 @@ int lookup_action(char *str_action)
 }
 
 #define PLUGIN_PATHNAME_LEN	128
-struct plugin *get_plugin(struct conf *conf, char *name)
+struct plugin *get_plugin(struct conf *conf, const char *name)
 {
 	int i;
 	char pathname[PLUGIN_PATHNAME_LEN];

@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,9 +13,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,7 +31,7 @@
 #include <bluetooth/hci_lib.h>
 #include "wiimote_internal.h"
 
-void wiimote_err(char *str, ...)
+void wiimote_err(const char *str, ...)
 {
 	va_list ap;
 
@@ -55,8 +61,8 @@ int verify_handshake(struct wiimote *wiimote)
 }
 
 #define SEND_RPT_BUF_LEN	23
-int send_report(struct wiimote *wiimote, unsigned int flags,
-                unsigned char report, unsigned int len, unsigned char *data)
+int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
+                size_t len, const void *data)
 {
 	unsigned char buf[SEND_RPT_BUF_LEN];
 

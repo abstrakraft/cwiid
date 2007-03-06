@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,11 +13,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
 #ifndef WIIMOTE_INTERNAL_H
 #define WIIMOTE_INTERNAL_H
 
+#include <stdint.h>
 #include <pthread.h>
 #include "wiimote.h"
 
@@ -109,10 +115,10 @@ enum write_seq_type {
 
 struct write_seq {
 	enum write_seq_type type;
-	unsigned int report_offset;
-	unsigned char *data;
-	unsigned int len;
-	unsigned int flags;
+	uint32_t report_offset;
+	const void *data;
+	uint16_t len;
+	uint8_t flags;
 };
 
 #define SEQ_LEN(seq) (sizeof(seq)/sizeof(struct write_seq))
@@ -133,9 +139,9 @@ struct wiimote {
 	int id;
 	int ctl_socket;
 	int int_socket;
-	unsigned char led_rumble_state;
-	unsigned char rpt_mode_flags;
-	unsigned short buttons;
+	uint8_t led_rumble_state;
+	uint8_t rpt_mode_flags;
+	uint16_t buttons;
 	enum wiimote_ext_type extension;
 	wiimote_mesg_callback_t *mesg_callback;
 	pthread_t int_listen_thread;
@@ -146,24 +152,25 @@ struct wiimote {
 	pthread_cond_t rw_cond;
 	pthread_mutex_t rw_cond_mutex;
 	enum rw_status rw_status;
-	unsigned char *read_buf;
-	unsigned int read_len;
-	unsigned int read_received;
+	void *read_buf;
+	uint16_t read_len;
+	uint16_t read_received;
 };
 
 /* prototypes */
 void *int_listen(struct wiimote *wiimote);
 void *dispatch(struct wiimote *wiimote);
 
-int update_rpt_mode(struct wiimote *wiimote, int flags);
+int update_rpt_mode(struct wiimote *wiimote, int8_t flags);
 
-void wiimote_err(char *str, ...);
+void wiimote_err(const char *str, ...);
 int verify_handshake(struct wiimote *wiimote);
-int send_report(struct wiimote *wiimote, unsigned int flags,
-                unsigned char report, unsigned int len, unsigned char *data);
+int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
+                size_t len, const void *data);
 int exec_write_seq(struct wiimote *wiimote, unsigned int len,
                    struct write_seq *seq);
 void free_mesg_array(struct mesg_array *array);
 int wiimote_findfirst(bdaddr_t *bdaddr);
 
 #endif
+

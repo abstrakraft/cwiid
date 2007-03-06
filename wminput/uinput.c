@@ -13,8 +13,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/04/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
+#include <stdint.h>
 #include <string.h>
 
 #include <fcntl.h>
@@ -75,7 +81,7 @@ int uinput_open(struct conf *conf)
 	}	
 
 	for (i=0; i < CONF_WM_BTN_COUNT; i++) {
-		if (conf->wiimote_bmap[i].action != -1) {
+		if (conf->wiimote_bmap[i].active) {
 			if (ioctl(conf->fd, UI_SET_KEYBIT, conf->wiimote_bmap[i].action)
 			  < 0) {
 				wminput_err("error on uinput ioctl");
@@ -85,7 +91,7 @@ int uinput_open(struct conf *conf)
 		}			
 	}
 	for (i=0; i < CONF_NC_BTN_COUNT; i++) {
-		if (conf->nunchuk_bmap[i].action != -1) {
+		if (conf->nunchuk_bmap[i].active) {
 			if (ioctl(conf->fd, UI_SET_KEYBIT, conf->nunchuk_bmap[i].action)
 			  < 0) {
 				wminput_err("error on uinput ioctl");
@@ -95,7 +101,7 @@ int uinput_open(struct conf *conf)
 		}			
 	}
 	for (i=0; i < CONF_CC_BTN_COUNT; i++) {
-		if (conf->classic_bmap[i].action != -1) {
+		if (conf->classic_bmap[i].active) {
 			if (ioctl(conf->fd, UI_SET_KEYBIT, conf->classic_bmap[i].action)
 			  < 0) {
 				wminput_err("error on uinput ioctl");
@@ -105,7 +111,7 @@ int uinput_open(struct conf *conf)
 		}			
 	}
 	for (i=0; i < CONF_AXIS_COUNT; i++) {
-		if (conf->amap[i].action != -1) {
+		if (conf->amap[i].active) {
 			if (ioctl(conf->fd, UI_SET_EVBIT, conf->amap[i].axis_type) < 0) {
 				wminput_err("error uinput ioctl");
 				close(conf->fd);
@@ -139,7 +145,7 @@ int uinput_open(struct conf *conf)
 	for (i=0; i < CONF_MAX_PLUGINS; i++) {
 		if (conf->plugins[i].name) {
 			for (j=0; j < conf->plugins[i].info->button_count; j++) {
-				if (conf->plugins[i].bmap[j].action != -1) {
+				if (conf->plugins[i].bmap[j].active) {
 					if (ioctl(conf->fd, UI_SET_KEYBIT,
 					          conf->plugins[i].bmap[j].action) < 0) {
 						wminput_err("error on uinput ioctl");
@@ -149,7 +155,7 @@ int uinput_open(struct conf *conf)
 				}
 			}
 			for (j=0; j < conf->plugins[i].info->axis_count; j++) {
-				if (conf->plugins[i].amap[j].action != -1) {
+				if (conf->plugins[i].amap[j].active) {
 					if (ioctl(conf->fd, UI_SET_EVBIT,
 					          conf->plugins[i].amap[j].axis_type) < 0) {
 						wminput_err("error uinput ioctl");
@@ -206,7 +212,7 @@ int uinput_close(struct conf *conf)
 	return 0;
 }
 
-int send_event(struct conf *conf, int type, int code, int value)
+int send_event(struct conf *conf, __u16 type, __u16 code, __s32 value)
 {
 	struct input_event event;
 
@@ -225,7 +231,7 @@ int send_event(struct conf *conf, int type, int code, int value)
 
 void *uinput_listen(struct uinput_listen_data *data)
 {
-	int len;
+	size_t len;
 	struct input_event event;
 	struct uinput_ff_upload upload;
 	struct uinput_ff_erase erase;

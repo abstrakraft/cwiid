@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,9 +13,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  ChangeLog:
+ *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Initial ChangeLog
+ *  * type audit (stdint, const, char booleans)
  */
 
 /* Note on thread synchronization:
+ * Note on Note on Note: This is really out of data.  Seriously, don't even
+ * read it.  I only keep it around to make it easier if I ever actually get
+ * around to updating it.
+ *
  * Note on Note: this is slightly out of date, there's only one mutex, one
  * condition, and one condition mutex now.  It protects read, write, and 
  * report mode update.  Dispatch queue synchronization is handled in queue.c
@@ -71,6 +80,7 @@
  * more difficult to implement concurrent/non-blocking reads in the future, as 
  * read reply collection is no longer centralized. */
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
@@ -78,7 +88,7 @@
 #include "wiimote_internal.h"
 #include "queue.h"
 
-static int process_status(struct wiimote *wiimote, unsigned char *data,
+static int process_status(struct wiimote *wiimote, const unsigned char *data,
                           struct mesg_array *mesg_array)
 {
 	struct wiimote_status_mesg *mesg;
@@ -102,11 +112,11 @@ static int process_status(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-static int process_btn(struct wiimote *wiimote, unsigned char *data,
+static int process_btn(struct wiimote *wiimote, const unsigned char *data,
                        struct mesg_array *mesg_array)
 {
 	struct wiimote_btn_mesg *mesg;
-	unsigned short buttons;
+	uint16_t buttons;
 
 	buttons = (data[0] & BTN_MASK_0)<<8 |
 	          (data[1] & BTN_MASK_1);
@@ -129,7 +139,7 @@ static int process_btn(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-static int process_acc(struct wiimote *wiimote, unsigned char *data,
+static int process_acc(struct wiimote *wiimote, const unsigned char *data,
                        struct mesg_array *mesg_array)
 {
 	struct wiimote_acc_mesg *mesg;
@@ -151,12 +161,12 @@ static int process_acc(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-static int process_ir10(struct wiimote *wiimote, unsigned char *data,
+static int process_ir10(struct wiimote *wiimote, const unsigned char *data,
                         struct mesg_array *mesg_array)
 {
 	struct wiimote_ir_mesg *mesg;
 	int i;
-	unsigned char *block;
+	const unsigned char *block;
 
 	if (wiimote->rpt_mode_flags & WIIMOTE_RPT_IR) {
 		if ((mesg = malloc(sizeof *mesg)) == NULL) {
@@ -171,10 +181,10 @@ static int process_ir10(struct wiimote *wiimote, unsigned char *data,
 			}
 			else {
 				mesg->src[i].valid = 1;
-				mesg->src[i].x = ((unsigned int)block[2] & 0x30)<<4 |
-				                  (unsigned int)block[0];
-				mesg->src[i].y = ((unsigned int)block[2] & 0xC0)<<2 |
-				                  (unsigned int)block[1];
+				mesg->src[i].x = ((uint16_t)block[2] & 0x30)<<4 |
+				                  (uint16_t)block[0];
+				mesg->src[i].y = ((uint16_t)block[2] & 0xC0)<<2 |
+				                  (uint16_t)block[1];
 				mesg->src[i].size = -1;
 			}
 
@@ -183,10 +193,10 @@ static int process_ir10(struct wiimote *wiimote, unsigned char *data,
 			}
 			else {
 				mesg->src[i+1].valid = 1;
-				mesg->src[i+1].x = ((unsigned int)block[2] & 0x03)<<8 |
-				                    (unsigned int)block[3];
-				mesg->src[i+1].y = ((unsigned int)block[2] & 0x0C)<<6 |
-				                    (unsigned int)block[4];
+				mesg->src[i+1].x = ((uint16_t)block[2] & 0x03)<<8 |
+				                    (uint16_t)block[3];
+				mesg->src[i+1].y = ((uint16_t)block[2] & 0x0C)<<6 |
+				                    (uint16_t)block[4];
 				mesg->src[i+1].size = -1;
 			}
 		}
@@ -198,12 +208,12 @@ static int process_ir10(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-static int process_ir12(struct wiimote *wiimote, unsigned char *data,
+static int process_ir12(struct wiimote *wiimote, const unsigned char *data,
                         struct mesg_array *mesg_array)
 {
 	struct wiimote_ir_mesg *mesg;
 	int i;
-	unsigned char *block;
+	const unsigned char *block;
 
 	if (wiimote->rpt_mode_flags & WIIMOTE_RPT_IR) {
 		if ((mesg = malloc(sizeof *mesg)) == NULL) {
@@ -218,10 +228,10 @@ static int process_ir12(struct wiimote *wiimote, unsigned char *data,
 			}
 			else {
 				mesg->src[i].valid = 1;
-				mesg->src[i].x = ((unsigned int)block[2] & 0x30)<<4 |
-				                  (unsigned int)block[0];
-				mesg->src[i].y = ((unsigned int)block[2] & 0xC0)<<2 |
-				                  (unsigned int)block[1];
+				mesg->src[i].x = ((uint16_t)block[2] & 0x30)<<4 |
+				                  (uint16_t)block[0];
+				mesg->src[i].y = ((uint16_t)block[2] & 0xC0)<<2 |
+				                  (uint16_t)block[1];
 				mesg->src[i].size = block[2] & 0x0F;
 			}
 		}
@@ -233,8 +243,8 @@ static int process_ir12(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-static int process_ext(struct wiimote *wiimote, unsigned char *data, int len,
-                       struct mesg_array *mesg_array)
+static int process_ext(struct wiimote *wiimote, unsigned char *data,
+                       unsigned char len, struct mesg_array *mesg_array)
 {
 	struct wiimote_nunchuk_mesg *nunchuk_mesg;
 	struct wiimote_classic_mesg *classic_mesg;
@@ -287,8 +297,8 @@ static int process_ext(struct wiimote *wiimote, unsigned char *data, int len,
 			classic_mesg->l = (data[2] & 0x60)>>2 |
 			                  (data[3] & 0xE0)>>5;
 			classic_mesg->r = data[3] & 0x1F;
-			classic_mesg->buttons = ~((unsigned short)data[4]<<8 |
-			                          (unsigned short)data[5]);
+			classic_mesg->buttons = ~((uint16_t)data[4]<<8 |
+			                          (uint16_t)data[5]);
 
 			mesg_array->mesg[mesg_array->count] =
 			  (union wiimote_mesg *)classic_mesg;
@@ -304,9 +314,9 @@ static int process_ext(struct wiimote *wiimote, unsigned char *data, int len,
 void *int_listen(struct wiimote *wiimote)
 {
 	unsigned char buf[READ_BUF_LEN];
-	int len;
+	size_t len;
 	struct mesg_array *mesg_array;
-	int err;
+	char err;
 
 	do {
 		/* Read packet */
@@ -417,8 +427,8 @@ void *int_listen(struct wiimote *wiimote)
 				break;
 			case RPT_READ_DATA:
 				if (wiimote->rw_status == RW_PENDING) {
-					int data_len;
-					int error;
+					uint8_t data_len;
+					uint8_t error;
 
 					/* Extract error status and current packet length */
 					data_len = (buf[4]>>4)+1;
