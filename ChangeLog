@@ -3,6 +3,7 @@
 	  wiimote types
 	* Changed email addresses to cwiid@abstrakraft.org
 	* Added file ChangeLogs
+	* Fixed GTK_{CFLAGS,LIBS} in configure.ac and wmgui/Makefile.in
 
 2007-02-26 L. Donnie Smith <cwiid@abstrakraft.org>
 	* Changed installation directories to comply with FHS standard
