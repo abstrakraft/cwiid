@@ -13,7 +13,8 @@ $(LIB_NAME): $(OBJECTS)
 	$(CC) -shared $(LDFLAGS) $(LDLIBS) -o $(LIB_NAME) $(OBJECTS)
 
 install: $(LIB_NAME)
-	cp $(LIB_NAME) $(INST_DIR)
+	install -d $(INST_DIR)
+	install $(LIB_NAME) $(INST_DIR)
 
 clean:
 	rm -f $(LIB_NAME) $(OBJECTS) $(DEPS)

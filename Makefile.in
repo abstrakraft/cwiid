@@ -26,13 +26,14 @@ $(LIB_DIRS) $(BIN_DIRS) wmdemo:
 	$(MAKE) $(TARGET) -C $@
 
 $(CWIID_CONFIG_DIR):
-	mkdir -p $(CWIID_CONFIG_DIR)
+	install -d $(CWIID_CONFIG_DIR)
 
 $(CWIID_PLUGINS_DIR):
-	mkdir -p $(CWIID_PLUGINS_DIR)
+	install -d $(CWIID_PLUGINS_DIR)
 
 distclean:
-	rm -rf Makefile config.log config.status autom4te.cache $(COMMON)/include/defs.mak
+	rm -rf Makefile config.log config.status autom4te.cache \
+		$(COMMON)/include/defs.mak
 
 uninstall:
 	rm -r $(CWIID_PLUGINS_DIR); true

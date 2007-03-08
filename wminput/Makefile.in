@@ -29,8 +29,8 @@ make_plugins:
 	$(MAKE) $(MAKECMDGOALS) -C plugins
 
 install_configs:
-	mkdir -p $(WMINPUT_CONFIG_DIR)
-	cp configs/* $(WMINPUT_CONFIG_DIR)
+	install -d $(WMINPUT_CONFIG_DIR)
+	install configs/* $(WMINPUT_CONFIG_DIR)
 	ln -sf $(WMINPUT_CONFIG_DIR)/acc_ptr \
 		$(WMINPUT_CONFIG_DIR)/default
 

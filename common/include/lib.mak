@@ -27,13 +27,16 @@ $(SHARED_LIB): $(OBJECTS)
 install: install_header install_static install_shared
 
 install_header:
-	cp $(LIB_NAME).h $(INC_INST_DIR)
+	install -d $(INC_INST_DIR)
+	install $(LIB_NAME).h $(INC_INST_DIR)
 
 install_static: static
-	cp $(STATIC_LIB) $(LIB_INST_DIR)
+	install -d $(LIB_INST_DIR)
+	install $(STATIC_LIB) $(LIB_INST_DIR)
 
 install_shared: shared
-	cp $(SHARED_LIB) $(LIB_INST_DIR)
+	install -d $(LIB_INST_DIR)
+	install $(SHARED_LIB) $(LIB_INST_DIR)
 	ln -sf $(SO_NAME) $(LIB_INST_DIR)/$(LINK_NAME)
 	ldconfig
 
