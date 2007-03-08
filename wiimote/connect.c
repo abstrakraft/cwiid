@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/06/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added wiimote parameter to wiimote_err calls
+ *
  *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  */
@@ -41,21 +44,24 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
 
 	/* TODO: clean up error checking and backout code */
 
+	/* TODO: first two wiimote_err calls may pass bad ids due to race
+	 * conditions.  If this is acceptable, at least document it. */
+
 	/* Verify valid wiimote state */
 	if ((wiimote = malloc(sizeof *wiimote)) == NULL) {
-		wiimote_err("Error allocate wiimote)");
+		wiimote_err(NULL, "Error allocate wiimote)");
 		return NULL;
 	}
 
 	/* Global Lock, Store and Increment wiimote_id */
 	if (pthread_mutex_lock(&global_mutex)) {
-		wiimote_err("Error locking global lock");
+		wiimote_err(NULL, "Error locking global lock");
 		free(wiimote);
 		return NULL;
 	}
 	wiimote->id = wiimote_id++;
 	if (pthread_mutex_unlock(&global_mutex)) {
-		wiimote_err("Error unlocking global lock");
+		wiimote_err(wiimote, "Error unlocking global lock");
 		free(wiimote);
 		return NULL;
 	}
@@ -70,8 +76,8 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
 	/* TODO: better way to compare ? */
 	if (memcmp(&bdaddr, BDADDR_ANY, sizeof(bdaddr_t)) == 0) {
 		if (wiimote_findfirst(&bdaddr)) {
+			wiimote_err(wiimote, "Unable to find wiimote");
 			free(wiimote);
-			wiimote_err("Unable to find wiimote");
 			return NULL;
 		}
 	}
@@ -94,23 +100,25 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
 	/* Connect */
 	if (connect(wiimote->ctl_socket, (struct sockaddr *)&ctl_remote_addr,
 		        sizeof(ctl_remote_addr))) {
+		wiimote_err(wiimote,
+		            "Error establishing control channel connection");
 		free(wiimote);
-		wiimote_err("Error establishing control channel connection");
 		return NULL;
 	}
 	else if (connect(wiimote->int_socket, (struct sockaddr *)&int_remote_addr,
 		             sizeof(int_remote_addr))) {
 		close(wiimote->ctl_socket);
+		wiimote_err(wiimote,
+		            "Error establishing interrupt channel connection");
 		free(wiimote);
-		wiimote_err("Error establishing interrupt channel connection");
 		return NULL;
 	}
 
 	if ((wiimote->dispatch_queue = queue_new()) == NULL) {
 		close(wiimote->int_socket);
 		close(wiimote->ctl_socket);
+		wiimote_err(wiimote, "Error creating dispatch queue");
 		free(wiimote);
-		wiimote_err("Error creating dispatch queue");
 	}
 		
 	/* TODO: this should have finer grained error checking and
@@ -123,8 +131,9 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
 		close(wiimote->int_socket);
 		close(wiimote->ctl_socket);
 		queue_free(wiimote->dispatch_queue, (free_func_t *)free_mesg_array);
+		wiimote_err(wiimote,
+		            "Error initializing synchronization variables");
 		free(wiimote);
-		wiimote_err("Error initializing synchronization variables");
 		return NULL;
 	}
 	wiimote->rw_status = RW_NONE;
@@ -135,8 +144,9 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
 		close(wiimote->int_socket);
 		close(wiimote->ctl_socket);
 		queue_free(wiimote->dispatch_queue, (free_func_t *)free_mesg_array);
+		wiimote_err(wiimote,
+		            "Error creating interrupt channel listener thread");
 		free(wiimote);
-		wiimote_err("Error creating interrupt channel listener thread");
 		return NULL;
 	}
 	if (pthread_create(&wiimote->dispatch_thread, NULL,
@@ -146,8 +156,8 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
 		pthread_cancel(wiimote->int_listen_thread);
 		pthread_join(wiimote->int_listen_thread, NULL);
 		queue_free(wiimote->dispatch_queue, (free_func_t *)free_mesg_array);
+		wiimote_err(wiimote, "Error creating dispatch thread");
 		free(wiimote);
-		wiimote_err("Error creating dispatch thread");
 		return NULL;
 	}
 
@@ -168,14 +178,15 @@ int wiimote_disconnect(struct wiimote *wiimote)
 
 	/* Cancel and join int_thread */
 	if (pthread_cancel(wiimote->int_listen_thread)) {
-		wiimote_err("Error canceling int_listen_thread");
+		wiimote_err(wiimote, "Error canceling int_listen_thread");
 	}
 	else {
 		if (pthread_join(wiimote->int_listen_thread, &pthread_ret)) {
-			wiimote_err("Error joining int_listen_thread");
+			wiimote_err(wiimote, "Error joining int_listen_thread");
 		}
 		else if (pthread_ret != PTHREAD_CANCELED) {
-			wiimote_err("Invalid return value from int_listen_thread");
+			wiimote_err(wiimote,
+			            "Invalid return value from int_listen_thread");
 		}
 	}
 	/* TODO: cancel RW operations if they are in progress */
@@ -183,32 +194,32 @@ int wiimote_disconnect(struct wiimote *wiimote)
 	/* We detach to decouple dispatch (which runs the callback) from wiimote
 	 * code - specifically, a race condition exists for gtk apps */
 	if (pthread_cancel(wiimote->dispatch_thread)) {
-		wiimote_err("Error canceling dispatch_thread");
+		wiimote_err(wiimote, "Error canceling dispatch_thread");
 	}
 	if (pthread_detach(wiimote->dispatch_thread)) {
-		wiimote_err("Error detaching dispatch_thread");
+		wiimote_err(wiimote, "Error detaching dispatch_thread");
 	}
 
 	/* Close sockets */
 	if (close(wiimote->int_socket)) {
-		wiimote_err("Error closing interrupt channel");
+		wiimote_err(wiimote, "Error closing interrupt channel");
 	}
 	if (close(wiimote->ctl_socket)) {
-		wiimote_err("Error closing control channel");
+		wiimote_err(wiimote, "Error closing control channel");
 	}
 
 	/* Destroy sync variables */
 	if (pthread_mutex_destroy(&wiimote->wiimote_mutex)) {
-		wiimote_err("Error destroying wiimote_mutex");
+		wiimote_err(wiimote, "Error destroying wiimote_mutex");
 	}
 	if (pthread_mutex_destroy(&wiimote->rw_mutex)) {
-		wiimote_err("Error destroying rw_mutex");
+		wiimote_err(wiimote, "Error destroying rw_mutex");
 	}
 	if (pthread_cond_destroy(&wiimote->rw_cond)) {
-		wiimote_err("Error destroying rw_cond");
+		wiimote_err(wiimote, "Error destroying rw_cond");
 	}
 	if (pthread_mutex_destroy(&wiimote->rw_cond_mutex)) {
-		wiimote_err("Error destroying rw_cond_mutex");
+		wiimote_err(wiimote, "Error destroying rw_cond_mutex");
 	}
 
 	free(wiimote);

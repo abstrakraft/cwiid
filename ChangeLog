@@ -1,3 +1,12 @@
+2007-03-08 L. Donnie Smith <cwiid@abstrakraft.org>
+	wiimote
+		* created wiimote_err_t function type
+		* created wiimote_set_err function
+		* added wiimote parameter to wiimote_err calls
+
+	wmdemo
+		* added implementation of wiimote_err_t, wiimote_set_err
+
 2007-03-05 L. Donnie Smith <cwiid@abstrakraft.org>
 	* Type audit - boolean ints, const strings where appropriate, stdint.h
 	  wiimote types

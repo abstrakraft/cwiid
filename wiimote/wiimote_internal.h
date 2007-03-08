@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/05/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added wiimote parameter to wiimote_err prototype
+ *
  *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
@@ -163,7 +166,7 @@ void *dispatch(struct wiimote *wiimote);
 
 int update_rpt_mode(struct wiimote *wiimote, int8_t flags);
 
-void wiimote_err(const char *str, ...);
+void wiimote_err(struct wiimote *wiimote, const char *str, ...);
 int verify_handshake(struct wiimote *wiimote);
 int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
                 size_t len, const void *data);

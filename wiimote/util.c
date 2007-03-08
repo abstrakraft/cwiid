@@ -15,6 +15,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/05/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * created wiimote_err_func variable
+ *  * created wiimote_err_default
+ *  * added wiimote parameter to wiimote_err definition and calls
+ *
  *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
@@ -31,7 +36,20 @@
 #include <bluetooth/hci_lib.h>
 #include "wiimote_internal.h"
 
-void wiimote_err(const char *str, ...)
+static wiimote_err_t wiimote_err_default;
+
+static wiimote_err_t *wiimote_err_func = &wiimote_err_default;
+
+int wiimote_set_err(wiimote_err_t *err)
+{
+	/* TODO: assuming pointer assignment is atomic operation */
+	/* if it is, and the user doesn't care about race conditions, we don't
+	 * either */
+	wiimote_err_func = err;
+	return 0;
+}
+
+static void wiimote_err_default(int id, const char *str, ...)
 {
 	va_list ap;
 
@@ -41,19 +59,35 @@ void wiimote_err(const char *str, ...)
 	va_end(ap);
 }
 
+void wiimote_err(struct wiimote *wiimote, const char *str, ...)
+{
+	va_list ap;
+
+	if (wiimote_err_func) {
+		va_start(ap, str);
+		if (wiimote) {
+			(*wiimote_err_func)(wiimote->id, str, ap);
+		}
+		else {
+			(*wiimote_err_func)(-1, str, ap);
+		}
+		va_end(ap);
+	}
+}
+
 int verify_handshake(struct wiimote *wiimote)
 {
 	unsigned char handshake;
 	if (read(wiimote->ctl_socket, &handshake, 1) != 1) {
-		wiimote_err("Error on read handshake");
+		wiimote_err(wiimote, "Error on read handshake");
 		return -1;
 	}
 	else if ((handshake & BT_TRANS_MASK) != BT_TRANS_HANDSHAKE) {
-		wiimote_err("Handshake expected, non-handshake received");
+		wiimote_err(wiimote, "Handshake expected, non-handshake received");
 		return -1;
 	}
 	else if ((handshake & BT_PARAM_MASK) != BT_PARAM_SUCCESSFUL) {
-		wiimote_err("Non-successful handshake");
+		wiimote_err(wiimote, "Non-successful handshake");
 		return -1;
 	}
 
@@ -138,18 +172,18 @@ int wiimote_findfirst(bdaddr_t *bdaddr)
 
 	/* Get the first available Bluetooth device */
 	if ((dev_id = hci_get_route(NULL)) == -1) {
-		wiimote_err("No Bluetooth device found");
+		wiimote_err(NULL, "No Bluetooth device found");
 		return -1;
 	}
 	if ((sock = hci_open_dev(dev_id)) == -1) {
-		wiimote_err("Error opening Bluetooth device");
+		wiimote_err(NULL, "Error opening Bluetooth device");
 		return -1;
 	}
 
 	/* Get Device List */
 	if ((dev_count = hci_inquiry(dev_id, 2, MAX_RSP, NULL, &dev_list,
 	                             IREQ_CACHE_FLUSH)) == -1) {
-		wiimote_err("Error on device inquiry");
+		wiimote_err(NULL, "Error on device inquiry");
 		hci_close_dev(sock);
 		return -1;
 	}
@@ -161,7 +195,7 @@ int wiimote_findfirst(bdaddr_t *bdaddr)
 		  (dev_list[i].dev_class[2] == WIIMOTE_CLASS_2)) {
 			if (hci_remote_name(sock, &dev_list[i].bdaddr, WIIMOTE_CMP_LEN,
 			                    dev_name, 5000)) {
-				wiimote_err("Error reading device name");
+				wiimote_err(NULL, "Error reading device name");
 			}
 			else if (strncmp(dev_name, WIIMOTE_NAME, WIIMOTE_CMP_LEN) == 0) {
 				*bdaddr = dev_list[i].bdaddr;

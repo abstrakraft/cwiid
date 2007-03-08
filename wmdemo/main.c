@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 
 #include <wiimote.h>
@@ -7,7 +8,7 @@
  * has a horrible interface, but it's sparce enough to pick out the important
  * parts easily.  For examples of read and write code, see wmgui.  Speaker
  * support is "experimental" (read: bad) enough to be disabled.  The beginnings
- * of a speaker output program are in libwiimote source. */
+ * of a speaker output function are in libwiimote source. */
 /* Note: accelerometer (including nunchuk) and IR outputs produce a
  * lot of data - the purpose of this program is demonstration, not good
  * interface, and it shows. */
@@ -22,6 +23,18 @@ wiimote_mesg_callback_t wiimote_callback;
 void set_led_state(wiimote_t *wiimote, unsigned char led_state);
 void set_rpt_mode(wiimote_t *wiimote, unsigned char rpt_mode);
 
+wiimote_err_t err;
+void err(int id, const char *s, ...)
+{
+	va_list ap;
+
+	va_start(ap, s);
+	printf("%d:", id);
+	vprintf(s, ap);
+	printf("\n");
+	va_end(ap);
+}
+
 int main(int argc, char *argv[])
 {
 	bdaddr_t bdaddr;	/* bluetooth device address */
@@ -32,6 +45,8 @@ int main(int argc, char *argv[])
 	unsigned char rpt_mode = 0;
 	unsigned char rumble = 0;
 	int exit = 0;
+
+	wiimote_set_err(err);
 
 	/* Connect to any wiimote */
 	bdaddr = *BDADDR_ANY;
