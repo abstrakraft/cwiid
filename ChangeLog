@@ -1,4 +1,7 @@
 2007-03-08 L. Donnie Smith <cwiid@abstrakraft.org>
+	* added explicit creation of installation directories to prevent
+	  installation errors
+
 	wiimote
 		* created wiimote_err_t function type
 		* created wiimote_set_err function
