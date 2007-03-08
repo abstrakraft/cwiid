@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/06/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added wiimote parameter to wiimote_err calls
+ *
  *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
@@ -54,7 +57,7 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 
 	/* Lock wiimote rw access */
 	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
-		wiimote_err("Error locking rw_mutex");
+		wiimote_err(wiimote, "Error locking rw_mutex");
 		return -1;
 	}
 
@@ -76,12 +79,12 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 
 	/* Send read request packet */
 	if (send_report(wiimote, 0, RPT_READ_REQ, RPT_READ_REQ_LEN, buf)) {
-		wiimote_err("Error sending read request");
+		wiimote_err(wiimote, "Error sending read request");
 		ret = -1;
 	}
 	/* Lock rw_cond_mutex  */
 	else if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
-		wiimote_err("Error locking rw_cond_mutex");
+		wiimote_err(wiimote, "Error locking rw_cond_mutex");
 		ret = -1;
 	}
 	else {
@@ -89,13 +92,14 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 		while ((!ret) && (wiimote->rw_status == RW_PENDING)) {
 			if (pthread_cond_wait(&wiimote->rw_cond,
 			                      &wiimote->rw_cond_mutex)) {
-				wiimote_err("Error waiting on rw_cond");
+				wiimote_err(wiimote, "Error waiting on rw_cond");
 				ret = -1;
 			}
 		}
 		/* Unlock rw_cond_mutex */
 		if (pthread_mutex_unlock(&wiimote->rw_cond_mutex)) {
-			wiimote_err("Error unlocking rw_cond_mutex: deadlock warning");
+			wiimote_err(wiimote,
+			            "Error unlocking rw_cond_mutex: deadlock warning");
 		}
 
 		/* Check status */
@@ -112,7 +116,7 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 
 	/* Unlock rw_mutex */
 	if (pthread_mutex_unlock(&wiimote->rw_mutex)) {
-		wiimote_err("Error unlocking rw_mutex: deadlock warning");
+		wiimote_err(wiimote, "Error unlocking rw_mutex: deadlock warning");
 	}
 
 	if (flags & WIIMOTE_RW_DECODE) {
@@ -134,7 +138,7 @@ int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 
 	/* Lock wiimote rw access */
 	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
-		wiimote_err("Error locking rw_mutex");
+		wiimote_err(wiimote, "Error locking rw_mutex");
 		return -1;
 	}
 
@@ -155,12 +159,12 @@ int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 		memcpy(buf+5, data+sent, buf[4]);
 		wiimote->rw_status = RW_PENDING;
 		if (send_report(wiimote, 0, RPT_WRITE, RPT_WRITE_LEN, buf)) {
-			wiimote_err("Error sending write");
+			wiimote_err(wiimote, "Error sending write");
 			ret = -1;
 		}
 		/* Lock rw_cond_mutex  */
 		else if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
-			wiimote_err("Error locking rw_cond_mutex");
+			wiimote_err(wiimote, "Error locking rw_cond_mutex");
 			ret = -1;
 		}
 		else {
@@ -168,13 +172,14 @@ int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 			while ((!ret) && (wiimote->rw_status == RW_PENDING)) {
 				if (pthread_cond_wait(&wiimote->rw_cond,
 				                      &wiimote->rw_cond_mutex)) {
-					wiimote_err("Error waiting on rw_cond");
+					wiimote_err(wiimote, "Error waiting on rw_cond");
 					ret = -1;
 				}
 			}
 			/* Unlock rw_cond_mutex */
 			if (pthread_mutex_unlock(&wiimote->rw_cond_mutex)) {
-				wiimote_err("Error unlocking rw_cond_mutex: deadlock warning");
+				wiimote_err(wiimote,
+				            "Error unlocking rw_cond_mutex: deadlock warning");
 			}
 
 			/* Check status */
@@ -193,7 +198,7 @@ int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 
 	/* Unlock rw_mutex */
 	if (pthread_mutex_unlock(&wiimote->rw_mutex)) {
-		wiimote_err("Error unlocking rw_mutex: deadlock warning");
+		wiimote_err(wiimote, "Error unlocking rw_mutex: deadlock warning");
 	}
 
 	return ret;
@@ -216,7 +221,7 @@ int wiimote_beep(wiimote_t *wiimote)
 
 	if (exec_write_seq(wiimote, SEQ_LEN(speaker_enable_seq),
 	                   speaker_enable_seq)) {
-		wiimote_err("Error on speaker enable");
+		wiimote_err(wiimote, "Error on speaker enable");
 		ret = -1;
 	}
 
@@ -228,7 +233,7 @@ int wiimote_beep(wiimote_t *wiimote)
 		/* t.tv_nsec += 7000000; */
 		if (send_report(wiimote, 0, RPT_SPEAKER_DATA, SOUND_BUF_LEN, buf)) {
 		 	printf("%d\n", i);
-			wiimote_err("Error on speaker data");
+			wiimote_err(wiimote, "Error on speaker data");
 			ret = -1;
 			break;
 		}
@@ -241,7 +246,7 @@ int wiimote_beep(wiimote_t *wiimote)
 
 	if (exec_write_seq(wiimote, SEQ_LEN(speaker_disable_seq),
 	                   speaker_disable_seq)) {
-		wiimote_err("Error on speaker disable");
+		wiimote_err(wiimote, "Error on speaker disable");
 		ret = -1;
 	}
 

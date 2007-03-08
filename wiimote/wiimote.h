@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/05/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added wiimote_err_t definition
+ *  * added wiimote_set_err prototype
+ *
  *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
@@ -188,11 +192,13 @@ union wiimote_mesg {
 typedef struct wiimote wiimote_t;
 
 typedef void wiimote_mesg_callback_t(int, int, union wiimote_mesg* []);
+typedef void wiimote_err_t(int, const char *, ...);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+int wiimote_set_err(wiimote_err_t *err);
 wiimote_t *wiimote_connect(bdaddr_t bdaddr,
                            wiimote_mesg_callback_t *mesg_callback,
                            int *id);

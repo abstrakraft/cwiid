@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/06/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added wiimote parameter to wiimote_err calls
+ *
  *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
@@ -61,7 +64,7 @@ int wiimote_command(struct wiimote *wiimote, enum wiimote_command command,
 	case WIIMOTE_CMD_STATUS:
 		buf[0] = 0;
 		if (send_report(wiimote, 0, RPT_STATUS_REQ, 1, buf)) {
-			wiimote_err("Error requesting status");
+			wiimote_err(wiimote, "Error requesting status");
 			ret = -1;
 		}
 		break;
@@ -70,7 +73,7 @@ int wiimote_command(struct wiimote *wiimote, enum wiimote_command command,
 		                            (wiimote->led_rumble_state & 0x01);
 		buf[0]=wiimote->led_rumble_state;
 		if (send_report(wiimote, SEND_RPT_NO_RUMBLE, RPT_LED_RUMBLE, 1, buf)) {
-			wiimote_err("Error setting LEDs");
+			wiimote_err(wiimote, "Error setting LEDs");
 			ret = -1;
 		}
 		break;
@@ -79,7 +82,7 @@ int wiimote_command(struct wiimote *wiimote, enum wiimote_command command,
 		                            (flags ? 1 : 0);
 		buf[0]=wiimote->led_rumble_state;
 		if (send_report(wiimote, SEND_RPT_NO_RUMBLE, RPT_LED_RUMBLE, 1, buf)) {
-			wiimote_err("Error setting rumble");
+			wiimote_err(wiimote, "Error setting rumble");
 			ret = -1;
 		}
 		break;
@@ -87,7 +90,7 @@ int wiimote_command(struct wiimote *wiimote, enum wiimote_command command,
 		update_rpt_mode(wiimote, flags);
 		break;
 	default:
-		wiimote_err("Unknown command");
+		wiimote_err(wiimote, "Unknown command");
 		ret = -1;
 		break;
 	}
@@ -105,7 +108,7 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 
 	/* Lock wiimote access */
 	if (pthread_mutex_lock(&wiimote->wiimote_mutex)) {
-		wiimote_err("Error locking rw_mutex");
+		wiimote_err(wiimote, "Error locking rw_mutex");
 		return -1;
 	}
 
@@ -156,9 +159,10 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 	/* TODO: only do this when necessary (record old IR mode) */
 	if ((flags & WIIMOTE_RPT_IR)) {
 		if (exec_write_seq(wiimote, seq_len, ir_enable_seq)) {
-			wiimote_err("Error on IR enable");
+			wiimote_err(wiimote, "Error on IR enable");
 			if (pthread_mutex_unlock(&wiimote->wiimote_mutex)) {
-				wiimote_err("Error unlocking wiimote_mutex: deadlock warning");
+				wiimote_err(wiimote,
+				            "Error unlocking wiimote_mutex: deadlock warning");
 			}
 			return -1;
 		}
@@ -168,9 +172,10 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 	  !(flags & WIIMOTE_RPT_IR)) {
 		if (exec_write_seq(wiimote, SEQ_LEN(ir_disable_seq),
 		                   ir_disable_seq)) {
-			wiimote_err("Error on IR enable");
+			wiimote_err(wiimote, "Error on IR enable");
 			if (pthread_mutex_unlock(&wiimote->wiimote_mutex)) {
-				wiimote_err("Error unlocking wiimote_mutex: deadlock warning");
+				wiimote_err(wiimote,
+				            "Error unlocking wiimote_mutex: deadlock warning");
 			}
 			return -1;
 		}
@@ -180,9 +185,10 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 	buf[0]=0;
 	buf[1]=rpt_mode;
 	if (send_report(wiimote, 0, RPT_RPT_MODE, RPT_MODE_BUF_LEN, buf)) {
-		wiimote_err("Error setting report state");
+		wiimote_err(wiimote, "Error setting report state");
 		if (pthread_mutex_unlock(&wiimote->wiimote_mutex)) {
-			wiimote_err("Error unlocking wiimote_mutex: deadlock warning");
+			wiimote_err(wiimote,
+			            "Error unlocking wiimote_mutex: deadlock warning");
 		}
 		return -1;
 	}
@@ -191,7 +197,8 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 
 	/* Unlock wiimote_mutex */
 	if (pthread_mutex_unlock(&wiimote->wiimote_mutex)) {
-		wiimote_err("Error unlocking wiimote_mutex: deadlock warning");
+		wiimote_err(wiimote,
+		            "Error unlocking wiimote_mutex: deadlock warning");
 	}
 
 	return 0;
