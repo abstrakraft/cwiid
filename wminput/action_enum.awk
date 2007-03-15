@@ -1,4 +1,3 @@
-#! /usr/bin/awk -f
 BEGIN {
 	print "#include <stdlib.h>"
 	print "#include <linux/input.h>"

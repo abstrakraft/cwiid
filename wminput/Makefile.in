@@ -42,7 +42,7 @@ install_configs:
 #	rmdir $(WMINPUT_CONFIG_DIR); true
 
 action_enum.c: action_enum.awk action_enum.txt
-	./action_enum.awk action_enum.txt > action_enum.c
+	$(AWK) -f action_enum.awk action_enum.txt > action_enum.c
 
 conf.o lexer.c: y.tab.h
 
