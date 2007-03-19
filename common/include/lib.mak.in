@@ -37,8 +37,9 @@ install_static: static
 install_shared: shared
 	install -d $(LIB_INST_DIR)
 	install $(SHARED_LIB) $(LIB_INST_DIR)
+	ln -sf $(SHARED_LIB) $(LIB_INST_DIR)/$(SO_NAME)
 	ln -sf $(SO_NAME) $(LIB_INST_DIR)/$(LINK_NAME)
-	ldconfig
+	@LDCONFIG@
 
 clean:
 	rm -f $(STATIC_LIB) $(SHARED_LIB) $(OBJECTS) $(DEPS)
