@@ -62,6 +62,15 @@ else
 fi
 AC_SUBST(CWIID_PLUGINS_DIR)
 
+AC_ARG_WITH(ldconfig,AC_HELP_STRING([--disable-ldconfig],
+	[don't execute ldconfig after install]))
+if test "$enable_ldconfig" = "no"; then
+	LDCONFIG="#ldconfig"
+else
+	LDCONFIG="ldconfig"
+fi
+AC_SUBST(LDCONFIG)
+
 pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"
 PKG_CHECK_MODULES([GTK], [$pkg_modules])
 AC_SUBST(GTK_CFLAGS)
@@ -70,6 +79,7 @@ AC_SUBST(GTK_LIBS)
 AC_OUTPUT(
 	[Makefile]
 	[common/include/defs.mak]
+	[common/include/lib.mak]
 	[wiimote/Makefile]
 	[wmdemo/Makefile]
 	[wmgui/Makefile]
