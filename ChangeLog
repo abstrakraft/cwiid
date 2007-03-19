@@ -1,3 +1,10 @@
+2007-03-19 L. Donnie Smith <cwiid@abstrakraft.org>
+	* Added --disable-ldconfig option to configure
+
+2007-03-15 L. Donnie Smith <cwiid@abstrakraft.org>
+	wminput
+		* action_enum.awk - explicitly call awk rather than #! /usr/bin/awk
+
 2007-03-08 L. Donnie Smith <cwiid@abstrakraft.org>
 	* added explicit creation of installation directories to prevent
 	  installation errors
