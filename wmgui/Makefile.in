@@ -8,8 +8,8 @@ APP_NAME = wmgui
 SOURCES = main.c interface.c support.c
 
 CFLAGS += @GTK_CFLAGS@ -I@top_builddir@/wiimote
-LDFLAGS = -L@top_builddir@/wiimote
-LDLIBS = @GTK_LIBS@ -lm -lwiimote
+LDFLAGS += -L@top_builddir@/wiimote
+LDLIBS += @GTK_LIBS@ -lm -lwiimote
 INST_DIR = @bindir@
 
 include $(COMMON)/include/app.mak

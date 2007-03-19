@@ -9,12 +9,12 @@ SOURCES = main.c conf.c uinput.c action_enum.c parser.c lexer.c util.c
 
 CFLAGS += -I@top_builddir@/wiimote \
 	-DWMINPUT_CONFIG_DIR=\"$(WMINPUT_CONFIG_DIR)\"
-LDLIBS = -lwiimote -ldl
-LDFLAGS = -L@top_builddir@/wiimote -rdynamic
+LDLIBS += -lwiimote -ldl
+LDFLAGS += -L@top_builddir@/wiimote -rdynamic
 INST_DIR = @bindir@
 WMINPUT_CONFIG_DIR = $(CWIID_CONFIG_DIR)/wminput
 
-YFLAGS = -d
+YFLAGS += -d
 
 include $(COMMON)/include/app.mak
 
