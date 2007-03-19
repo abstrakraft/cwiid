@@ -6,7 +6,7 @@ include $(COMMON)/include/defs.mak
 PLUGIN_NAME = nunchuk_acc
 SOURCES = nunchuk_acc.c
 CFLAGS += -I@top_builddir@/wminput -I@top_builddir@/wiimote
-LDLIBS = -lm
+LDLIBS += -lm
 INST_DIR = $(CWIID_PLUGINS_DIR)
 
 include $(COMMON)/include/plugin.mak
