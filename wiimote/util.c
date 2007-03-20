@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * audited error checking (coda and error handler sections)
+ *
  *  03/05/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created wiimote_err_func variable
  *  * created wiimote_err_default
@@ -163,7 +166,7 @@ int wiimote_findfirst(bdaddr_t *bdaddr)
 	 * check errors here...
 	 */
 	int dev_id;
-	int sock;
+	int sock = -1;
 	inquiry_info *dev_list = NULL;
 	int i;
 	int dev_count;
@@ -173,19 +176,21 @@ int wiimote_findfirst(bdaddr_t *bdaddr)
 	/* Get the first available Bluetooth device */
 	if ((dev_id = hci_get_route(NULL)) == -1) {
 		wiimote_err(NULL, "No Bluetooth device found");
-		return -1;
+		ret = -1;
+		goto CODA;
 	}
 	if ((sock = hci_open_dev(dev_id)) == -1) {
 		wiimote_err(NULL, "Error opening Bluetooth device");
-		return -1;
+		ret = -1;
+		goto CODA;
 	}
 
 	/* Get Device List */
 	if ((dev_count = hci_inquiry(dev_id, 2, MAX_RSP, NULL, &dev_list,
 	                             IREQ_CACHE_FLUSH)) == -1) {
 		wiimote_err(NULL, "Error on device inquiry");
-		hci_close_dev(sock);
-		return -1;
+		ret = -1;
+		goto CODA;
 	}
 
 	/* Check class and name for Wiimotes */
@@ -205,7 +210,10 @@ int wiimote_findfirst(bdaddr_t *bdaddr)
 		}
 	}
 
-	hci_close_dev(sock);
+CODA:
+	if (sock != -1) {
+		hci_close_dev(sock);
+	}
 	if (dev_list) {
 		free(dev_list);
 	}
