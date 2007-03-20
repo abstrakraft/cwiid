@@ -34,6 +34,9 @@
 	* Added file ChangeLogs
 	* Fixed GTK_{CFLAGS,LIBS} in configure.ac and wmgui/Makefile.in
 
+2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
+	* configure.ac - check for stdint.h
+
 2007-02-26 L. Donnie Smith <cwiid@abstrakraft.org>
 	* Changed installation directories to comply with FHS standard
 	* Added check for yypop_buffer_state in flex
