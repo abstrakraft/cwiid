@@ -1,9 +1,12 @@
 # ChangeLog:
+# 03/19/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+# * added --disable-ldconfig
+#
 # 03/01/2007 L. Donnie Smith <cwiid@abstrakraft.org>
 # * Initial ChangeLog
 # * Check for stdint.h
 
-AC_INIT(CWiid,0.5.01,cwiid@abstrakraft.org)
+AC_INIT(CWiid,0.5.02,cwiid@abstrakraft.org)
 
 AC_PROG_CC
 AC_PROG_AWK
