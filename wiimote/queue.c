@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * audited error checking (coda and error handler sections)
+ *
  *  03/03/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  */
@@ -100,24 +103,31 @@ int queue_queue(struct queue *queue, void *data)
 	/* Lock dispatch mutex, add node to dispatch queue, unlock mutex */
 	if (pthread_mutex_lock(&queue->mutex)) {
 		free(node);
-		return -1;
+		ret = -1;
+		goto CODA;
 	}
 	*queue->p_tail = node;
 	queue->p_tail = &node->next;
 	if (pthread_mutex_unlock(&queue->mutex)) {
-		return -1;
+		ret = -1;
+		goto CODA;
 	}
 
 	/* Signal dispatch condition */
 	if (pthread_mutex_lock(&queue->cond_mutex)) {
-		return -1;
+		ret = -1;
+		goto CODA;
 	}
 	if (pthread_cond_signal(&queue->cond)) {
 		ret = -1;
+		goto CODA;
 	}
 	if (pthread_mutex_unlock(&queue->cond_mutex)) {
-		return -1;
+		ret = -1;
+		goto CODA;
 	}
+
+CODA:
 	if (pthread_setcanceltype(canceltype, &canceltype)) {
 		ret = -1;
 	}

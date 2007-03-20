@@ -1,9 +1,19 @@
 2007-03-19 L. Donnie Smith <cwiid@abstrakraft.org>
 	* Added --disable-ldconfig option to configure
+	* Makefiles - append to rather than set compiler options
 
 2007-03-15 L. Donnie Smith <cwiid@abstrakraft.org>
 	wminput
 		* action_enum.awk - explicitly call awk rather than #! /usr/bin/awk
+
+2007-03-14 L. Donnie Smith <cwiid@abstrakraft.org>
+	wiimote
+		* audited error checking (coda and error handler sections)
+		* updated comments
+		* event.c - moved int_listen read/write code to process_read and
+		  process_write, reorganized file
+		* wiimote_read - changed to obey decode flag only for register read
+		* wiimote_connect - changed memcpy to bacmp
 
 2007-03-08 L. Donnie Smith <cwiid@abstrakraft.org>
 	* added explicit creation of installation directories to prevent

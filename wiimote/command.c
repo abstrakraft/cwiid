@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * audited error checking (coda and error handler sections)
+ *  * updated comments
+ *
  *  03/06/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote parameter to wiimote_err calls
  *
@@ -105,11 +109,13 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 	uint8_t rpt_mode;
 	struct write_seq *ir_enable_seq;
 	int seq_len;
+	int ret = 0;
 
 	/* Lock wiimote access */
 	if (pthread_mutex_lock(&wiimote->wiimote_mutex)) {
 		wiimote_err(wiimote, "Error locking rw_mutex");
-		return -1;
+		ret = -1;
+		goto CODA;
 	}
 
 	/* Use -1 to update the reporting mode without changing flags */
@@ -117,6 +123,7 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 		flags = wiimote->rpt_mode_flags;
 	}
 
+	/* Pick a report mode based on report flags */
 	if ((flags & WIIMOTE_RPT_EXT) &&
 	  ((wiimote->extension == WIIMOTE_EXT_NUNCHUK) ||
 	   (wiimote->extension == WIIMOTE_EXT_CLASSIC))) {
@@ -160,11 +167,8 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 	if ((flags & WIIMOTE_RPT_IR)) {
 		if (exec_write_seq(wiimote, seq_len, ir_enable_seq)) {
 			wiimote_err(wiimote, "Error on IR enable");
-			if (pthread_mutex_unlock(&wiimote->wiimote_mutex)) {
-				wiimote_err(wiimote,
-				            "Error unlocking wiimote_mutex: deadlock warning");
-			}
-			return -1;
+			ret = -1;
+			goto CODA;
 		}
 	}
 	/* Disable IR */
@@ -173,11 +177,8 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 		if (exec_write_seq(wiimote, SEQ_LEN(ir_disable_seq),
 		                   ir_disable_seq)) {
 			wiimote_err(wiimote, "Error on IR enable");
-			if (pthread_mutex_unlock(&wiimote->wiimote_mutex)) {
-				wiimote_err(wiimote,
-				            "Error unlocking wiimote_mutex: deadlock warning");
-			}
-			return -1;
+			ret = -1;
+			goto CODA;
 		}
 	}
 
@@ -186,21 +187,19 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t flags)
 	buf[1]=rpt_mode;
 	if (send_report(wiimote, 0, RPT_RPT_MODE, RPT_MODE_BUF_LEN, buf)) {
 		wiimote_err(wiimote, "Error setting report state");
-		if (pthread_mutex_unlock(&wiimote->wiimote_mutex)) {
-			wiimote_err(wiimote,
-			            "Error unlocking wiimote_mutex: deadlock warning");
-		}
-		return -1;
+		ret = -1;
+		goto CODA;
 	}
 
 	wiimote->rpt_mode_flags = flags;
 
+CODA:
 	/* Unlock wiimote_mutex */
 	if (pthread_mutex_unlock(&wiimote->wiimote_mutex)) {
 		wiimote_err(wiimote,
 		            "Error unlocking wiimote_mutex: deadlock warning");
 	}
 
-	return 0;
+	return ret;
 }
 

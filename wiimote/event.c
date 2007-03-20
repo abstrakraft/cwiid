@@ -15,6 +15,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * audit error checking
+ *  * reorganized file
+ *  * moved int_listen read/write code to process_read and process_write
+ *  * updated (some/a few) comments
+ *
  *  03/06/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote parameter to wiimote_err calls
  *
@@ -91,6 +97,166 @@
 #include "wiimote_internal.h"
 #include "queue.h"
 
+/* process_* messages (except read and write ) allocate and fill in
+ * wiimote_*_mesg structs from raw wiimote data.  Messages are then
+ * placed at the end of mesg_array. */
+
+static int process_status(struct wiimote *, const unsigned char *,
+                          struct mesg_array *);
+static int process_btn(struct wiimote *, const unsigned char *,
+                       struct mesg_array *);
+static int process_acc(struct wiimote *, const unsigned char *,
+                       struct mesg_array *);
+static int process_ir10(struct wiimote *, const unsigned char *,
+                        struct mesg_array *);
+static int process_ir12(struct wiimote *, const unsigned char *,
+                        struct mesg_array *);
+static int process_ext(struct wiimote *, unsigned char *, unsigned char,
+                       struct mesg_array *);
+
+/* process_read and process_write handle copying data between wiimote buffers
+ * and r/w buffers, as well as communication between wiimote_read or
+ * wiimote_write */
+static int process_read(struct wiimote *, unsigned char *);
+static int process_write(struct wiimote *);
+
+#define READ_BUF_LEN 23
+void *int_listen(struct wiimote *wiimote)
+{
+	unsigned char buf[READ_BUF_LEN];
+	size_t len;
+	struct mesg_array *mesg_array;
+	char err;
+
+	do {
+		/* Read packet */
+		if ((len = read(wiimote->int_socket, buf, READ_BUF_LEN)) == -1) {
+			wiimote_err(wiimote, "Interrupt channel read error");
+			/* TODO: return ? */
+		}
+		else {
+			/* Verify first byte (DATA/INPUT) */
+			if (buf[0] != (BT_TRANS_DATA | BT_PARAM_INPUT)) {
+				wiimote_err(wiimote, "Invalid packet type");
+			}
+
+			/* Main switch */
+			switch (buf[1]) {
+			case RPT_STATUS:
+			case RPT_BTN:
+			case RPT_BTN_ACC:
+			case RPT_BTN_EXT8:
+			case RPT_BTN_ACC_IR12:
+			case RPT_BTN_EXT19:
+			case RPT_BTN_ACC_EXT16:
+			case RPT_BTN_IR10_EXT9:
+			case RPT_BTN_ACC_IR10_EXT6:
+			case RPT_EXT21:
+				if ((mesg_array = malloc(sizeof *mesg_array)) == NULL) {
+					wiimote_err(wiimote, "Error allocating mesg array");
+					break;
+				}
+				mesg_array->count = 0;
+				err = 0;
+				switch (buf[1]) {
+				case RPT_STATUS:
+					if (process_status(wiimote, &buf[2], mesg_array)) {
+						err = -1;
+					}
+					break;
+				case RPT_BTN:
+					if (process_btn(wiimote, &buf[2], mesg_array)) {
+						err = -1;
+					}
+					break;
+				case RPT_BTN_ACC:
+					if (process_btn(wiimote, &buf[2], mesg_array) ||
+					  process_acc(wiimote, &buf[4], mesg_array)) {
+						err = -1;
+					}
+					break;
+				case RPT_BTN_EXT8:
+					if (process_btn(wiimote, &buf[2], mesg_array) ||
+					  process_ext(wiimote, &buf[4], 8, mesg_array)) {
+						err = -1;
+					}
+					break;
+				case RPT_BTN_ACC_IR12:
+					if (process_btn(wiimote, &buf[2], mesg_array) ||
+					  process_acc(wiimote, &buf[4], mesg_array) ||
+					  process_ir12(wiimote, &buf[7], mesg_array)) {
+						err = -1;
+					}
+					break;
+				case RPT_BTN_EXT19:
+					if (process_btn(wiimote, &buf[2], mesg_array) ||
+					  process_ext(wiimote, &buf[4], 19, mesg_array)) {
+						err = -1;
+					}
+					break;
+				case RPT_BTN_ACC_EXT16:
+					if (process_btn(wiimote, &buf[2], mesg_array) ||
+					  process_acc(wiimote, &buf[4], mesg_array) ||
+					  process_ext(wiimote, &buf[7], 16, mesg_array)) {
+						err = -1;
+					}
+					break;
+				case RPT_BTN_IR10_EXT9:
+					if (process_btn(wiimote, &buf[2], mesg_array) ||
+					  process_ir10(wiimote, &buf[4], mesg_array) ||
+					  process_ext(wiimote, &buf[14], 9, mesg_array)) {
+						err = -1;
+					}
+					break;
+				case RPT_BTN_ACC_IR10_EXT6:
+					if (process_btn(wiimote, &buf[2], mesg_array) ||
+					  process_acc(wiimote, &buf[4], mesg_array) ||
+					  process_ir10(wiimote, &buf[7], mesg_array) ||
+					  process_ext(wiimote, &buf[17], 6, mesg_array)) {
+						err = -1;
+					}
+					break;
+				case RPT_EXT21:
+					if (process_ext(wiimote, &buf[2], 21, mesg_array)) {
+						err = -1;
+					}
+					break;
+				}
+
+				if (err || (mesg_array->count == 0)) {
+					free(mesg_array);
+				}
+				else {
+					if (queue_queue(wiimote->dispatch_queue, mesg_array)) {
+						free_mesg_array(mesg_array);
+						wiimote_err(wiimote,
+						            "error dispatching mesg array");
+					}
+				}
+				break;
+			case RPT_BTN_ACC_IR36_1:
+			case RPT_BTN_ACC_IR36_2:
+				wiimote_err(wiimote, "Unsupported report type received "
+				            "(interleaved data)");
+				break;
+			case RPT_READ_DATA:
+				process_read(wiimote, &buf[4]);
+				/* TODO: send button message */
+				break;
+			case RPT_WRITE_ACK:
+				process_write(wiimote);
+				break;
+			default:
+				wiimote_err(wiimote, "Unknown message type");
+				break;
+			}
+		}
+	} while (-1);
+
+	/* This should never execute */
+	return NULL;
+}
+
 static int process_status(struct wiimote *wiimote, const unsigned char *data,
                           struct mesg_array *mesg_array)
 {
@@ -98,7 +264,9 @@ static int process_status(struct wiimote *wiimote, const unsigned char *data,
 
 	if ((mesg = malloc(sizeof *mesg)) == NULL) {
 		wiimote_err(wiimote, "Error allocating status mesg");
+		return -1;
 	}
+
 	mesg->type = WIIMOTE_MESG_STATUS;
 	mesg->battery = data[5];
 	if (data[2] & 0x02) {
@@ -314,216 +482,101 @@ static int process_ext(struct wiimote *wiimote, unsigned char *data,
 	return 0;
 }
 
-#define READ_BUF_LEN 23
-void *int_listen(struct wiimote *wiimote)
+static int process_read(struct wiimote *wiimote, unsigned char *data)
 {
-	unsigned char buf[READ_BUF_LEN];
-	size_t len;
-	struct mesg_array *mesg_array;
-	char err;
+	uint8_t data_len;
+	uint8_t error;
+	int ret = 0;
 
-	do {
-		/* Read packet */
-		if ((len = read(wiimote->int_socket, buf, READ_BUF_LEN)) == -1) {
-			wiimote_err(wiimote, "Interrupt channel read error");
+	if (wiimote->rw_status == RW_PENDING) {
+		/* Extract error status and current packet length */
+		data_len = (data[0]>>4)+1;
+		error = data[0] & 0x0F;
+		/* Error if wiimote errors, or if packet is too long */
+		if (((data_len + wiimote->read_received) > wiimote->read_len) ||
+		  error) {
+			wiimote_err(wiimote, "Error in read data");
+			wiimote->rw_status = RW_ERROR;
+			ret = -1;
 		}
 		else {
-			/* Verify first byte (DATA/INPUT) */
-			if (buf[0] != (BT_TRANS_DATA | BT_PARAM_INPUT)) {
-				wiimote_err(wiimote, "Invalid packet type");
-			}
-
-			/* Main switch */
-			switch (buf[1]) {
-			case RPT_STATUS:
-			case RPT_BTN:
-			case RPT_BTN_ACC:
-			case RPT_BTN_EXT8:
-			case RPT_BTN_ACC_IR12:
-			case RPT_BTN_EXT19:
-			case RPT_BTN_ACC_EXT16:
-			case RPT_BTN_IR10_EXT9:
-			case RPT_BTN_ACC_IR10_EXT6:
-			case RPT_EXT21:
-				if ((mesg_array = malloc(sizeof *mesg_array)) == NULL) {
-					wiimote_err(wiimote, "Error allocating mesg array");
-					break;
-				}
-				mesg_array->count = 0;
-				err = 0;
-				switch (buf[1]) {
-				case RPT_STATUS:
-					if (process_status(wiimote, &buf[2], mesg_array)) {
-						err = -1;
-					}
-					break;
-				case RPT_BTN:
-					if (process_btn(wiimote, &buf[2], mesg_array)) {
-						err = -1;
-					}
-					break;
-				case RPT_BTN_ACC:
-					if (process_btn(wiimote, &buf[2], mesg_array) ||
-					  process_acc(wiimote, &buf[4], mesg_array)) {
-						err = -1;
-					}
-					break;
-				case RPT_BTN_EXT8:
-					if (process_btn(wiimote, &buf[2], mesg_array) ||
-					  process_ext(wiimote, &buf[4], 8, mesg_array)) {
-						err = -1;
-					}
-					break;
-				case RPT_BTN_ACC_IR12:
-					if (process_btn(wiimote, &buf[2], mesg_array) ||
-					  process_acc(wiimote, &buf[4], mesg_array) ||
-					  process_ir12(wiimote, &buf[7], mesg_array)) {
-						err = -1;
-					}
-					break;
-				case RPT_BTN_EXT19:
-					if (process_btn(wiimote, &buf[2], mesg_array) ||
-					  process_ext(wiimote, &buf[4], 19, mesg_array)) {
-						err = -1;
-					}
-					break;
-				case RPT_BTN_ACC_EXT16:
-					if (process_btn(wiimote, &buf[2], mesg_array) ||
-					  process_acc(wiimote, &buf[4], mesg_array) ||
-					  process_ext(wiimote, &buf[7], 16, mesg_array)) {
-						err = -1;
-					}
-					break;
-				case RPT_BTN_IR10_EXT9:
-					if (process_btn(wiimote, &buf[2], mesg_array) ||
-					  process_ir10(wiimote, &buf[4], mesg_array) ||
-					  process_ext(wiimote, &buf[14], 9, mesg_array)) {
-						err = -1;
-					}
-					break;
-				case RPT_BTN_ACC_IR10_EXT6:
-					process_btn(wiimote, &buf[2], mesg_array);
-					process_acc(wiimote, &buf[4], mesg_array);
-					process_ir10(wiimote, &buf[7], mesg_array);
-					process_ext(wiimote, &buf[17], 6, mesg_array);
-					break;
-				case RPT_EXT21:
-					if (process_ext(wiimote, &buf[2], 21, mesg_array)) {
-						err = -1;
-					}
-					break;
-				}
-
-				if (err || (mesg_array->count == 0)) {
-					free(mesg_array);
-				}
-				else {
-					if (queue_queue(wiimote->dispatch_queue, mesg_array)) {
-						free_mesg_array(mesg_array);
-						wiimote_err(wiimote,
-						            "error dispatching mesg array");
-					}
-				}
-				break;
-			case RPT_BTN_ACC_IR36_1:
-			case RPT_BTN_ACC_IR36_2:
-				wiimote_err(wiimote, "Unsupported report type received "
-				            "(interleaved data)");
-				break;
-			case RPT_READ_DATA:
-				if (wiimote->rw_status == RW_PENDING) {
-					uint8_t data_len;
-					uint8_t error;
-
-					/* Extract error status and current packet length */
-					data_len = (buf[4]>>4)+1;
-					error = buf[4] & 0x0F;
-					/* Error if wiimote errors, or if packet is too long */
-					if (((data_len+wiimote->read_received)>
-					  wiimote->read_len) || error) {
-						wiimote_err(wiimote, "Error in read data");
-						wiimote->rw_status = RW_ERROR;
-					}
-					else {
-						/* Copy data into read_buf, update read data, signal
-						 * ready if we have enough data */
-						memcpy(wiimote->read_buf, buf+7, data_len);
-						wiimote->read_buf += data_len;
-						wiimote->read_received += data_len;
-						if (wiimote->read_received == wiimote->read_len) {
-							wiimote->rw_status = RW_READY;
-						}
-					}
-					if (wiimote->rw_status != RW_PENDING) {
-						/* Lock rw_cond_mutex, signal rw_cond, unlock
-						 * rw_cond_mutex */
-						if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
-							wiimote_err(wiimote,
-							            "Error locking rw_cond_mutex");
-						}
-						else {
-							if (pthread_cond_signal(&wiimote->rw_cond)) {
-								wiimote_err(wiimote,
-								            "Error signaling rw_cond: "
-								            "deadlock warning");
-							}
-							if (pthread_mutex_unlock(
-							  &wiimote->rw_cond_mutex)) {
-								wiimote_err(wiimote,
-								            "Error unlocking rw_cond_mutex: "
-							                "deadlock warning");
-							}
-						}
-					}
-					/* TODO: add button message */
-				}
-				else {
-					wiimote_err(wiimote, "Extraneous read data received");
-				}
-				break;
-			case RPT_WRITE_ACK:
-				if (wiimote->rw_status == RW_PENDING) {
-					wiimote->rw_status = RW_READY;
-					/* Lock write_cond_mutex, signal write_cond, unlock
-					 * write_cond_mutex */
-					if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
-						wiimote_err(wiimote,
-						            "Error locking rw_cond_mutex");
-					}
-					else {
-						if (pthread_cond_signal(&wiimote->rw_cond)) {
-							wiimote_err(wiimote,
-							            "Error signaling rw_cond: "
-							            "deadlock warning");
-						}
-						if (pthread_mutex_unlock(
-						  &wiimote->rw_cond_mutex)) {
-							wiimote_err(wiimote,
-							            "Error unlocking rw_cond_mutex: "
-					                    "deadlock warning");
-						}
-					}
-				}
-				else {
-					wiimote_err(wiimote, "Extraneous write ack received");
-				}
-				break;
-			default:
-				wiimote_err(wiimote, "Unknown message type");
-				break;
+			/* Copy data into read_buf, update read data, signal
+			 * ready if we have enough data */
+			memcpy(wiimote->read_buf, data+3, data_len);
+			wiimote->read_buf += data_len;
+			wiimote->read_received += data_len;
+			if (wiimote->read_received == wiimote->read_len) {
+				wiimote->rw_status = RW_READY;
 			}
 		}
-	} while (-1);
+		if (wiimote->rw_status != RW_PENDING) {
+			/* Lock rw_cond_mutex, signal rw_cond, unlock
+			 * rw_cond_mutex */
+			if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
+				wiimote_err(wiimote, "Error locking rw_cond_mutex");
+				ret = -1;
+			}
+			else {
+				if (pthread_cond_signal(&wiimote->rw_cond)) {
+					wiimote_err(wiimote, "Error signaling rw_cond: "
+					            "deadlock warning");
+					ret = -1;
+				}
+				if (pthread_mutex_unlock(
+				  &wiimote->rw_cond_mutex)) {
+					wiimote_err(wiimote, "Error unlocking rw_cond_mutex: "
+				                "deadlock warning");
+					ret = -1;
+				}
+			}
+		}
+	}
+	else {
+		wiimote_err(wiimote, "Extraneous read data received");
+		ret = 1;
+	}
 
-	/* This should never execute */
-	return NULL;
+	return ret;
+}
+
+static int process_write(struct wiimote *wiimote)
+{
+	int ret = 0;
+
+	if (wiimote->rw_status == RW_PENDING) {
+		wiimote->rw_status = RW_READY;
+		/* Lock write_cond_mutex, signal write_cond, unlock
+		 * write_cond_mutex */
+		if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
+			wiimote_err(wiimote, "Error locking rw_cond_mutex");
+			ret = -1;
+		}
+		else {
+			if (pthread_cond_signal(&wiimote->rw_cond)) {
+				wiimote_err(wiimote, "Error signaling rw_cond: "
+				            "deadlock warning");
+				ret = -1;
+			}
+			if (pthread_mutex_unlock(&wiimote->rw_cond_mutex)) {
+				wiimote_err(wiimote, "Error unlocking rw_cond_mutex: "
+		                    "deadlock warning");
+				ret = -1;
+			}
+		}
+	}
+	else {
+		wiimote_err(wiimote, "Extraneous write ack received");
+		ret = -1;
+	}
+
+	return ret;
 }
 
 /* cleanup func */
 static void free_dispatch_queue(struct queue *queue)
 {
 	if (queue_free(queue, (free_func_t *)free_mesg_array)) {
-		/* TODO: return proper wiimote id */
+		/* TODO: return proper wiimote ptr */
 		wiimote_err(NULL, "Error freeing dispatch queue");
 	}
 }
@@ -548,6 +601,7 @@ void *dispatch(struct wiimote *wiimote)
 		/* dispatch messages */
 		while (!queue_dequeue(dispatch_queue, (void **)&mesg_array)) {
 			pthread_testcancel();
+			/* Disable cancelling while in callback */
 			if (pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancelstate)) {
 				wiimote_err(wiimote, "Error disabling cancel state");
 			}
@@ -560,12 +614,14 @@ void *dispatch(struct wiimote *wiimote)
 					if ((mesg->status_mesg.extension == WIIMOTE_EXT_UNKNOWN) &&
 					  (wiimote->extension == WIIMOTE_EXT_NONE)) {
 						buf = 0x00;
+						/* Initialize extension register space */
 						if (wiimote_write(wiimote, WIIMOTE_RW_REG, 0xA40040, 1,
 						                  &buf)) {
 							wiimote_err(wiimote,
 							            "Error initializing extension");
 							wiimote->extension = WIIMOTE_EXT_UNKNOWN;
 						}
+						/* Read extension ID */
 						else if (wiimote_read(wiimote,
 						         WIIMOTE_RW_REG | WIIMOTE_RW_DECODE, 0xA400FE,
 							     1, &buf)) {
@@ -599,6 +655,7 @@ void *dispatch(struct wiimote *wiimote)
 						wiimote_err(wiimote, "Error reseting report mode");
 					}
 
+					/* Invoke Callback (for Status Messages) */
 					if (wiimote->rpt_mode_flags & WIIMOTE_RPT_STATUS) {
 						mesg->status_mesg.extension = wiimote->extension;
 						if (wiimote->mesg_callback) {
@@ -609,11 +666,13 @@ void *dispatch(struct wiimote *wiimote)
 					}
 				}
 				else {
+					/* Invoke Callback (all but Status Messages) */
 					if (wiimote->mesg_callback) {
 						wiimote->mesg_callback(wiimote->id, mesg_array->count,
 						                       mesg_array->mesg);
 					}
 				}
+				/* Reenable Thread Cancel */
 				if (pthread_setcancelstate(cancelstate, &cancelstate)) {
 					wiimote_err(wiimote, "Error enabling cancel state");
 				}
@@ -625,6 +684,7 @@ void *dispatch(struct wiimote *wiimote)
 	/* This code should never execute */
 	wiimote_err(wiimote, "Exiting dispatch thread");
 
+	/* Just in case, free the dispatch queue */
 	pthread_cleanup_pop(1);
 
 	return NULL;

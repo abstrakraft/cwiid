@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * wiimote_read - changed to obey decode flag only for register read
+ *
  *  03/06/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote parameter to wiimote_err calls
  *
@@ -119,7 +122,8 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 		wiimote_err(wiimote, "Error unlocking rw_mutex: deadlock warning");
 	}
 
-	if (flags & WIIMOTE_RW_DECODE) {
+	/* Decode only for registers */
+	if ((flags & WIIMOTE_RW_DECODE) && (flags & WIIMOTE_RW_REG)) {
 		for (i=0; i < len; i++) {
 			((unsigned char *)data)[i] = DECODE(((unsigned char *)data)[i]);
 		}
