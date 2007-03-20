@@ -33,7 +33,7 @@ $(CWIID_PLUGINS_DIR):
 
 distclean:
 	rm -rf Makefile config.log config.status autom4te.cache \
-		$(COMMON)/include/defs.mak
+		$(COMMON)/include/defs.mak $(COMMON)/include/lib.mak
 
 uninstall:
 	rm -r $(CWIID_PLUGINS_DIR); true
