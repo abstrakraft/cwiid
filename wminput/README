@@ -43,6 +43,8 @@ Key symbols can be assigned to wminput button events.  While standard keys are s
 3.If the code is not mapped to the appropriate symbol, edit ~/.Xmodmap, and use xmodmap to map them.  (A copy of my ~/.Xmodmap is included in cwiid/doc)
 4.Use xbindkeys or a window manager-specific utility to map the key symbols to specific actions.
 
+Wiimote buttons can be mapped to modifier keys (control, shift, alt, etc.) with the command xmodmap command 'add [mod] = [keysym]', where keysym is the key symbol mapped in the process described above, and mod is one of the modifier names listed by 'xmodmap -pm' (mod1 = alt).
+
 CONFIGURATION FILES
 ------------------------------------------------------------------------------------------------
 Configuration files are installed in /usr/local/etc/cwiid/wminput.  Configuration search directory order is ~/.cwiid/wminput, /usr/local/etc/cwiid/wminput.
