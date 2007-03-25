@@ -1,3 +1,7 @@
+2007-03-23 L. Donnie Smith <cwiid@abstrakraft.org>
+	* Corrected installation directory creation logic
+	* Added .NOTPARALLEL to top level Makefile
+
 2007-03-19 L. Donnie Smith <cwiid@abstrakraft.org>
 	* Added --disable-ldconfig option to configure
 	* Makefiles - append to rather than set compiler options
