@@ -43,3 +43,5 @@ uninstall_config:
 
 .PHONY: all install clean distclean uninstall uninstall_config $(LIB_DIRS) \
 	$(BIN_DIRS) wmdemo
+
+.NOTPARALLEL:

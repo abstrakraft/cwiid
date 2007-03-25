@@ -26,20 +26,23 @@ $(SHARED_LIB): $(OBJECTS)
 
 install: install_header install_static install_shared
 
-install_header:
-	install -d $(INC_INST_DIR)
+install_header: $(INC_INST_DIR)
 	install $(LIB_NAME).h $(INC_INST_DIR)
 
-install_static: static
-	install -d $(LIB_INST_DIR)
+$(INC_INST_DIR):
+	install -d $(INC_INST_DIR)
+
+install_static: static $(LIB_INST_DIR)
 	install $(STATIC_LIB) $(LIB_INST_DIR)
 
-install_shared: shared
-	install -d $(LIB_INST_DIR)
+install_shared: shared $(LIB_INST_DIR)
 	install $(SHARED_LIB) $(LIB_INST_DIR)
 	ln -sf $(SHARED_LIB) $(LIB_INST_DIR)/$(SO_NAME)
 	ln -sf $(SO_NAME) $(LIB_INST_DIR)/$(LINK_NAME)
 	@LDCONFIG@
+
+$(LIB_INST_DIR):
+	install -d $(LIB_INST_DIR)
 
 clean:
 	rm -f $(STATIC_LIB) $(SHARED_LIB) $(OBJECTS) $(DEPS)
