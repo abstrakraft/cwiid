@@ -5,22 +5,24 @@ DEPS    = $(SOURCES:.c=.d)
 
 INST_DIR ?= /usr/local/bin
 
+DEST_INST_DIR = $(DESTDIR)/$(INST_DIR)
+
 all: $(APP_NAME)
 
 $(APP_NAME): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(LDLIBS)
 
-install: $(APP_NAME) $(INST_DIR)
-	install $(APP_NAME) $(INST_DIR)
+install: $(APP_NAME) $(DEST_INST_DIR)
+	install $(APP_NAME) $(DEST_INST_DIR)
 
-$(INST_DIR):
-	install -d $(INST_DIR)
+$(DEST_INST_DIR):
+	install -d $(DEST_INST_DIR)
 
 clean:
 	rm -f $(APP_NAME) $(OBJECTS) $(DEPS)
 
 uninstall:
-	rm -f $(INST_DIR)/$(APP_NAME)
+	rm -f $(DEST_INST_DIR)/$(APP_NAME)
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),distclean)

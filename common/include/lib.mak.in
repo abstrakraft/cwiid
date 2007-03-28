@@ -1,10 +1,14 @@
 #Copyright (C) 2007 L. Donnie Smith
 
+LDCONFIG = @LDCONFIG@
+
 HEADER	   = $(LIB_NAME).h
 STATIC_LIB = lib$(LIB_NAME).a
 LINK_NAME  = lib$(LIB_NAME).so
 SO_NAME    = $(LINK_NAME).$(MAJOR_VER)
 SHARED_LIB = $(SO_NAME).$(MINOR_VER)
+DEST_INC_INST_DIR = $(DESTDIR)/$(INC_INST_DIR)
+DEST_LIB_INST_DIR = $(DESTDIR)/$(LIB_INST_DIR)
 
 OBJECTS = $(SOURCES:.c=.o)
 DEPS    = $(SOURCES:.c=.d)
@@ -26,30 +30,31 @@ $(SHARED_LIB): $(OBJECTS)
 
 install: install_header install_static install_shared
 
-install_header: $(INC_INST_DIR)
-	install $(LIB_NAME).h $(INC_INST_DIR)
+install_header: $(DEST_INC_INST_DIR)
+	install $(LIB_NAME).h $(DEST_INC_INST_DIR)
 
-$(INC_INST_DIR):
-	install -d $(INC_INST_DIR)
+$(DEST_INC_INST_DIR):
+	install -d $(DEST_INC_INST_DIR)
 
-install_static: static $(LIB_INST_DIR)
-	install $(STATIC_LIB) $(LIB_INST_DIR)
+install_static: static $(DEST_LIB_INST_DIR)
+	install $(STATIC_LIB) $(DEST_LIB_INST_DIR)
 
-install_shared: shared $(LIB_INST_DIR)
-	install $(SHARED_LIB) $(LIB_INST_DIR)
-	ln -sf $(SHARED_LIB) $(LIB_INST_DIR)/$(SO_NAME)
-	ln -sf $(SO_NAME) $(LIB_INST_DIR)/$(LINK_NAME)
-	@LDCONFIG@
+install_shared: shared $(DEST_LIB_INST_DIR)
+	install $(SHARED_LIB) $(DEST_LIB_INST_DIR)
+	ln -sf $(SHARED_LIB) $(DEST_LIB_INST_DIR)/$(SO_NAME)
+	ln -sf $(SO_NAME) $(DEST_LIB_INST_DIR)/$(LINK_NAME)
+	$(LDCONFIG)
 
-$(LIB_INST_DIR):
-	install -d $(LIB_INST_DIR)
+$(DEST_LIB_INST_DIR):
+	install -d $(DEST_LIB_INST_DIR)
 
 clean:
 	rm -f $(STATIC_LIB) $(SHARED_LIB) $(OBJECTS) $(DEPS)
 
 uninstall:
-	rm -f $(INC_INST_DIR)/$(LIB_NAME).h $(LIB_INST_DIR)/$(STATIC_LIB) \
-	    $(LIB_INST_DIR)/$(LINK_NAME)*
+	rm -f $(DEST_INC_INST_DIR)/$(LIB_NAME).h \
+		$(DEST_LIB_INST_DIR)/$(STATIC_LIB) \
+		$(DEST_LIB_INST_DIR)/$(LINK_NAME)*
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),distclean)
