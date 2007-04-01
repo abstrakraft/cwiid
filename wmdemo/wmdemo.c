@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	/* Connect to any wiimote */
 	bdaddr = *BDADDR_ANY;
 	/* Connect to address in string WIIMOTE_BDADDR */
-	/* bdaddr = str2ba(WIIMOTE_BDADDR); */
+	/* str2ba(WIIMOTE_BDADDR, &bdaddr); */
 
 	/* Connect to the wiimote */
 	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
