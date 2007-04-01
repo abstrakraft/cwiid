@@ -16,6 +16,7 @@
  *
  *  ChangeLog:
  *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * wiimote_connect now takes a pointer to bdaddr_t
  *  * added wiimote_info definition and macros
  *  * added wiimote_get_info_array prototype
  *  * changed wiimote_findfirst to wiimote_find_wiimote
@@ -214,7 +215,7 @@ extern "C" {
 #endif
 
 int wiimote_set_err(wiimote_err_t *err);
-wiimote_t *wiimote_connect(bdaddr_t bdaddr,
+wiimote_t *wiimote_connect(bdaddr_t *bdaddr,
                            wiimote_mesg_callback_t *mesg_callback,
                            int *id);
 int wiimote_disconnect(wiimote_t *wiimote);

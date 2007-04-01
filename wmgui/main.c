@@ -612,12 +612,16 @@ gboolean winRW_delete_event(void)
 
 void menuConnect_activate(void)
 {
+	char reset_bdaddr = 0;
 	unsigned char buf[7];
 
+	if (bacmp(&bdaddr, BDADDR_ANY) == 0) {
+		reset_bdaddr = 1;
+	}
 	message(GTK_MESSAGE_INFO,
 	        "Put Wiimote in discoverable mode (press 1+2) and press OK",
 	         GTK_WINDOW(winMain));
-	if ((wiimote = wiimote_connect(bdaddr, &wiimote_callback, NULL)) == NULL) {
+	if ((wiimote = wiimote_connect(&bdaddr, &wiimote_callback, NULL)) == NULL) {
 		message(GTK_MESSAGE_ERROR, "Unable to connect", GTK_WINDOW(winMain));
 		status("No connection");
 	}
@@ -638,6 +642,10 @@ void menuConnect_activate(void)
 		set_gui_state();
 		set_report_mode();
 		wiimote_command(wiimote, WIIMOTE_CMD_STATUS, 0);
+	}
+
+	if (reset_bdaddr) {
+		bdaddr = *BDADDR_ANY;
 	}
 }
 

@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
 	/* Connect to the wiimote */
 	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
-	if (!(wiimote = wiimote_connect(bdaddr, wiimote_callback, &wiimote_id))) {
+	if (!(wiimote = wiimote_connect(&bdaddr, wiimote_callback, &wiimote_id))) {
 		fprintf(stderr, "Unable to connect to wiimote\n");
 		return -1;
 	}
