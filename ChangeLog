@@ -1,4 +1,7 @@
 2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
+	lswm
+	* created app
+
 	wmdemo
 	* renamed main.c to wmdemo.c
 

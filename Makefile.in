@@ -4,7 +4,7 @@ COMMON = @top_builddir@/common
 include $(COMMON)/include/defs.mak
 
 LIB_DIRS = wiimote
-BIN_DIRS = wmgui wminput
+BIN_DIRS = wmgui wminput lswm
 
 all install clean distclean uninstall: TARGET += $(MAKECMDGOALS)
 

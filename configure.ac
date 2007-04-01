@@ -1,4 +1,7 @@
 # ChangeLog:
+# 04/01/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+# * added lswm/Makefile
+#
 # 03/19/2007 L. Donnie Smith <cwiid@abstrakraft.org>
 # * added --disable-ldconfig
 #
@@ -91,5 +94,6 @@ AC_OUTPUT(
 	[wminput/plugins/ir_ptr/Makefile]
 	[wminput/plugins/acc/Makefile]
 	[wminput/plugins/nunchuk_acc/Makefile]
+	[lswm/Makefile]
 	)
 
