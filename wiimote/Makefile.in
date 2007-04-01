@@ -6,7 +6,7 @@ include $(COMMON)/include/defs.mak
 LIB_NAME = wiimote
 MAJOR_VER = 0
 MINOR_VER = 1
-SOURCES = connect.c command.c event.c rw.c util.c queue.c
+SOURCES = connect.c command.c event.c rw.c bluetooth.c util.c queue.c
 LDLIBS += -lbluetooth -lpthread -lrt
 LIB_INST_DIR = @libdir@
 INC_INST_DIR = @includedir@

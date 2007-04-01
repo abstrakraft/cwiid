@@ -2,6 +2,13 @@
 	wmdemo
 	* renamed main.c to wmdemo.c
 
+	wiimote
+	* created bluetooth.c
+	* moved wiimote_findfirst to bluetooth.c, renamed to wiimote_find_wiimote,
+	  added timeout argument
+	* defined struct wiimote_info
+	* wrote wiimote_get_info_array
+
 2007-03-27 L. Donnie Smith <cwiid@abstrakraft.org>
 	* Added DESTDIR variable to make system
 

@@ -15,6 +15,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added wiimote_info definition and macros
+ *  * added wiimote_get_info_array prototype
+ *  * changed wiimote_findfirst to wiimote_find_wiimote
+ *
  *  03/05/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote_err_t definition
  *  * added wiimote_set_err prototype
@@ -194,6 +199,16 @@ typedef struct wiimote wiimote_t;
 typedef void wiimote_mesg_callback_t(int, int, union wiimote_mesg* []);
 typedef void wiimote_err_t(int, const char *, ...);
 
+/* getinfo flags */
+#define BT_NO_WIIMOTE_FILTER 0x01
+#define BT_WM_NAME_LEN 32
+
+struct wiimote_info {
+	bdaddr_t bdaddr;
+	uint8_t class[3];
+	char name[BT_WM_NAME_LEN];
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -210,7 +225,9 @@ int wiimote_read(wiimote_t *wiimote, uint8_t flags, uint32_t offset,
 int wiimote_write(wiimote_t *wiimote, uint8_t flags, uint32_t offset,
                   uint16_t len, const void *data);
 /* int wiimote_beep(wiimote_t *wiimote); */
-int wiimote_findfirst(bdaddr_t *bdaddr);
+int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
+                           struct wiimote_info **wm, uint8_t flags);
+int wiimote_find_wiimote(bdaddr_t *bdaddr, int timeout);
 
 #ifdef __cplusplus
 }
