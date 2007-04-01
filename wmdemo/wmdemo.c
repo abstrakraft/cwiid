@@ -70,7 +70,8 @@ int main(int argc, char *argv[])
 	       "e: toggle extension output\n"
 	       "i: toggle ir output\n"
 	       "r: toggle rumble\n"
-	       "s: toggle status output\n"
+	       "s: request status message (use t to turn on output)\n"
+	       "t: toggle status output\n"
 	       "x: exit\n");
 
 	while (!exit) {
@@ -119,6 +120,11 @@ int main(int argc, char *argv[])
 			}
 			break;
 		case 's':
+			if (wiimote_command(wiimote, WIIMOTE_CMD_STATUS, 0)) {
+				fprintf(stderr, "Error requesting status message\n");
+			}
+			break;
+		case 't':
 			toggle_bit(rpt_mode, WIIMOTE_RPT_STATUS);
 			set_rpt_mode(wiimote, rpt_mode);
 			break;
