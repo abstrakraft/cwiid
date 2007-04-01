@@ -1,3 +1,7 @@
+2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
+	wmdemo
+	* renamed main.c to wmdemo.c
+
 2007-03-27 L. Donnie Smith <cwiid@abstrakraft.org>
 	* Added DESTDIR variable to make system
 
