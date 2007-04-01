@@ -5,7 +5,7 @@ include $(COMMON)/include/defs.mak
 
 APP_NAME = wmdemo
 
-SOURCES = main.c
+SOURCES = wmdemo.c
 
 CFLAGS += -I@top_builddir@/wiimote
 LDFLAGS += -L@top_builddir@/wiimote
