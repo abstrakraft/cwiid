@@ -5,6 +5,7 @@
 	wmdemo
 	* renamed main.c to wmdemo.c
 	* updated for wiimote_connect change
+	* clarified status output menu item, added status request
 
 	wmgui
 	* updated for wiimote_connect change
