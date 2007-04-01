@@ -16,6 +16,7 @@
  *
  *  ChangeLog:
  *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * wiimote_connect now takes a pointer to bdaddr_t
  *  * changed wiimote_findfirst to wiimote_find_wiimote
  *
  *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
@@ -44,7 +45,7 @@
 pthread_mutex_t global_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int wiimote_id = 0;
 
-wiimote_t *wiimote_connect(bdaddr_t bdaddr,
+wiimote_t *wiimote_connect(bdaddr_t *bdaddr,
                            wiimote_mesg_callback_t *mesg_callback, int *id)
 {
 	struct wiimote *wiimote = NULL;
@@ -80,8 +81,8 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
 	wiimote->mesg_callback = mesg_callback;
 
 	/* If BDADDR_ANY is given, find available wiimote */
-	if (bacmp(&bdaddr, BDADDR_ANY) == 0) {
-		if (wiimote_find_wiimote(&bdaddr, 2)) {
+	if (bacmp(bdaddr, BDADDR_ANY) == 0) {
+		if (wiimote_find_wiimote(bdaddr, 2)) {
 			/* TODO: wiimote functions should print their own errors */
 			wiimote_err(wiimote, "Unable to find wiimote");
 			goto ERR_HND;
@@ -91,12 +92,12 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
 	/* Clear address structs, fill address family, address, and ports */
 	memset(&ctl_remote_addr, 0, sizeof(ctl_remote_addr));
 	ctl_remote_addr.l2_family = AF_BLUETOOTH;
-	ctl_remote_addr.l2_bdaddr = bdaddr;
+	ctl_remote_addr.l2_bdaddr = *bdaddr;
 	ctl_remote_addr.l2_psm = htobs(CTL_PSM);
 
 	memset(&int_remote_addr, 0, sizeof(int_remote_addr));
 	int_remote_addr.l2_family = AF_BLUETOOTH;
-	int_remote_addr.l2_bdaddr = bdaddr;
+	int_remote_addr.l2_bdaddr = *bdaddr;
 	int_remote_addr.l2_psm = htobs(INT_PSM);
 
 	/* Get Bluetooth Sockets */

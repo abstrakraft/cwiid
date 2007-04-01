@@ -4,6 +4,13 @@
 
 	wmdemo
 	* renamed main.c to wmdemo.c
+	* updated for wiimote_connect change
+
+	wmgui
+	* updated for wiimote_connect change
+
+	wminput
+	* updated for wiimote_connect change
 
 	wiimote
 	* created bluetooth.c
@@ -11,6 +18,7 @@
 	  added timeout argument
 	* defined struct wiimote_info
 	* wrote wiimote_get_info_array
+	* wiimote_connect now takes a pointer to bdaddr_t
 
 2007-03-27 L. Donnie Smith <cwiid@abstrakraft.org>
 	* Added DESTDIR variable to make system
