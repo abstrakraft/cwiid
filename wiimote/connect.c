@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * changed wiimote_findfirst to wiimote_find_wiimote
+ *
  *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * changed memcpy to bacmp
  *  * audited error checking (coda and error handler sections)
@@ -78,7 +81,7 @@ wiimote_t *wiimote_connect(bdaddr_t bdaddr,
 
 	/* If BDADDR_ANY is given, find available wiimote */
 	if (bacmp(&bdaddr, BDADDR_ANY) == 0) {
-		if (wiimote_findfirst(&bdaddr)) {
+		if (wiimote_find_wiimote(&bdaddr, 2)) {
 			/* TODO: wiimote functions should print their own errors */
 			wiimote_err(wiimote, "Unable to find wiimote");
 			goto ERR_HND;

@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * removed WIIMOTE_CMP_LEN macro and wiimote_findfirst prototype
+ *
  *  03/05/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote parameter to wiimote_err prototype
  *
@@ -53,7 +56,6 @@
 
 /* Wiimote specific magic numbers */
 #define WIIMOTE_NAME "Nintendo RVL-CNT-01"
-#define WIIMOTE_CMP_LEN sizeof(WIIMOTE_NAME)
 #define WIIMOTE_CLASS_0 0x04
 #define WIIMOTE_CLASS_1 0x25
 #define WIIMOTE_CLASS_2 0x00
@@ -173,7 +175,6 @@ int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
 int exec_write_seq(struct wiimote *wiimote, unsigned int len,
                    struct write_seq *seq);
 void free_mesg_array(struct mesg_array *array);
-int wiimote_findfirst(bdaddr_t *bdaddr);
 
 #endif
 

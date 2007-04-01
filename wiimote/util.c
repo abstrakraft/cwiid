@@ -15,6 +15,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * removed wiimote_findfirst (moved to bluetooth.c)
+ *
+ *  03/27/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * moved wiimote_findfirst to bluetooth.c
+ *
  *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * audited error checking (coda and error handler sections)
  *
@@ -34,9 +40,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/hci_lib.h>
 #include "wiimote_internal.h"
 
 static wiimote_err_t wiimote_err_default;
@@ -157,66 +160,5 @@ void free_mesg_array(struct mesg_array *array)
 		free(array->mesg[i]);
 	}
 	free(array);
-}
-
-#define MAX_RSP 256
-int wiimote_findfirst(bdaddr_t *bdaddr)
-{
-	/* TODO: I suppose we'll have to sift through BlueZ source to properly
-	 * check errors here...
-	 */
-	int dev_id;
-	int sock = -1;
-	inquiry_info *dev_list = NULL;
-	int i;
-	int dev_count;
-	int ret = -1;
-	char dev_name[WIIMOTE_CMP_LEN];
-
-	/* Get the first available Bluetooth device */
-	if ((dev_id = hci_get_route(NULL)) == -1) {
-		wiimote_err(NULL, "No Bluetooth device found");
-		ret = -1;
-		goto CODA;
-	}
-	if ((sock = hci_open_dev(dev_id)) == -1) {
-		wiimote_err(NULL, "Error opening Bluetooth device");
-		ret = -1;
-		goto CODA;
-	}
-
-	/* Get Device List */
-	if ((dev_count = hci_inquiry(dev_id, 2, MAX_RSP, NULL, &dev_list,
-	                             IREQ_CACHE_FLUSH)) == -1) {
-		wiimote_err(NULL, "Error on device inquiry");
-		ret = -1;
-		goto CODA;
-	}
-
-	/* Check class and name for Wiimotes */
-	for (i=0; i < dev_count; i++) {
-		if ((dev_list[i].dev_class[0] == WIIMOTE_CLASS_0) &&
-		  (dev_list[i].dev_class[1] == WIIMOTE_CLASS_1) &&
-		  (dev_list[i].dev_class[2] == WIIMOTE_CLASS_2)) {
-			if (hci_remote_name(sock, &dev_list[i].bdaddr, WIIMOTE_CMP_LEN,
-			                    dev_name, 5000)) {
-				wiimote_err(NULL, "Error reading device name");
-			}
-			else if (strncmp(dev_name, WIIMOTE_NAME, WIIMOTE_CMP_LEN) == 0) {
-				*bdaddr = dev_list[i].bdaddr;
-				ret = 0;
-				break;
-			}
-		}
-	}
-
-CODA:
-	if (sock != -1) {
-		hci_close_dev(sock);
-	}
-	if (dev_list) {
-		free(dev_list);
-	}
-	return ret;
 }
 
