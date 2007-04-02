@@ -1,3 +1,7 @@
+2007-04-02 L. Donnie Smith <cwiid@abstrakraft.org>
+	wiimote
+	* fixed exception handling bugs in bluetooth.c
+
 2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
 	* Moved defs.mak.in to top level directory
 	* Added directories to defs.mak.in
