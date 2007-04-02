@@ -13,7 +13,7 @@ install:
 
 uninstall:
 	for f in `ls man?/*.?`; do \
-		rm $(DEST_MAN_DIR)/$$f ; \
+		rm -f $(DEST_MAN_DIR)/$$f ; \
 	done
 
 distclean:

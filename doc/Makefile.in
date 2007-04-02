@@ -15,7 +15,7 @@ $(DEST_DOC_DIR):
 	install -d $(DEST_DOC_DIR)
 
 uninstall:
-	rm -r $(DEST_DOC_DIR)
+	rm -rf $(DEST_DOC_DIR)
 
 distclean:
 	rm Makefile
