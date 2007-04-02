@@ -18,11 +18,8 @@ all: $(LIB_NAME)
 $(LIB_NAME): $(OBJECTS)
 	$(CC) -shared $(LDFLAGS) $(LDLIBS) -o $(LIB_NAME) $(OBJECTS)
 
-install: $(LIB_NAME) $(DEST_INST_DIR)
-	install $(LIB_NAME) $(INST_DIR)
-
-$(DEST_INST_DIR):
-	install -d $(DEST_INST_DIR)
+install: $(LIB_NAME)
+	install -D $(LIB_NAME) $(DEST_INST_DIR)/$(LIB_NAME)
 
 clean:
 	rm -f $(LIB_NAME) $(OBJECTS) $(DEPS)

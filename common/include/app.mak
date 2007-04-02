@@ -12,11 +12,8 @@ all: $(APP_NAME)
 $(APP_NAME): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(LDLIBS)
 
-install: $(APP_NAME) $(DEST_INST_DIR)
-	install $(APP_NAME) $(DEST_INST_DIR)
-
-$(DEST_INST_DIR):
-	install -d $(DEST_INST_DIR)
+install: $(APP_NAME)
+	install -D $(APP_NAME) $(DEST_INST_DIR)/$(APP_NAME)
 
 clean:
 	rm -f $(APP_NAME) $(OBJECTS) $(DEPS)
