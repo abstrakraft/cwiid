@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/02/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * exception handling bugs
+ *
  *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created file
  */
@@ -45,7 +48,8 @@ int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
 	int sock = -1;
 	int wm_count;
 	int i, j;
-	int ret = 0;
+	int err = 0;
+	int ret;
 
 	/* NULLify for the benefit of error handling */
 	*wm = NULL;
@@ -68,14 +72,19 @@ int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
 	if ((dev_count = hci_inquiry(dev_id, timeout, max_inquiry, NULL,
 	                             &dev_list, IREQ_CACHE_FLUSH)) == -1) {
 		wiimote_err(NULL, "Error on bluetooth device inquiry");
-		ret = -1;
+		err = 1;
+		goto CODA;
+	}
+
+	if (dev_count == 0) {
+		wm_count = 0;
 		goto CODA;
 	}
 
 	/* Open connection to Bluetooth Interface */
 	if ((sock = hci_open_dev(dev_id)) == -1) {
 		wiimote_err(NULL, "Error opening Bluetooth interface");
-		ret = -1;
+		err = 1;
 		goto CODA;
 	}
 
@@ -85,7 +94,7 @@ int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
 	}
 	if ((*wm = malloc(max_wm * sizeof **wm)) == NULL) {
 		wiimote_err(NULL, "Error mallocing wiimote_info array");
-		ret = -1;
+		err = 1;
 		goto CODA;
 	}
 
@@ -95,7 +104,7 @@ int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
 		if (hci_remote_name(sock, &dev_list[i].bdaddr, BT_WM_NAME_LEN,
 		                    (*wm)[wm_count].name, 5000)) {
 			wiimote_err(NULL, "Error reading Bluetooth device name");
-			ret = -1;
+			err = 1;
 			goto CODA;
 		}
 		/* Filter? */
@@ -113,10 +122,13 @@ int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
 		wm_count++;
 	}
 
-	if (wm_count < max_wm) {
+	if (wm_count == 0) {
+		free(*wm);
+	}
+	else if (wm_count < max_wm) {
 		if ((*wm = realloc(*wm, wm_count * sizeof **wm)) == NULL) {
 			wiimote_err(NULL, "Error reallocing wiimote_info array");
-			ret = -1;
+			err = 1;
 			goto CODA;
 		}
 	}
@@ -124,8 +136,9 @@ int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
 CODA:
 	if (dev_list) free(dev_list);
 	if (sock != -1) hci_close_dev(sock);
-	if (ret == -1) {
+	if (err) {
 		if (*wm) free(*wm);
+		ret = -1;
 	}
 	else {
 		ret = wm_count;
@@ -139,13 +152,13 @@ int wiimote_find_wiimote(bdaddr_t *bdaddr, int timeout)
 	int ret;
 
 	if (timeout == -1) {
-		while (!(ret = wiimote_get_info_array(-1, 2, 1, &wm, 0)));
-		if (ret != -1) {
+		while ((ret = wiimote_get_info_array(-1, 2, 1, &wm, 0)) == 0);
+		if (ret == -1) {
 			return -1;
 		}
 	}
 	else {
-		if (wiimote_get_info_array(-1, timeout, 1, &wm, 0) != 1) {
+		if (wiimote_get_info_array(-1, timeout, 1, &wm, 0) == 1) {
 			return -1;
 		}
 	}
