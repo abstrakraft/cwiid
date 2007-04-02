@@ -1,7 +1,6 @@
 #Copyright (C) 2006 L. Donnie Smith
 
-COMMON = @top_builddir@/common
-include $(COMMON)/include/defs.mak
+include @top_builddir@/defs.mak
 
 LIB_NAME = wiimote
 MAJOR_VER = 0

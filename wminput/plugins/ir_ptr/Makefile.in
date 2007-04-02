@@ -1,7 +1,6 @@
 #Copyright (C) 2007 L. Donnie Smith
 
-COMMON = @top_builddir@/common
-include $(COMMON)/include/defs.mak
+include @top_builddir@/defs.mak
 
 PLUGIN_NAME = ir_ptr
 SOURCES = ir_ptr.c

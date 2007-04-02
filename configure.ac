@@ -1,6 +1,7 @@
 # ChangeLog:
 # 04/01/2007 L. Donnie Smith <cwiid@abstrakraft.org>
 # * added lswm/Makefile
+# * moved defs.mak
 #
 # 03/19/2007 L. Donnie Smith <cwiid@abstrakraft.org>
 # * added --disable-ldconfig
@@ -84,7 +85,7 @@ AC_SUBST(GTK_LIBS)
 
 AC_OUTPUT(
 	[Makefile]
-	[common/include/defs.mak]
+	[defs.mak]
 	[common/include/lib.mak]
 	[wiimote/Makefile]
 	[wmdemo/Makefile]

@@ -1,0 +1,29 @@
+#Copyright (C) 2007 L. Donnie Smith
+
+PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_VERSION = @PACKAGE_VERSION@
+PACKAGE_STRING = @PACKAGE_STRING@
+PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+sysconfdir = @sysconfdir@
+libdir = @libdir@
+
+datarootdir = @datarootdir@
+mandir = @mandir@
+docdir = @docdir@
+
+CC = @CC@
+AWK = @AWK@
+LEX = @LEX@
+YACC = @YACC@
+
+COMMON = @abs_top_builddir@/common
+
+CWIID_CONFIG_DIR = $(DESTDIR)/@CWIID_CONFIG_DIR@
+CWIID_PLUGINS_DIR = $(DESTDIR)/@CWIID_PLUGINS_DIR@
+
+CFLAGS = -g -Wall
