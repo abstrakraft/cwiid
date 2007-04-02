@@ -1,14 +1,16 @@
 #Copyright (C) 2007 L. Donnie Smith
 
-COMMON = @top_builddir@/common
-include $(COMMON)/include/defs.mak
+include @top_builddir@/defs.mak
 
 LIB_DIRS = wiimote
 BIN_DIRS = wmgui wminput lswm
+DOC_DIRS = man doc
 
 all install clean distclean uninstall: TARGET += $(MAKECMDGOALS)
 
 all install clean distclean uninstall: $(BIN_DIRS) $(LIB_DIRS)
+
+install uninstall distclean: $(DOC_DIRS)
 
 all clean distclean: wmdemo
 
@@ -22,7 +24,7 @@ ifeq ($(MAKECMDGOALS),install)
 $(BIN_DIRS) $(LIB_DIRS): $(CWIID_CONFIG_DIR) $(CWIID_PLUGINS_DIR)
 endif
 
-$(LIB_DIRS) $(BIN_DIRS) wmdemo:
+$(LIB_DIRS) $(BIN_DIRS) $(DOC_DIRS) wmdemo:
 	$(MAKE) $(TARGET) -C $@
 
 $(CWIID_CONFIG_DIR):
@@ -33,7 +35,7 @@ $(CWIID_PLUGINS_DIR):
 
 distclean:
 	rm -rf Makefile config.log config.status autom4te.cache \
-		$(COMMON)/include/defs.mak $(COMMON)/include/lib.mak
+		defs.mak $(COMMON)/include/lib.mak
 
 uninstall:
 	rm -r $(CWIID_PLUGINS_DIR); true
@@ -42,6 +44,6 @@ uninstall_config:
 	rm -rf $(CWIID_CONFIG_DIR)
 
 .PHONY: all install clean distclean uninstall uninstall_config $(LIB_DIRS) \
-	$(BIN_DIRS) wmdemo
+	$(BIN_DIRS) $(DOC_DIRS) wmdemo
 
 .NOTPARALLEL:

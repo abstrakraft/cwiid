@@ -1,4 +1,9 @@
 2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
+	* Moved defs.mak.in to top level directory
+	* Added directories to defs.mak.in
+	* Moved CFLAGS directories from defs.mak to Makefiles
+	* simplified make install deps
+
 	lswm
 	* created app
 
