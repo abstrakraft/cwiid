@@ -20,9 +20,10 @@ wminput is an Linux event, mouse, and joystick driver for the wiimote using the 
 
 EXECUTION
 ------------------------------------------------------------------------------------------------
-wminput [-h] [-c config] [bdaddr]
+wminput [-h] [-w] [-c config] [bdaddr]
 
 -h: print usage and exit
+-w: on startup, wait (without timing) out until a wiimote is found
 -c config: specifies the configuration file to load.  "default" is the default configuration file (on install, a symlink is created to the acc_ptr configuration.  The search directories are specified below in the section on configuration files, or an absolute or relative pathname may be given.
 bdaddr: specifies the bluetooth device address of the wiimote.  If unspecified, the environment variable WIIMOTE_BDADDR is used.  If this variable does not exist, a connection is made with the first wiimote found.
 

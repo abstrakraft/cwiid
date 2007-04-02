@@ -37,7 +37,7 @@
 struct conf conf;
 
 /* GetOpt */
-#define OPTSTRING	"hc:"
+#define OPTSTRING	"hwc:"
 extern char *optarg;
 extern int optind, opterr, optopt;
 
@@ -55,11 +55,12 @@ char init;
 
 #define DEFAULT_CONFIG_FILE	"default"
 
-#define USAGE "usage:%s [-h] [-c config] [bdaddr]\n"
+#define USAGE "usage:%s [-h] [-w] [-c config] [bdaddr]\n"
 
 #define HOME_DIR_LEN	128
 int main(int argc, char *argv[])
 {
+	char wait_forever = 0;
 	char *config_search_dirs[3], *plugin_search_dirs[3];
 	char *config_filename = DEFAULT_CONFIG_FILE;
 	char home_config_dir[HOME_DIR_LEN];
@@ -82,12 +83,15 @@ int main(int argc, char *argv[])
 			printf(USAGE, argv[0]);
 			return 0;
 			break;
+		case 'w':
+			wait_forever = 1;
+			break;
 		case 'c':
 			config_filename = optarg;
 			break;
 		case '?':
 		default:
-			wminput_err("unknown command-line option: -%c", c);
+			return -1;
 			break;
 		}
 	}
@@ -140,6 +144,13 @@ int main(int argc, char *argv[])
 
 	/* Wiimote connect */
 	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
+	if (wait_forever) {
+		if (wiimote_find_wiimote(&bdaddr, -1)) {
+			wminput_err("error finding wiimote");
+			conf_unload(&conf);
+			return -1;
+		}
+	}
 	if ((wiimote = wiimote_connect(&bdaddr, wiimote_callback, NULL)) == NULL) {
 		wminput_err("unable to connect");
 		conf_unload(&conf);
