@@ -158,7 +158,7 @@ int wiimote_find_wiimote(bdaddr_t *bdaddr, int timeout)
 		}
 	}
 	else {
-		if (wiimote_get_info_array(-1, timeout, 1, &wm, 0) == 1) {
+		if (wiimote_get_info_array(-1, timeout, 1, &wm, 0) == -1) {
 			return -1;
 		}
 	}
