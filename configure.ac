@@ -87,6 +87,8 @@ AC_OUTPUT(
 	[Makefile]
 	[defs.mak]
 	[common/include/lib.mak]
+	[doc/Makefile]
+	[man/Makefile]
 	[wiimote/Makefile]
 	[wmdemo/Makefile]
 	[wmgui/Makefile]
