@@ -1,18 +1,18 @@
 #Copyright (C) 2007 L. Donnie Smith
 
-COMMON = @top_builddir@/common
-include $(COMMON)/include/defs.mak
+include @top_builddir@/defs.mak
 
 APP_NAME = wminput
 
 SOURCES = main.c conf.c uinput.c action_enum.c parser.c lexer.c util.c
 
+WMINPUT_CONFIG_DIR = $(CWIID_CONFIG_DIR)/wminput
 CFLAGS += -I@top_builddir@/wiimote \
-	-DWMINPUT_CONFIG_DIR=\"$(WMINPUT_CONFIG_DIR)\"
+	-DWMINPUT_CONFIG_DIR=\"$(WMINPUT_CONFIG_DIR)\" \
+	-DCWIID_PLUGINS_DIR=\"$(CWIID_PLUGINS_DIR)\"
 LDLIBS += -lwiimote -ldl
 LDFLAGS += -L@top_builddir@/wiimote -rdynamic
 INST_DIR = @bindir@
-WMINPUT_CONFIG_DIR = $(CWIID_CONFIG_DIR)/wminput
 
 YFLAGS += -d
 
