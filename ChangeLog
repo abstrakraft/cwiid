@@ -1,3 +1,7 @@
+2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
+	wiimote
+	* fixed wiimote_find_wiimote seg fault
+
 2007-04-02 L. Donnie Smith <cwiid@abstrakraft.org>
 	wiimote
 	* fixed exception handling bugs in bluetooth.c
