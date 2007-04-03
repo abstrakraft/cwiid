@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/03/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * fixed wiimote_find_wiimote seg fault
+ *
  *  04/02/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * exception handling bugs
  *
@@ -149,16 +152,21 @@ CODA:
 int wiimote_find_wiimote(bdaddr_t *bdaddr, int timeout)
 {
 	struct wiimote_info *wm;
-	int ret;
+	int wm_count;
 
 	if (timeout == -1) {
-		while ((ret = wiimote_get_info_array(-1, 2, 1, &wm, 0)) == 0);
-		if (ret == -1) {
+		while ((wm_count = wiimote_get_info_array(-1, 2, 1, &wm, 0)) == 0);
+		if (wm_count == -1) {
 			return -1;
 		}
 	}
 	else {
-		if (wiimote_get_info_array(-1, timeout, 1, &wm, 0) == -1) {
+		wm_count = wiimote_get_info_array(-1, timeout, 1, &wm, 0);
+		if (wm_count == -1) {
+			return -1;
+		}
+		else if (wm_count == 0) {
+			wiimote_err(NULL, "No wiimotes found");
 			return -1;
 		}
 	}
