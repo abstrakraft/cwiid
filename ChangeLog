@@ -2,6 +2,9 @@
 	wiimote
 	* fixed wiimote_find_wiimote seg fault
 
+	wmgui
+	* commented custom wiimote_err (causing Xlib errors)
+
 2007-04-02 L. Donnie Smith <cwiid@abstrakraft.org>
 	wiimote
 	* fixed exception handling bugs in bluetooth.c

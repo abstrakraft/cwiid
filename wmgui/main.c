@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/03/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * commented custom wiimote_err (causing Xlib errors)
+ *
  *  03/01/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
  *  * Initial Changelog
  *  * type audit (stdint, const, char booleans)
@@ -169,12 +172,14 @@ extern int optind, opterr, optopt;
 
 #define USAGE "usage:%s [-h] [BDADDR]\n"
 
+/*
 wiimote_err_t err;
 
 void err(int id, const char *s, ...)
 {
 	message(GTK_MESSAGE_ERROR, s, GTK_WINDOW(winMain));
 }
+*/
 
 int main (int argc, char *argv[])
 {
@@ -190,7 +195,7 @@ int main (int argc, char *argv[])
 	gdk_threads_init();
 	gdk_threads_enter();
 
-	wiimote_set_err(err);
+	/* wiimote_set_err(err); */
 
 	/* Parse Options */
 	while ((c = getopt(argc, argv, OPTSTRING)) != -1) {
