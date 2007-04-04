@@ -3,6 +3,9 @@
 # * added lswm/Makefile
 # * moved defs.mak
 #
+# 04/04/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+# * removed --noyywrap from lex
+#
 # 03/19/2007 L. Donnie Smith <cwiid@abstrakraft.org>
 # * added --disable-ldconfig
 #
@@ -18,7 +21,7 @@ AC_PROG_LEX
 if test "$LEX" != "flex"; then
 	AC_MSG_ERROR([flex not found])
 fi
-if test -z "`echo %%|$LEX -t --noyywrap|grep yypop_buffer_state`"; then
+if test -z "`echo %%|$LEX -t|grep yypop_buffer_state`"; then
 	AC_MSG_ERROR([flex missing yypop_buffer_state - upgrade to version 2.5.33 or later])
 fi
 AC_PROG_YACC

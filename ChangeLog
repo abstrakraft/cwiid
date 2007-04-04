@@ -1,4 +1,7 @@
 2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
+	configure.ac
+	* removed --noyywrap from lex
+
 	wiimote
 	* fixed wiimote_find_wiimote seg fault
 
