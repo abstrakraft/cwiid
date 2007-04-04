@@ -15,7 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  03/02/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  04/03/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added stdio.h include
+ *
+ *  03/02/2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */
@@ -24,6 +27,7 @@
 #define CONF_H
 
 #include <stdint.h>
+#include <stdio.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
 
