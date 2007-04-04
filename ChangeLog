@@ -5,6 +5,9 @@
 	wmgui
 	* commented custom wiimote_err (causing Xlib errors)
 
+	wminput
+	* added stdio.h include to conf.h
+
 2007-04-02 L. Donnie Smith <cwiid@abstrakraft.org>
 	wiimote
 	* fixed exception handling bugs in bluetooth.c
