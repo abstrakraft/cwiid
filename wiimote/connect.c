@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/04/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * cancel rw operations from wiimote_disconnect
+ *
  *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * wiimote_connect now takes a pointer to bdaddr_t
  *  * changed wiimote_findfirst to wiimote_find_wiimote
@@ -83,8 +86,6 @@ wiimote_t *wiimote_connect(bdaddr_t *bdaddr,
 	/* If BDADDR_ANY is given, find available wiimote */
 	if (bacmp(bdaddr, BDADDR_ANY) == 0) {
 		if (wiimote_find_wiimote(bdaddr, 2)) {
-			/* TODO: wiimote functions should print their own errors */
-			wiimote_err(wiimote, "Unable to find wiimote");
 			goto ERR_HND;
 		}
 	}
@@ -143,6 +144,7 @@ wiimote_t *wiimote_connect(bdaddr_t *bdaddr,
 
 	/* Set rw_status before interrupt thread */
 	wiimote->rw_status = RW_NONE;
+	wiimote->rw_error = 0;
 
 	/* Launch interrupt channel listener and dispatch threads */
 	if (pthread_create(&wiimote->int_listen_thread, NULL,
@@ -196,7 +198,8 @@ int wiimote_disconnect(struct wiimote *wiimote)
 
 	/* Cancel and join int_thread */
 	if (pthread_cancel(wiimote->int_listen_thread)) {
-		wiimote_err(wiimote, "Error canceling int_listen_thread");
+		/* int could exit on it's own, so we don't care */
+		/* wiimote_err(wiimote, "Error canceling int_listen_thread"); */
 	}
 	else {
 		if (pthread_join(wiimote->int_listen_thread, &pthread_ret)) {
@@ -207,7 +210,22 @@ int wiimote_disconnect(struct wiimote *wiimote)
 			            "Invalid return value from int_listen_thread");
 		}
 	}
-	/* TODO: cancel RW operations if they are in progress */
+
+	/* Cancel any RW operations in progress */
+	wiimote->rw_error = 1;
+	if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
+		wiimote_err(wiimote, "Error locking rw_cond_mutex: deadlock warning");
+	}
+	else {
+		if (pthread_cond_signal(&wiimote->rw_cond)) {
+			wiimote_err(wiimote, "Error signaling rw_cond: deadlock warning");
+		}
+		if (pthread_mutex_unlock(
+		  &wiimote->rw_cond_mutex)) {
+			wiimote_err(wiimote, "Error unlocking rw_cond_mutex");
+		}
+	}
+
 	/* Cancel and detach dispatch_thread */
 	/* We detach to decouple dispatch (which runs the callback) from wiimote
 	 * code - specifically, a race condition exists for gtk apps */
@@ -225,6 +243,10 @@ int wiimote_disconnect(struct wiimote *wiimote)
 	if (close(wiimote->ctl_socket)) {
 		wiimote_err(wiimote, "Error closing control channel");
 	}
+
+	/* TODO: We have no way of telling if all in flight rw operations
+	 * have exited yet, so for now, user must verify that all have returned
+	 * before calling disconnect */
 
 	/* Destroy sync variables */
 	if (pthread_mutex_destroy(&wiimote->wiimote_mutex)) {

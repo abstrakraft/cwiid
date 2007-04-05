@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/04/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated wiimote_read and wiimote_write to trigger and detect rw_error
+ *
  *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * wiimote_read - changed to obey decode flag only for register read
  *
@@ -56,7 +59,23 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 	unsigned char buf[RPT_READ_REQ_LEN];
 	int ret = 0;
 	int i;
-	uint8_t address_flags;
+
+	/* TODO: once this code has been tested, check for rw_error before printing
+	 * error messages */
+
+	/* Exit immediately if rw_error */
+	if (wiimote->rw_error) {
+		return -1;
+	}
+
+	/* Compose read request packet */
+	buf[0]=flags & (WIIMOTE_RW_EEPROM | WIIMOTE_RW_REG);
+	buf[1]=(unsigned char)((offset>>16) & 0xFF);
+	buf[2]=(unsigned char)((offset>>8) & 0xFF);
+	buf[3]=(unsigned char)(offset & 0xFF);
+	buf[4]=(unsigned char)((len>>8) & 0xFF);
+	buf[5]=(unsigned char)(len & 0xFF);
+
 
 	/* Lock wiimote rw access */
 	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
@@ -64,15 +83,11 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 		return -1;
 	}
 
-	address_flags = flags & (WIIMOTE_RW_EEPROM | WIIMOTE_RW_REG);
-
-	/* Compose read request packet */
-	buf[0]=address_flags;
-	buf[1]=(unsigned char)((offset>>16) & 0xFF);
-	buf[2]=(unsigned char)((offset>>8) & 0xFF);
-	buf[3]=(unsigned char)(offset & 0xFF);
-	buf[4]=(unsigned char)((len>>8) & 0xFF);
-	buf[5]=(unsigned char)(len & 0xFF);
+	/* Check for rw_error after mutex wait */
+	if (wiimote->rw_error) {
+		ret = -1;
+		goto CODA;
+	}
 
 	/* Setup read info */
 	wiimote->rw_status = RW_PENDING;
@@ -84,46 +99,50 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 	if (send_report(wiimote, 0, RPT_READ_REQ, RPT_READ_REQ_LEN, buf)) {
 		wiimote_err(wiimote, "Error sending read request");
 		ret = -1;
+		goto CODA;
 	}
+
 	/* Lock rw_cond_mutex  */
-	else if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
+	if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
 		wiimote_err(wiimote, "Error locking rw_cond_mutex");
 		ret = -1;
+		goto CODA;
 	}
-	else {
-		/* Wait on condition, signalled by wiimote_int_listen */
-		while ((!ret) && (wiimote->rw_status == RW_PENDING)) {
-			if (pthread_cond_wait(&wiimote->rw_cond,
-			                      &wiimote->rw_cond_mutex)) {
-				wiimote_err(wiimote, "Error waiting on rw_cond");
-				ret = -1;
-			}
-		}
-		/* Unlock rw_cond_mutex */
-		if (pthread_mutex_unlock(&wiimote->rw_cond_mutex)) {
-			wiimote_err(wiimote,
-			            "Error unlocking rw_cond_mutex: deadlock warning");
-		}
-
-		/* Check status */
-		if (wiimote->rw_status == RW_READY) {
-			ret = 0;
-		}
-		else {
+	/* Wait on condition, signalled by int_listen */
+	while (!wiimote->rw_error && !ret && (wiimote->rw_status == RW_PENDING)) {
+		if (pthread_cond_wait(&wiimote->rw_cond,
+		                      &wiimote->rw_cond_mutex)) {
+			wiimote_err(wiimote, "Error waiting on rw_cond");
 			ret = -1;
+			/* can't goto CODA from here - unlock rw_cond_mutex first */
 		}
 	}
+	/* Unlock rw_cond_mutex */
+	if (pthread_mutex_unlock(&wiimote->rw_cond_mutex)) {
+		wiimote_err(wiimote, "Error unlocking rw_cond_mutex");
+		wiimote->rw_error = 1;
+		ret = -1;
+		goto CODA;
+	}
 
+	/* Check status */
+	if (wiimote->rw_status != RW_READY) {
+		ret = -1;
+	}
+
+CODA:
 	/* Clear rw_status */
 	wiimote->rw_status = RW_NONE;
 
 	/* Unlock rw_mutex */
 	if (pthread_mutex_unlock(&wiimote->rw_mutex)) {
 		wiimote_err(wiimote, "Error unlocking rw_mutex: deadlock warning");
+		wiimote->rw_error = 1;
 	}
 
-	/* Decode only for registers */
-	if ((flags & WIIMOTE_RW_DECODE) && (flags & WIIMOTE_RW_REG)) {
+	/* Decode (only for register reads) */
+	if ((ret == 0) && (flags & WIIMOTE_RW_DECODE) &&
+	  (flags & WIIMOTE_RW_REG)) {
 		for (i=0; i < len; i++) {
 			((unsigned char *)data)[i] = DECODE(((unsigned char *)data)[i]);
 		}
@@ -140,17 +159,29 @@ int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 	uint16_t sent=0;
 	int ret = 0;
 
-	/* Lock wiimote rw access */
-	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
-		wiimote_err(wiimote, "Error locking rw_mutex");
+	/* TODO: once this code has been tested, check for rw_error before printing
+	 * error messages */
+
+	/* Exit immediately if rw_error */
+	if (wiimote->rw_error) {
 		return -1;
 	}
 
 	/* Compose write packet header */
 	buf[0]=flags;
 
+	/* Lock wiimote rw access */
+	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
+		wiimote_err(wiimote, "Error locking rw_mutex");
+		return -1;
+	}
+
 	/* Send packets */
-	while (!ret && (sent<len)) {
+	/* Check rw_error after mutex wait */
+	while (!wiimote->rw_error && (sent<len)) {
+		wiimote->rw_status = RW_PENDING;
+
+		/* Compose write packet */
 		buf[1]=(unsigned char)(((offset+sent)>>16) & 0xFF);
 		buf[2]=(unsigned char)(((offset+sent)>>8) & 0xFF);
 		buf[3]=(unsigned char)((offset+sent) & 0xFF);
@@ -161,48 +192,60 @@ int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 			buf[4]=(unsigned char)(len-sent);
 		}
 		memcpy(buf+5, data+sent, buf[4]);
-		wiimote->rw_status = RW_PENDING;
+
 		if (send_report(wiimote, 0, RPT_WRITE, RPT_WRITE_LEN, buf)) {
 			wiimote_err(wiimote, "Error sending write");
 			ret = -1;
+			goto CODA;
 		}
 		/* Lock rw_cond_mutex  */
 		else if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
 			wiimote_err(wiimote, "Error locking rw_cond_mutex");
 			ret = -1;
+			goto CODA;
 		}
 		else {
 			/* Wait on condition, signalled by wiimote_int_listen */
-			while ((!ret) && (wiimote->rw_status == RW_PENDING)) {
+			while (!wiimote->rw_error && !ret &&
+			  (wiimote->rw_status == RW_PENDING)) {
 				if (pthread_cond_wait(&wiimote->rw_cond,
 				                      &wiimote->rw_cond_mutex)) {
 					wiimote_err(wiimote, "Error waiting on rw_cond");
 					ret = -1;
+					/* can't goto CODA from here -
+					 * unlock rw_cond_mutex first */
 				}
 			}
 			/* Unlock rw_cond_mutex */
 			if (pthread_mutex_unlock(&wiimote->rw_cond_mutex)) {
-				wiimote_err(wiimote,
-				            "Error unlocking rw_cond_mutex: deadlock warning");
+				wiimote_err(wiimote, "Error unlocking rw_cond_mutex");
+				wiimote->rw_error = 1;
+				ret = -1;
+				goto CODA;
+			}
+
+			/* Check for error from cond_wait */
+			if (ret == -1) {
+				goto CODA;
 			}
 
 			/* Check status */
-			if (wiimote->rw_status == RW_READY) {
-				ret = 0;
-			}
-			else {
+			if (wiimote->rw_status != RW_READY) {
 				ret = -1;
+				goto CODA;
 			}
 		}
 		sent+=buf[4];
 	}
 
+CODA:
 	/* Clear rw_status */
 	wiimote->rw_status = RW_NONE;
 
 	/* Unlock rw_mutex */
 	if (pthread_mutex_unlock(&wiimote->rw_mutex)) {
 		wiimote_err(wiimote, "Error unlocking rw_mutex: deadlock warning");
+		wiimote->rw_error = 1;
 	}
 
 	return ret;

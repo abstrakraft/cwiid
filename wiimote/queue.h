@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/04/2007: L. Donnie Smith >cwiid@abstrakraft.org>
+ *  * Added queue_flush prototype
+ *
  *  03/03/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  */
@@ -40,6 +43,7 @@ struct queue {
 };
 
 struct queue *queue_new();
+int queue_flush(struct queue *queue, free_func_t free_func);
 int queue_free(struct queue *queue, free_func_t free_func);
 int queue_queue(struct queue *queue, void *data);
 int queue_dequeue(struct queue *queue, void **data);

@@ -3,6 +3,27 @@
 	* removed --noyywrap from lex
 
 	wiimote
+	* added queue_flush
+	* reimplemented queue_queue with queue_flush
+	* added wiimote_mesg_error message type
+	* moved RW error state to separate wiimote member
+	* updated wiimote_read and wiimote_write to trigger and detect rw_error
+	* cancel rw operations from wiimote_disconnect
+	* implemented process_error to handle socket read errors
+	* added rw_status triggers to read and write handlers
+
+	wmdemo
+	* made wiimote handle global
+	* disconnect and exit on wiimote_mesg_error
+
+	wmgui
+	* disconnect on wiimote_mesg_error
+
+	wminput
+	* exit on wiimote_mesg_error
+
+2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
+	wiimote
 	* fixed wiimote_find_wiimote seg fault
 
 	wmgui

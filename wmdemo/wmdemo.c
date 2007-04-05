@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <wiimote.h>
 
@@ -35,10 +36,12 @@ void err(int id, const char *s, ...)
 	va_end(ap);
 }
 
+/* wiimote handle */
+wiimote_t *wiimote;
+
 int main(int argc, char *argv[])
 {
 	bdaddr_t bdaddr;	/* bluetooth device address */
-	wiimote_t *wiimote;	/* wiimote handle */
 	int wiimote_id;		/* wiimote id: useful for handling multiple wiimotes
 	                       with a single callback */
 	unsigned char led_state = 0;
@@ -235,6 +238,13 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
 			       mesg[i]->classic_mesg.r_stick_x,
 			       mesg[i]->classic_mesg.r_stick_y,
 			       mesg[i]->classic_mesg.l, mesg[i]->classic_mesg.r);
+			break;
+		case WIIMOTE_MESG_ERROR:
+			if (wiimote_disconnect(wiimote)) {
+				fprintf(stderr, "Error on wiimote disconnect\n");
+				exit(-1);
+			}
+			exit(0);
 			break;
 		default:
 			printf("Unknown Report");
