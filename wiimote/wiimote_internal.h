@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/04/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * moved RW error state to separate member
+ *
  *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * removed WIIMOTE_CMP_LEN macro and wiimote_findfirst prototype
  *
@@ -131,8 +134,7 @@ struct write_seq {
 enum rw_status {
 	RW_NONE,
 	RW_PENDING,
-	RW_READY,
-	RW_ERROR
+	RW_READY
 };
 
 struct mesg_array {
@@ -157,6 +159,7 @@ struct wiimote {
 	pthread_cond_t rw_cond;
 	pthread_mutex_t rw_cond_mutex;
 	enum rw_status rw_status;
+	char rw_error;
 	void *read_buf;
 	uint16_t read_len;
 	uint16_t read_received;

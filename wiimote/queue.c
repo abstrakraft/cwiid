@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/04/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Added queue_flush
+ *  * Reimplemented queue_free using queue_flush
+ *
  *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * audited error checking (coda and error handler sections)
  *
@@ -57,8 +61,10 @@ struct queue *queue_new()
 int queue_free(struct queue *queue, free_func_t free_func)
 {
 	int ret = 0;
-	struct queue_node *cursor, *tmp;
 
+	if (queue_flush(queue, free_func)) {
+		ret = -1;
+	}
 	if (pthread_mutex_destroy(&queue->mutex)) {
 		ret = -1;
 	}
@@ -67,6 +73,26 @@ int queue_free(struct queue *queue, free_func_t free_func)
 	}
 	if (pthread_mutex_destroy(&queue->cond_mutex)) {
 		ret = -1;
+	}
+
+	free(queue);
+
+	return ret;
+}
+
+int queue_flush(struct queue *queue, free_func_t free_func)
+{
+	struct queue_node *cursor, *tmp;
+	int ret = 0;
+	int canceltype;
+
+	if (pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &canceltype)) {
+		return -1;
+	}
+
+	if (pthread_mutex_lock(&queue->mutex)) {
+		ret = -1;
+		goto CODA;
 	}
 
 	cursor = queue->head;
@@ -78,8 +104,18 @@ int queue_free(struct queue *queue, free_func_t free_func)
 		free(cursor);
 		cursor = tmp;
 	}
+	queue->head = NULL;
+	queue->p_tail = &queue->head;
 
-	free(queue);
+	if (pthread_mutex_unlock(&queue->mutex)) {
+		ret = -1;
+		goto CODA;
+	}
+
+CODA:
+	if (pthread_setcanceltype(canceltype, &canceltype)) {
+		return -1;
+	}
 
 	return ret;
 }

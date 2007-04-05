@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/04/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * disconnect on wiimote_mesg_error
+ *
  *  04/03/2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * commented custom wiimote_err (causing Xlib errors)
  *
@@ -1057,6 +1060,9 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg_array[])
 			break;
 		case WIIMOTE_MESG_CLASSIC:
 			wiimote_classic(&mesg_array[i]->classic_mesg);
+			break;
+		case WIIMOTE_MESG_ERROR:
+			menuDisconnect_activate();
 			break;
 		default:
 			break;

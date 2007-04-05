@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  04/04/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added wiimote_mesg_error message type
+ *
  *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * wiimote_connect now takes a pointer to bdaddr_t
  *  * added wiimote_info definition and macros
@@ -124,6 +127,7 @@ enum wiimote_mesg_type {
 	WIIMOTE_MESG_IR,
 	WIIMOTE_MESG_NUNCHUK,
 	WIIMOTE_MESG_CLASSIC,
+	WIIMOTE_MESG_ERROR,
 	WIIMOTE_MESG_UNKNOWN
 };
 
@@ -132,6 +136,11 @@ enum wiimote_ext_type {
 	WIIMOTE_EXT_NUNCHUK,
 	WIIMOTE_EXT_CLASSIC,
 	WIIMOTE_EXT_UNKNOWN
+};
+
+enum wiimote_error {
+	WIIMOTE_ERROR_DISCONNECT,
+	WIIMOTE_ERROR_COMM,
 };
 
 struct wiimote_status_mesg {
@@ -185,6 +194,11 @@ struct wiimote_classic_mesg {
 	uint16_t buttons;
 };
 
+struct wiimote_error_mesg {
+	enum wiimote_mesg_type type;
+	enum wiimote_error error;
+};
+
 union wiimote_mesg {
 	enum wiimote_mesg_type type;
 	struct wiimote_status_mesg status_mesg;
@@ -193,6 +207,7 @@ union wiimote_mesg {
 	struct wiimote_ir_mesg ir_mesg;
 	struct wiimote_nunchuk_mesg nunchuk_mesg;
 	struct wiimote_classic_mesg classic_mesg;
+	struct wiimote_error_mesg error_mesg;
 };
 
 typedef struct wiimote wiimote_t;

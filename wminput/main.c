@@ -15,7 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  03/03/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  04/04/2007 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * exit on wiimote_error
+ *
+ *  03/03/2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */
@@ -26,6 +29,7 @@
 
 #include <pthread.h>
 #include <signal.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <wiimote.h>
@@ -264,6 +268,11 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
 			break;
 		case WIIMOTE_MESG_CLASSIC:
 			process_classic_mesg((struct wiimote_classic_mesg *) mesg[i]);
+			break;
+		case WIIMOTE_MESG_ERROR:
+			if (kill(getpid(),SIGINT)) {
+				wminput_err("error sending SIGINT");
+			}
 			break;
 		default:
 			break;
