@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-07: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * changed wiimote_info.class to btclass
+ *
  *  2007-04-04: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote_mesg_error message type
  *
@@ -221,7 +224,7 @@ typedef void wiimote_err_t(int, const char *, ...);
 
 struct wiimote_info {
 	bdaddr_t bdaddr;
-	uint8_t class[3];
+	uint8_t btclass[3];
 	char name[BT_WM_NAME_LEN];
 };
 
