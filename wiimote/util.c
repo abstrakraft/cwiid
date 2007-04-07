@@ -15,21 +15,21 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * removed wiimote_findfirst (moved to bluetooth.c)
  *
- *  03/27/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-27: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * moved wiimote_findfirst to bluetooth.c
  *
- *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-14: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * audited error checking (coda and error handler sections)
  *
- *  03/05/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-05: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created wiimote_err_func variable
  *  * created wiimote_err_default
  *  * added wiimote parameter to wiimote_err definition and calls
  *
- *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */

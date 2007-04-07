@@ -15,20 +15,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  04/04/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-04: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote_mesg_error message type
  *
- *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * wiimote_connect now takes a pointer to bdaddr_t
  *  * added wiimote_info definition and macros
  *  * added wiimote_get_info_array prototype
  *  * changed wiimote_findfirst to wiimote_find_wiimote
  *
- *  03/05/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-05: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote_err_t definition
  *  * added wiimote_set_err prototype
  *
- *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */

@@ -15,22 +15,22 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  04/04/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-04: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * cancel rw operations from wiimote_disconnect
  *
- *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * wiimote_connect now takes a pointer to bdaddr_t
  *  * changed wiimote_findfirst to wiimote_find_wiimote
  *
- *  03/14/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-14: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * changed memcpy to bacmp
  *  * audited error checking (coda and error handler sections)
  *  * updated comments
  *
- *  03/06/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-06: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote parameter to wiimote_err calls
  *
- *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  */
 
