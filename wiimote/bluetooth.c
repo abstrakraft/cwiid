@@ -15,13 +15,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  04/03/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-03: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * fixed wiimote_find_wiimote seg fault
  *
- *  04/02/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-02: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * exception handling bugs
  *
- *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created file
  */
 

@@ -15,16 +15,16 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  04/04/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-04: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * moved RW error state to separate member
  *
- *  04/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * removed WIIMOTE_CMP_LEN macro and wiimote_findfirst prototype
  *
- *  03/05/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-05: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added wiimote parameter to wiimote_err prototype
  *
- *  03/01/2007: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */

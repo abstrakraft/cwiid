@@ -15,7 +15,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  03/03/2007 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  2007-03-03 L. Donnie Smith <cwiid@abstrakraft.rg>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */
