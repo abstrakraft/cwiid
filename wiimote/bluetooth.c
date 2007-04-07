@@ -15,16 +15,16 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  2007-04-07: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-07 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * changed wiimote_info.class to btclass
  *
- *  2007-04-03: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * fixed wiimote_find_wiimote seg fault
  *
- *  2007-04-02: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-02 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * exception handling bugs
  *
- *  2007-04-01: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created file
  */
 

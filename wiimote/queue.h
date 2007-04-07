@@ -15,10 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  2007-04-04: L. Donnie Smith >cwiid@abstrakraft.org>
+ *  2007-04-04 L. Donnie Smith >cwiid@abstrakraft.org>
  *  * Added queue_flush prototype
  *
- *  2007-03-03: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  2007-03-03 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  */
 
