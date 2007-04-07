@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-07: L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * changed wiimote_info.class to btclass
+ *
  *  2007-04-01: L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created file
  */
@@ -94,8 +97,8 @@ int main(int argc, char *argv[])
 	for (i=0; i < wm_count; i++) {
 		ba2str(&wm[i].bdaddr, ba_str);
 		if (long_format) {
-			printf("%s 0x%.2X%.2X%.2X %s\n", ba_str, wm[i].class[2],
-			       wm[i].class[1], wm[i].class[0], wm[i].name);
+			printf("%s 0x%.2X%.2X%.2X %s\n", ba_str, wm[i].btclass[2],
+			       wm[i].btclass[1], wm[i].btclass[0], wm[i].name);
 		}
 		else {
 			printf("%s\n", ba_str);
