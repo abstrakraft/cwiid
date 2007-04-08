@@ -15,6 +15,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * fixed incompatible pointer warning in process_error
+ *
+ *  2007-04-08 Petter Reinholdtsen <pere@hungry.com>
+ *  * fixed signed/unsigned comparison error in int_listen
+ *
  *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * implemented process_error to handle socket read errors
  *  * added rw_status triggers to read and write handlers
@@ -129,7 +135,7 @@ static int process_write(struct wiimote *);
 void *int_listen(struct wiimote *wiimote)
 {
 	unsigned char buf[READ_BUF_LEN];
-	size_t len;
+	ssize_t len;
 	struct mesg_array *mesg_array;
 	char err;
 
@@ -294,7 +300,7 @@ static int process_error(struct wiimote *wiimote, size_t len)
 	else {
 		error_mesg->error = WIIMOTE_ERROR_COMM;
 	}
-	mesg_array->mesg[0] = error_mesg;
+	mesg_array->mesg[0] = (union wiimote_mesg *)error_mesg;
 	if (queue_flush(wiimote->dispatch_queue, (free_func_t *)free_mesg_array)) {
 		wiimote_err(wiimote, "error flushing dispatch queue");
 		ret = -1;
