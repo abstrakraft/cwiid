@@ -48,7 +48,7 @@ Many distributions do not have /usr/local/lib in the library search path, and on
 
 I prefer the second method since it keeps local software in the local directory where it should be, and it fixes the problem for every package using /usr/local/lib, not just CWiid.  Until someone offers a convincing argument for the omission of /usr/local/lib from /etc/ld.so.conf, I consider this to be a distribution bug, and method #2 above is the fix.
 
-Please report any compilation errors to <cwiid@abstrakraft.org>.
+Please report any compilation errors at http://www.abstrakraft.org/cwiid.
 
 EXECUTION
 ------------------------------------------------------------------------------------------------
