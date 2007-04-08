@@ -15,7 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  2007-03-03 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * fixed pointer qualifier warning in get_plugin
+ *
+ *  2007-03-03 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */
@@ -493,7 +496,7 @@ struct plugin *get_plugin(struct conf *conf, const char *name)
 	}
 	else {
 		plugin = &conf->plugins[i];
-		plugin->name = name;
+		plugin->name = (char *)name;
 
 		for (i=0; conf->plugin_search_dirs[i]; i++) {
 			snprintf(pathname, PLUGIN_PATHNAME_LEN, "%s/%s.so",

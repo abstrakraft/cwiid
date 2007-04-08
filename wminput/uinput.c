@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-08 L. Donnie Smith <cwiid@anstrakraft.org>
+ *  * fixed signed/unsigned comparison warning in uinput_open
+ *
  *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.rg>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
@@ -41,7 +44,8 @@ char *uinput_filename[] = {"/dev/uinput", "/dev/input/uinput",
 
 int uinput_open(struct conf *conf)
 {
-	int i, j;
+	unsigned int i;
+	int j;
 	int request;
 
 	/* Open uinput device */

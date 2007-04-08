@@ -1,3 +1,25 @@
+2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+	defs.mak
+	* added DEBUGFLAGS variable
+
+	wiimote
+	* fixed incompatible pointer warning in process_error
+
+	wmgui
+	* fixed signed/unsigned comparison warning in btnRead_clicked
+
+	wminput
+	* fixed signed/unsigned comparison warning in uinput_open and get_plugin
+
+2007-04-08 Petter Reinholdtsen <pere@hungry.com>
+	defs.mak
+	* created WARNFLAGS variable
+	* added -W to WARNFLAGS
+
+	wiimote
+	* fixed signed/unsigned comparison warning in int_listen, send_report, and
+	  exec_write_seq
+
 2007-04-07 L. Donnie Smith <cwiid@abstrakraft.org>
 	wiimote
 	* changed wiimote_info.class to btclass

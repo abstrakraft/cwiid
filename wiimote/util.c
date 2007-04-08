@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-08 Petter Reinholdtsen <pere@hungry.com>
+ *  * fixed signed/unsigned comparison warning in send_report and
+ *    exec_write_seq
+ *
  *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * removed wiimote_findfirst (moved to bluetooth.c)
  *
@@ -117,7 +121,7 @@ int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
 		buf[2] |= wiimote->led_rumble_state & 0x01;
 	}
 
-	if (write(wiimote->ctl_socket, buf, len+2) != (len+2)) {
+	if (write(wiimote->ctl_socket, buf, len+2) != (ssize_t)(len+2)) {
 		return -1;
 	}
 	else if (verify_handshake(wiimote)) {
@@ -130,7 +134,7 @@ int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
 int exec_write_seq(struct wiimote *wiimote, unsigned int len,
                    struct write_seq *seq)
 {
-	int i;
+	unsigned int i;
 
 	for (i=0; i < len; i++) {
 		switch (seq[i].type) {
