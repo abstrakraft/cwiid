@@ -24,7 +24,7 @@
  *  2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * commented custom wiimote_err (causing Xlib errors)
  *
- *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial Changelog
  *  * type audit (stdint, const, char booleans)
  */

@@ -18,7 +18,7 @@
  *  2007-04-08 L. Donnie Smith <cwiid@anstrakraft.org>
  *  * fixed signed/unsigned comparison warning in uinput_open
  *
- *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */
