@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * initialized param array
+ *
  *  2007-04-08 Arthur Peters <amp@singingwizard.org>
  *  * added debounce and low pass filter
  *
@@ -67,6 +70,7 @@ struct wmplugin_info *wmplugin_info() {
 		info.axis_info[1].min  = 0;
 		info.axis_info[1].fuzz = 0;
 		info.axis_info[1].flat = 0;
+		info.param_count = 0;
 		info_init = 1;
 	}
 	return &info;

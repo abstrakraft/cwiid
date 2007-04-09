@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added conf_plugin_param_{int,float} prototypes
+ *
  *  2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added stdio.h include
  *
@@ -175,6 +178,10 @@ int conf_plugin_button(struct conf *conf, const char *name, const char *button,
                        __u16 action);
 int conf_plugin_axis(struct conf *conf, const char *name, const char *axis,
                      __u16 axis_type, __u16 action, char flags);
+int conf_plugin_param_int(struct conf *conf, const char *name,
+                          const char *param, int value);
+int conf_plugin_param_float(struct conf *conf, const char *name,
+                            const char *param, float value);
 
 void conf_init(struct conf *conf);
 FILE *conf_push_config(struct conf *conf, const char *filename, YYLTYPE *yyloc);

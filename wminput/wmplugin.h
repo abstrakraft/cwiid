@@ -15,7 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added param structs
+ *
+ *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */
@@ -29,6 +32,7 @@
 
 #define WMPLUGIN_MAX_BUTTON_COUNT	16
 #define WMPLUGIN_MAX_AXIS_COUNT		6
+#define WMPLUGIN_MAX_PARAM_COUNT	16
 
 #define WMPLUGIN_ABS	1
 #define WMPLUGIN_REL	2
@@ -46,11 +50,29 @@ struct wmplugin_axis_info {
 	int flat;
 };
 
+enum wmplugin_param_type {
+	WMPLUGIN_PARAM_INT,
+	WMPLUGIN_PARAM_FLOAT
+};
+
+union wmplugin_param_value {
+	int Int;
+	float Float;
+};
+
+struct wmplugin_param_info {
+	char *name;
+	enum wmplugin_param_type type;
+	union wmplugin_param_value value;
+};
+
 struct wmplugin_info {
 	unsigned char button_count;
 	struct wmplugin_button_info button_info[WMPLUGIN_MAX_BUTTON_COUNT];
 	unsigned char axis_count;
 	struct wmplugin_axis_info axis_info[WMPLUGIN_MAX_AXIS_COUNT];
+	unsigned char param_count;
+	struct wmplugin_param_info param_info[WMPLUGIN_MAX_PARAM_COUNT];
 };
 
 struct wmplugin_axis {

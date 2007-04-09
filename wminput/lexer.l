@@ -15,7 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added param rules
+ *
+ *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  */
 
@@ -52,6 +55,8 @@ PLUGIN		Plugin\.
 ID			[[:alnum:]_][[:alnum:]_-]*
 ACTION		(KEY|BTN|ABS|REL)_[[:alnum:]_]+
 FILENAME	[[:alnum:]_.-]+
+INT			[0-9]+
+FLOAT		[0-9]+(\.[0-9]*)?([eE][+/-]?[0-9]+)?
 BLANK		[[:blank:]]+
 
 %option nounput
@@ -146,6 +151,9 @@ BLANK		[[:blank:]]+
 
 On				{ step; yylval.Int = -1;	return ON_OFF; }
 Off				{ step; yylval.Int =  0;	return ON_OFF; }
+
+{INT}			{ step; yylval.Int = atoi(yytext); return INT; }
+{FLOAT}			{ step; yylval.Float = atof(yytext); return FLOAT; }
 
 {ACTION}		{
 					step;

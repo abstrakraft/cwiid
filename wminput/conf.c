@@ -17,6 +17,7 @@
  *  ChangeLog:
  *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * fixed pointer qualifier warning in get_plugin
+ *  * created conf_plugin_param_{int,float} functions
  *
  *  2007-03-03 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
@@ -261,39 +262,118 @@ int conf_plugin_axis(struct conf *conf, const char *name, const char *axis,
 		wminput_err("Invalid plugin axis: %s.%s", name, axis);
 		return -1;
 	}
-	else {
-		switch (axis_type) {
-		case CONF_ABS:
-			if (!(plugin->info->axis_info[i].type & WMPLUGIN_ABS)) {
-				mismatch = 1;
-			}
-			break;
-		case CONF_REL:
-			if (!(plugin->info->axis_info[i].type & WMPLUGIN_REL)) {
-				mismatch = 1;
-			}
-			break;
+
+	switch (axis_type) {
+	case CONF_ABS:
+		if (!(plugin->info->axis_info[i].type & WMPLUGIN_ABS)) {
+			mismatch = 1;
 		}
-		if (mismatch) {
-			wminput_err("Warning: axis type mismatch - %s.%s", name, axis);
+		break;
+	case CONF_REL:
+		if (!(plugin->info->axis_info[i].type & WMPLUGIN_REL)) {
+			mismatch = 1;
+		}
+		break;
+	}
+	if (mismatch) {
+		wminput_err("Warning: axis type mismatch - %s.%s", name, axis);
+	}
+
+	plugin->amap[i].active = 1;
+	plugin->amap[i].axis_type = axis_type;
+	plugin->amap[i].action = action;
+	plugin->amap[i].flags = flags;
+
+	if (axis_type == EV_ABS) {
+		if (!(conf->dev.absmax[action] == -1) ||
+		  !(conf->dev.absmin[action] == -1)) {
+			wminput_err("Warning: duplicate absolute axis assignment");
 		}
 
-		plugin->amap[i].active = 1;
-		plugin->amap[i].axis_type = axis_type;
-		plugin->amap[i].action = action;
-		plugin->amap[i].flags = flags;
+		conf->dev.absmax[action] = plugin->info->axis_info[i].max;
+		conf->dev.absmin[action] = plugin->info->axis_info[i].min;
+		conf->dev.absfuzz[action] = plugin->info->axis_info[i].fuzz;
+		conf->dev.absflat[action] = plugin->info->axis_info[i].flat;
+	}
 
-		if (axis_type == EV_ABS) {
-			if (!(conf->dev.absmax[action] == -1) ||
-			  !(conf->dev.absmin[action] == -1)) {
-				wminput_err("Warning: duplicate absolute axis assignment");
-			}
-	
-			conf->dev.absmax[action] = plugin->info->axis_info[i].max;
-			conf->dev.absmin[action] = plugin->info->axis_info[i].min;
-			conf->dev.absfuzz[action] = plugin->info->axis_info[i].fuzz;
-			conf->dev.absflat[action] = plugin->info->axis_info[i].flat;
+	return 0;
+}
+
+int conf_plugin_param_int(struct conf *conf, const char *name,
+                          const char *param, int value)
+{
+	struct plugin *plugin;
+	int i;
+	unsigned char param_found = 0;
+
+	if ((plugin = get_plugin(conf, name)) == NULL) {
+		return -1;
+	}
+
+	for (i=0; i < plugin->info->param_count; i++) {
+		if (!strcmp(plugin->info->param_info[i].name, param)) {
+			param_found = 1;
+			break;
 		}
+	}
+
+	if (!param_found) {
+		wminput_err("Invalid plugin parameter: %s.%s", name, param);
+		return -1;
+	}
+
+	switch (plugin->info->param_info[i].type) {
+	case WMPLUGIN_PARAM_INT:
+		plugin->info->param_info[i].value.Int = value;
+		break;
+	case WMPLUGIN_PARAM_FLOAT:
+		plugin->info->param_info[i].value.Float = (float) value;
+		break;
+	default:
+		wminput_err("unknown parameter type: %s.%s", name, param);
+		return -1;
+		break;
+	}
+
+	return 0;
+}
+
+int conf_plugin_param_float(struct conf *conf, const char *name,
+                            const char *param, float value)
+{
+	struct plugin *plugin;
+	int i;
+	unsigned char param_found = 0;
+
+	if ((plugin = get_plugin(conf, name)) == NULL) {
+		return -1;
+	}
+
+	for (i=0; i < plugin->info->param_count; i++) {
+		if (!strcmp(plugin->info->param_info[i].name, param)) {
+			param_found = 1;
+			break;
+		}
+	}
+
+	if (!param_found) {
+		wminput_err("Invalid plugin parameter: %s.%s", name, param);
+		return -1;
+	}
+
+	switch (plugin->info->param_info[i].type) {
+	case WMPLUGIN_PARAM_INT:
+		wminput_err("possible loss of precision: %s.%s (cast float to int)",
+		            name, param);
+		plugin->info->param_info[i].value.Int = value;
+		break;
+	case WMPLUGIN_PARAM_FLOAT:
+		plugin->info->param_info[i].value.Float = value;
+		break;
+	default:
+		wminput_err("unknown parameter type: %s.%s", name, param);
+		return -1;
+		break;
 	}
 
 	return 0;
