@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-08 Arthur Peters <amp@singingwizard.org>
+ *  * added debounce and low pass filter
+ *
  *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * type audit (stdint, const, char booleans)
  *
@@ -32,6 +35,7 @@ struct cursor {
 	uint16_t x;
 	uint16_t y;
 };
+int a_debounce, b_debounce;
 
 /* static objects are initialized to 0 by default */
 static int a_index = -1, b_index = -1;
@@ -134,20 +138,37 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 			}
 		}
 	}
+
+#define DEBOUNCE_THRESHOLD 50
+
 	/* set a & b, mirror the x coordinates */
 	if (a_index == -1) {
-		a.valid = 0;
+		a_debounce++;
+		if( a_debounce > DEBOUNCE_THRESHOLD ) {
+			a.valid = 0;
+		}
+		else {
+			a = prev_a;
+		}
 	}
 	else {
 		a = ir_mesg->src[a_index];
 		a.x = WIIMOTE_IR_X_MAX - a.x;
+		a_debounce = 0;
 	}
 	if (b_index == -1) {
-		b.valid = 0;
+		b_debounce++;
+		if( b_debounce > DEBOUNCE_THRESHOLD ) {
+			b.valid = 0;
+		}
+		else {
+			b = prev_b;
+		}
 	}
 	else {
 		b = ir_mesg->src[b_index];
 		b.x = WIIMOTE_IR_X_MAX - b.x;
+		b_debounce = 0;
 	}
 
 	/* if both sources are valid, calculate the center */
@@ -216,8 +237,12 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 	old_flags = flags;
 
 	data.axes[0].valid = data.axes[1].valid = c.valid;
-	data.axes[0].value = c.x;
-	data.axes[1].value = c.y;
+
+#define NEW_AMOUNT 0.6
+#define OLD_AMOUNT (1.0-NEW_AMOUNT)
+
+	data.axes[0].value = c.x*NEW_AMOUNT + data.axes[0].value*OLD_AMOUNT;
+	data.axes[1].value = c.y*NEW_AMOUNT + data.axes[1].value*OLD_AMOUNT;
 
 	return &data;
 }

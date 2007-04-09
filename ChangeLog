@@ -1,3 +1,8 @@
+2007-04-08 Arthur Peters <amp@singingwizard.org>
+	wminput
+	* added debounce and low-pass filter to ir_ptr plugin
+	* added low-pass filter to acc plugin
+
 2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
 	defs.mak
 	* added DEBUGFLAGS variable
@@ -10,6 +15,7 @@
 
 	wminput
 	* fixed signed/unsigned comparison warning in uinput_open and get_plugin
+	* copied acc low-pass filter to nunchuk_acc
 
 2007-04-08 Petter Reinholdtsen <pere@hungry.com>
 	defs.mak
