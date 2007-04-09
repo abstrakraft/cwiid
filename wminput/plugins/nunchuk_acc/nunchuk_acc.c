@@ -135,17 +135,21 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 	return ret;
 }
 
+#define NEW_AMOUNT 0.1
+#define OLD_AMOUNT (1.0-NEW_AMOUNT)
+double a_x = 0, a_y = 0, a_z = 0;
+
 static void process_nunchuk(struct wiimote_nunchuk_mesg *mesg)
 {
-	double a_x, a_y, a_z, a;
+	double a;
 	double roll, pitch;
 
-	a_x = ((double)mesg->acc_x - acc_zero.x) /
-	      (acc_one.x - acc_zero.x);
-	a_y = ((double)mesg->acc_y - acc_zero.y) /
-	      (acc_one.y - acc_zero.y);
-	a_z = ((double)mesg->acc_z - acc_zero.z) /
-	      (acc_one.z - acc_zero.z);
+	a_x = (((double)mesg->acc_x - acc_zero.x) /
+	      (acc_one.x - acc_zero.x))*NEW_AMOUNT + a_x*OLD_AMOUNT;
+	a_y = (((double)mesg->acc_y - acc_zero.y) /
+	      (acc_one.y - acc_zero.y))*NEW_AMOUNT + a_y*OLD_AMOUNT;
+	a_z = (((double)mesg->acc_z - acc_zero.z) /
+	      (acc_one.z - acc_zero.z))*NEW_AMOUNT + a_z*OLD_AMOUNT;
 
 	a = sqrt(pow(a_x,2)+pow(a_y,2)+pow(a_z,2));
 	roll = atan(a_x/a_z);
