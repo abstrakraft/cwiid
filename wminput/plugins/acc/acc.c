@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * initialized params
+ *  * added Scale params
+ *
  *  2007-04-08 Arthur Peters <amp@singingwizard.org>
  *  * added low-pass filter
  *
@@ -79,6 +83,19 @@ struct wmplugin_info *wmplugin_info() {
 		info.axis_info[3].min  = -16;
 		info.axis_info[3].fuzz = 0;
 		info.axis_info[3].flat = 0;
+		info.param_count = 4;
+		info.param_info[0].name = "Roll_Scale";
+		info.param_info[0].type = WMPLUGIN_PARAM_FLOAT;
+		info.param_info[0].value.Float = 1.0;
+		info.param_info[1].name = "Pitch_Scale";
+		info.param_info[1].type = WMPLUGIN_PARAM_FLOAT;
+		info.param_info[1].value.Float = 1.0;
+		info.param_info[2].name = "X_Scale";
+		info.param_info[2].type = WMPLUGIN_PARAM_FLOAT;
+		info.param_info[2].value.Float = 1.0;
+		info.param_info[3].name = "Y_Scale";
+		info.param_info[3].type = WMPLUGIN_PARAM_FLOAT;
+		info.param_info[3].value.Float = 1.0;
 		info_init = 1;
 	}
 	return &info;
@@ -154,20 +171,20 @@ static void process_acc(struct wiimote_acc_mesg *mesg)
 
 	pitch = atan(a_y/a_z*cos(roll));
 
-	data.axes[0].value = roll*1000;
-	data.axes[1].value = pitch*1000;
+	data.axes[0].value = roll  * 1000 * info.param_info[0].value.Float;
+	data.axes[1].value = pitch * 1000 * info.param_info[1].value.Float;
 
 	if ((a > 0.85) && (a < 1.15)) {
 		if ((fabs(roll)*(180/PI) > 10) && (fabs(pitch)*(180/PI) < 80)) {
 			data.axes[2].valid = 1;
-			data.axes[2].value = roll * 5;
+			data.axes[2].value = roll * 5 * info.param_info[2].value.Float;
 		}
 		else {
 			data.axes[2].valid = 0;
 		}
 		if (fabs(pitch)*(180/PI) > 10) {
 			data.axes[3].valid = 1;
-			data.axes[3].value = pitch * 10;
+			data.axes[3].value = pitch * 10 * info.param_info[3].value.Float;
 		}
 		else {
 			data.axes[3].valid = 0;

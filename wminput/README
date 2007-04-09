@@ -69,6 +69,9 @@ Classic.<axis> = [-][~]<abs_axis_symbol> | [-]<rel_axis_symbol>
 Plugin.<plugin>.<axis> = [-][~]<abs_axis_symbol> | [-]<rel_axis_symbol>
 	Map the axis symbol specified on the right-hand side to the axis event specified on the left-hand side.  Axis symbols are listed in /usr/include/linux/input.h (ABS_* and REL_* macros), and in cwiid/wminput/action_enum.txt.  All valid wiimote, nunchuk, and classic axes are listed in cwiid/doc/wminput.list.  A - before the axis symbol inverts the axis.  A ~ is usually required before an absolute axis symbol in order to use it for cursor movement.
 
+Plugin.<plugin>.<param> = <int> | <float>
+	Set the value of a plugin parameter.  Ints are silently cast to floats, and floats are cast to ints with a warning.
+
 Wiimote.Rumble = On | Off
 	Activates or deactivates force feedback/rumble function.
 

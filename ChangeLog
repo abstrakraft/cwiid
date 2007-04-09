@@ -16,6 +16,12 @@
 	wminput
 	* fixed signed/unsigned comparison warning in uinput_open and get_plugin
 	* copied acc low-pass filter to nunchuk_acc
+	* removed path from default config symlink target
+	* added plugins parameters (added lex and parse rules, conf functions,
+	  wmplugin_param_info struct, updated README)
+	* initialized param info in ir_ptr, nunchuk_acc, and acc plugins
+	* created Scale params in nunchuk_acc and acc plugins
+	* set Scale params for neverball config
 
 2007-04-08 Petter Reinholdtsen <pere@hungry.com>
 	defs.mak

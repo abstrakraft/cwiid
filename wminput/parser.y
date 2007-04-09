@@ -15,7 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
- *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.rg>
+ *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added param rules
+ *
+ *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  */
 
@@ -34,14 +37,16 @@ extern struct conf *cur_conf;
 
 %union {
 	int Int;
+	float Float;
 	char *String;
 }
 
 %error-verbose
 %locations
 
-%token <Int> ON_OFF WM_BTN NC_BTN CC_BTN BTN_ACTION AXIS ABS_AXIS_ACTION
+%token <Int> INT ON_OFF WM_BTN NC_BTN CC_BTN BTN_ACTION AXIS ABS_AXIS_ACTION
              REL_AXIS_ACTION
+%token <Float> FLOAT
 %token <String> ID
 %token WM_RUMBLE PLUGIN
 
@@ -79,6 +84,10 @@ conf_item:
 			{ conf_plugin_axis(cur_conf, $2, $4, CONF_ABS, $8, $6 | $7); }
 	|	PLUGIN ID '.' ID '=' sign REL_AXIS_ACTION
 			{ conf_plugin_axis(cur_conf, $2, $4, CONF_REL, $7, $6); }
+	|	PLUGIN ID '.' ID '=' INT
+			{ conf_plugin_param_int(cur_conf, $2, $4, $6); }
+	|	PLUGIN ID '.' ID '=' FLOAT
+			{ conf_plugin_param_float(cur_conf, $2, $4, $6); }
 ;
 
 sign:
