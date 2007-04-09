@@ -31,8 +31,7 @@ make_plugins:
 install_configs:
 	install -d $(WMINPUT_CONFIG_DIR)
 	install configs/* $(WMINPUT_CONFIG_DIR)
-	ln -sf $(WMINPUT_CONFIG_DIR)/acc_ptr \
-		$(WMINPUT_CONFIG_DIR)/default
+	ln -sf acc_ptr $(WMINPUT_CONFIG_DIR)/default
 
 #uninstall_configs:
 #	rm -f $(WMINPUT_CONFIG_DIR)/default
