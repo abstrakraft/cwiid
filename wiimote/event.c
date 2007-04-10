@@ -665,7 +665,7 @@ static void free_dispatch_queue(struct queue *queue)
 	if (queue_free(queue, (free_func_t *)free_mesg_array)) {
 		/* TODO: return proper wiimote ptr */
 		/* This won't be here much longer, no reason to point out
-		 * a known, harmless bug till it's gone */
+		 * a known, harmless bug in the meantime */
 		/* wiimote_err(NULL, "Error freeing dispatch queue"); */
 	}
 }
