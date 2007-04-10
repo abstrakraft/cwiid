@@ -1,10 +1,10 @@
 # ChangeLog:
+# 2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
+# * removed --noyywrap from lex
+#
 # 2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
 # * added lswm/Makefile
 # * moved defs.mak
-#
-# 2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
-# * removed --noyywrap from lex
 #
 # 2007-03-19 L. Donnie Smith <cwiid@abstrakraft.org>
 # * added --disable-ldconfig
