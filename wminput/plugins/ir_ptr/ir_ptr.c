@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for libcwiid rename
+ *
  *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * initialized param array
  *
@@ -31,7 +34,7 @@
 
 #include "wmplugin.h"
 
-wiimote_t *wiimote;
+cwiid_wiimote_t *wiimote;
 
 struct cursor {
 	unsigned char valid;
@@ -42,7 +45,7 @@ int a_debounce, b_debounce;
 
 /* static objects are initialized to 0 by default */
 static int a_index = -1, b_index = -1;
-static struct wiimote_ir_src a, b, prev_a, prev_b;
+static struct cwiid_ir_src a, b, prev_a, prev_b;
 
 static unsigned char info_init = 0;
 static struct wmplugin_info info;
@@ -76,29 +79,29 @@ struct wmplugin_info *wmplugin_info() {
 	return &info;
 }
 
-int wmplugin_init(int id, wiimote_t *arg_wiimote)
+int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 {
 	wiimote = arg_wiimote;
 
 	data.buttons = 0;
 
-	if (wmplugin_set_report_mode(id, WIIMOTE_RPT_IR)) {
+	if (wmplugin_set_report_mode(id, CWIID_RPT_IR)) {
 		return -1;
 	}
 
 	return 0;
 }
 
-struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
+struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 {
 	int i;
 	uint8_t flags;
 	static uint8_t old_flags;
-	struct wiimote_ir_mesg *ir_mesg;
+	struct cwiid_ir_mesg *ir_mesg;
 
 	ir_mesg = NULL;
 	for (i=0; i < mesg_count; i++) {
-		if (mesg[i]->type == WIIMOTE_MESG_IR) {
+		if (mesg[i]->type == CWIID_MESG_IR) {
 			ir_mesg = &mesg[i]->ir_mesg;
 		}
 	}
@@ -122,7 +125,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 
 	/* of not set, pick largest available source for a & b */
 	if (a_index == -1) {
-		for (i=0; i < WIIMOTE_IR_SRC_COUNT; i++) {
+		for (i=0; i < CWIID_IR_SRC_COUNT; i++) {
 			if ((ir_mesg->src[i].valid) && (i != b_index)) {
 				if ((a_index == -1) ||
 				  (ir_mesg->src[i].size > ir_mesg->src[a_index].size)) {
@@ -133,7 +136,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 	}
 	/* if there is no current src_b, pick the largest valid one */
 	if (b_index == -1) {
-		for (i=0; i < WIIMOTE_IR_SRC_COUNT; i++) {
+		for (i=0; i < CWIID_IR_SRC_COUNT; i++) {
 			if ((ir_mesg->src[i].valid) && (i != a_index)) {
 				if ((b_index == -1) ||
 				  (ir_mesg->src[i].size > ir_mesg->src[b_index].size)) {
@@ -157,7 +160,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 	}
 	else {
 		a = ir_mesg->src[a_index];
-		a.x = WIIMOTE_IR_X_MAX - a.x;
+		a.x = CWIID_IR_X_MAX - a.x;
 		a_debounce = 0;
 	}
 	if (b_index == -1) {
@@ -171,7 +174,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 	}
 	else {
 		b = ir_mesg->src[b_index];
-		b.x = WIIMOTE_IR_X_MAX - b.x;
+		b.x = CWIID_IR_X_MAX - b.x;
 		b_debounce = 0;
 	}
 
@@ -222,21 +225,21 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 	/* LEDs */
 	flags = 0;
 	if ((a_index == 1) || (b_index == 1)) {
-		flags |= WIIMOTE_LED1_ON;
+		flags |= CWIID_LED1_ON;
 	}
 	else if ((a_index == 2) || (b_index == 2)) {
-		flags |= WIIMOTE_LED2_ON;
+		flags |= CWIID_LED2_ON;
 	}
 	else if ((a_index == 3) || (b_index == 3)) {
-		flags |= WIIMOTE_LED3_ON;
+		flags |= CWIID_LED3_ON;
 	}
 	else if ((a_index == 4) || (b_index == 4)) {
-		flags |= WIIMOTE_LED4_ON;
+		flags |= CWIID_LED4_ON;
 	}
 	if (flags != old_flags) {
 		/* TODO: if this message is sent every time, we get a battery meter of
 		 * blinking lights - why? */
-		wiimote_command(wiimote, WIIMOTE_CMD_LED, flags);
+		cwiid_command(wiimote, CWIID_CMD_LED, flags);
 	}
 	old_flags = flags;
 

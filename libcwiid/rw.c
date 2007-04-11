@@ -15,14 +15,17 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * renamed wiimote to libcwiid, renamed structures accordingly
+ *
  *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated wiimote_read and wiimote_write to trigger and detect rw_error
+ *  * updated cwiid_read and cwiid_write to trigger and detect rw_error
  *
  *  2007-03-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * wiimote_read - changed to obey decode flag only for register read
+ *  * cwiid_read - changed to obey decode flag only for register read
  *
  *  2007-03-06 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added wiimote parameter to wiimote_err calls
+ *  * added wiimote parameter to cwiid_err calls
  *
  *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
@@ -33,16 +36,16 @@
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
-#include "wiimote_internal.h"
+#include "cwiid_internal.h"
 
 struct write_seq speaker_enable_seq[] = {
 	{WRITE_SEQ_RPT, RPT_SPEAKER_ENABLE, (const void *)"\x04", 1, 0},
 	{WRITE_SEQ_RPT,   RPT_SPEAKER_MUTE, (const void *)"\x04", 1, 0},
-	{WRITE_SEQ_MEM, 0xA20009, (const void *)"\x01", 1, WIIMOTE_RW_REG},
-	{WRITE_SEQ_MEM, 0xA20001, (const void *)"\x08", 1, WIIMOTE_RW_REG},
+	{WRITE_SEQ_MEM, 0xA20009, (const void *)"\x01", 1, CWIID_RW_REG},
+	{WRITE_SEQ_MEM, 0xA20001, (const void *)"\x08", 1, CWIID_RW_REG},
 	{WRITE_SEQ_MEM, 0xA20001, (const void *)"\x00\x00\x00\x0C\x40\x00\x00",
-	                          7, WIIMOTE_RW_REG},
-	{WRITE_SEQ_MEM, 0xA20008, (const void *)"\x01", 1, WIIMOTE_RW_REG},
+	                          7, CWIID_RW_REG},
+	{WRITE_SEQ_MEM, 0xA20008, (const void *)"\x01", 1, CWIID_RW_REG},
 	{WRITE_SEQ_RPT,   RPT_SPEAKER_MUTE, (const void *)"\x00", 1, 0}
 };
 
@@ -53,7 +56,7 @@ struct write_seq speaker_disable_seq[] = {
 
 
 #define RPT_READ_REQ_LEN 6
-int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
+int cwiid_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
                  uint16_t len, void *data)
 {
 	unsigned char buf[RPT_READ_REQ_LEN];
@@ -69,7 +72,7 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 	}
 
 	/* Compose read request packet */
-	buf[0]=flags & (WIIMOTE_RW_EEPROM | WIIMOTE_RW_REG);
+	buf[0]=flags & (CWIID_RW_EEPROM | CWIID_RW_REG);
 	buf[1]=(unsigned char)((offset>>16) & 0xFF);
 	buf[2]=(unsigned char)((offset>>8) & 0xFF);
 	buf[3]=(unsigned char)(offset & 0xFF);
@@ -79,7 +82,7 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 
 	/* Lock wiimote rw access */
 	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
-		wiimote_err(wiimote, "Error locking rw_mutex");
+		cwiid_err(wiimote, "Error locking rw_mutex");
 		return -1;
 	}
 
@@ -97,14 +100,14 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 
 	/* Send read request packet */
 	if (send_report(wiimote, 0, RPT_READ_REQ, RPT_READ_REQ_LEN, buf)) {
-		wiimote_err(wiimote, "Error sending read request");
+		cwiid_err(wiimote, "Error sending read request");
 		ret = -1;
 		goto CODA;
 	}
 
 	/* Lock rw_cond_mutex  */
 	if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
-		wiimote_err(wiimote, "Error locking rw_cond_mutex");
+		cwiid_err(wiimote, "Error locking rw_cond_mutex");
 		ret = -1;
 		goto CODA;
 	}
@@ -112,14 +115,14 @@ int wiimote_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 	while (!wiimote->rw_error && !ret && (wiimote->rw_status == RW_PENDING)) {
 		if (pthread_cond_wait(&wiimote->rw_cond,
 		                      &wiimote->rw_cond_mutex)) {
-			wiimote_err(wiimote, "Error waiting on rw_cond");
+			cwiid_err(wiimote, "Error waiting on rw_cond");
 			ret = -1;
 			/* can't goto CODA from here - unlock rw_cond_mutex first */
 		}
 	}
 	/* Unlock rw_cond_mutex */
 	if (pthread_mutex_unlock(&wiimote->rw_cond_mutex)) {
-		wiimote_err(wiimote, "Error unlocking rw_cond_mutex");
+		cwiid_err(wiimote, "Error unlocking rw_cond_mutex");
 		wiimote->rw_error = 1;
 		ret = -1;
 		goto CODA;
@@ -136,13 +139,13 @@ CODA:
 
 	/* Unlock rw_mutex */
 	if (pthread_mutex_unlock(&wiimote->rw_mutex)) {
-		wiimote_err(wiimote, "Error unlocking rw_mutex: deadlock warning");
+		cwiid_err(wiimote, "Error unlocking rw_mutex: deadlock warning");
 		wiimote->rw_error = 1;
 	}
 
 	/* Decode (only for register reads) */
-	if ((ret == 0) && (flags & WIIMOTE_RW_DECODE) &&
-	  (flags & WIIMOTE_RW_REG)) {
+	if ((ret == 0) && (flags & CWIID_RW_DECODE) &&
+	  (flags & CWIID_RW_REG)) {
 		for (i=0; i < len; i++) {
 			((unsigned char *)data)[i] = DECODE(((unsigned char *)data)[i]);
 		}
@@ -152,7 +155,7 @@ CODA:
 }
 
 #define RPT_WRITE_LEN 21
-int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
+int cwiid_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
                   uint16_t len, const void *data)
 {
 	unsigned char buf[RPT_WRITE_LEN];
@@ -172,7 +175,7 @@ int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 
 	/* Lock wiimote rw access */
 	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
-		wiimote_err(wiimote, "Error locking rw_mutex");
+		cwiid_err(wiimote, "Error locking rw_mutex");
 		return -1;
 	}
 
@@ -194,23 +197,23 @@ int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 		memcpy(buf+5, data+sent, buf[4]);
 
 		if (send_report(wiimote, 0, RPT_WRITE, RPT_WRITE_LEN, buf)) {
-			wiimote_err(wiimote, "Error sending write");
+			cwiid_err(wiimote, "Error sending write");
 			ret = -1;
 			goto CODA;
 		}
 		/* Lock rw_cond_mutex  */
 		else if (pthread_mutex_lock(&wiimote->rw_cond_mutex)) {
-			wiimote_err(wiimote, "Error locking rw_cond_mutex");
+			cwiid_err(wiimote, "Error locking rw_cond_mutex");
 			ret = -1;
 			goto CODA;
 		}
 		else {
-			/* Wait on condition, signalled by wiimote_int_listen */
+			/* Wait on condition, signalled by cwiid_int_listen */
 			while (!wiimote->rw_error && !ret &&
 			  (wiimote->rw_status == RW_PENDING)) {
 				if (pthread_cond_wait(&wiimote->rw_cond,
 				                      &wiimote->rw_cond_mutex)) {
-					wiimote_err(wiimote, "Error waiting on rw_cond");
+					cwiid_err(wiimote, "Error waiting on rw_cond");
 					ret = -1;
 					/* can't goto CODA from here -
 					 * unlock rw_cond_mutex first */
@@ -218,7 +221,7 @@ int wiimote_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 			}
 			/* Unlock rw_cond_mutex */
 			if (pthread_mutex_unlock(&wiimote->rw_cond_mutex)) {
-				wiimote_err(wiimote, "Error unlocking rw_cond_mutex");
+				cwiid_err(wiimote, "Error unlocking rw_cond_mutex");
 				wiimote->rw_error = 1;
 				ret = -1;
 				goto CODA;
@@ -244,7 +247,7 @@ CODA:
 
 	/* Unlock rw_mutex */
 	if (pthread_mutex_unlock(&wiimote->rw_mutex)) {
-		wiimote_err(wiimote, "Error unlocking rw_mutex: deadlock warning");
+		cwiid_err(wiimote, "Error unlocking rw_mutex: deadlock warning");
 		wiimote->rw_error = 1;
 	}
 
@@ -252,7 +255,7 @@ CODA:
 }
 
 #define SOUND_BUF_LEN	21
-int wiimote_beep(wiimote_t *wiimote)
+int cwiid_beep(cwiid_wiimote_t *wiimote)
 {
 	/* unsigned char buf[SOUND_BUF_LEN] = { 0xA0, 0xCC, 0x33, 0xCC, 0x33,
 	    0xCC, 0x33, 0xCC, 0x33, 0xCC, 0x33, 0xCC, 0x33, 0xCC, 0x33, 0xCC, 0x33,
@@ -268,7 +271,7 @@ int wiimote_beep(wiimote_t *wiimote)
 
 	if (exec_write_seq(wiimote, SEQ_LEN(speaker_enable_seq),
 	                   speaker_enable_seq)) {
-		wiimote_err(wiimote, "Error on speaker enable");
+		cwiid_err(wiimote, "Error on speaker enable");
 		ret = -1;
 	}
 
@@ -280,7 +283,7 @@ int wiimote_beep(wiimote_t *wiimote)
 		/* t.tv_nsec += 7000000; */
 		if (send_report(wiimote, 0, RPT_SPEAKER_DATA, SOUND_BUF_LEN, buf)) {
 		 	printf("%d\n", i);
-			wiimote_err(wiimote, "Error on speaker data");
+			cwiid_err(wiimote, "Error on speaker data");
 			ret = -1;
 			break;
 		}
@@ -293,7 +296,7 @@ int wiimote_beep(wiimote_t *wiimote)
 
 	if (exec_write_seq(wiimote, SEQ_LEN(speaker_disable_seq),
 	                   speaker_disable_seq)) {
-		wiimote_err(wiimote, "Error on speaker disable");
+		cwiid_err(wiimote, "Error on speaker disable");
 		ret = -1;
 	}
 

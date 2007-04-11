@@ -2,7 +2,7 @@
 
 include @top_builddir@/defs.mak
 
-LIB_DIRS = wiimote
+LIB_DIRS = libcwiid
 BIN_DIRS = wmgui wminput lswm
 DOC_DIRS = man doc
 

@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for libcwiid rename
+ *
  *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * initialized params
  *  * added Scale params
@@ -53,7 +56,7 @@ static int plugin_id;
 wmplugin_info_t wmplugin_info;
 wmplugin_init_t wmplugin_init;
 wmplugin_exec_t wmplugin_exec;
-static void process_acc(struct wiimote_acc_mesg *mesg);
+static void process_acc(struct cwiid_acc_mesg *mesg);
 
 struct wmplugin_info *wmplugin_info() {
 	if (!info_init) {
@@ -101,7 +104,7 @@ struct wmplugin_info *wmplugin_info() {
 	return &info;
 }
 
-int wmplugin_init(int id, wiimote_t *wiimote)
+int wmplugin_init(int id, cwiid_wiimote_t *wiimote)
 {
 	unsigned char buf[7];
 
@@ -110,11 +113,11 @@ int wmplugin_init(int id, wiimote_t *wiimote)
 	data.buttons = 0;
 	data.axes[0].valid = 1;
 	data.axes[1].valid = 1;
-	if (wmplugin_set_report_mode(id, WIIMOTE_RPT_ACC)) {
+	if (wmplugin_set_report_mode(id, CWIID_RPT_ACC)) {
 		return -1;
 	}
 
-	if (wiimote_read(wiimote, WIIMOTE_RW_EEPROM, 0x16, 7, buf)) {
+	if (cwiid_read(wiimote, CWIID_RW_EEPROM, 0x16, 7, buf)) {
 		wmplugin_err(id, "unable to read wiimote info");
 		return -1;
 	}
@@ -128,14 +131,14 @@ int wmplugin_init(int id, wiimote_t *wiimote)
 	return 0;
 }
 
-struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
+struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 {
 	int i;
 	struct wmplugin_data *ret = NULL;
 
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg[i]->type) {
-		case WIIMOTE_MESG_ACC:
+		case CWIID_MESG_ACC:
 			process_acc(&mesg[i]->acc_mesg);
 			ret = &data;
 			break;
@@ -151,7 +154,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 #define OLD_AMOUNT (1.0-NEW_AMOUNT)
 double a_x = 0, a_y = 0, a_z = 0;
 
-static void process_acc(struct wiimote_acc_mesg *mesg)
+static void process_acc(struct cwiid_acc_mesg *mesg)
 {
 	double a;
 	double roll, pitch;

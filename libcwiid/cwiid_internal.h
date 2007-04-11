@@ -15,26 +15,29 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * renamed wiimote to libcwiid, renamed structures accordingly
+ *
  *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * moved RW error state to separate member
  *
  *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * removed WIIMOTE_CMP_LEN macro and wiimote_findfirst prototype
+ *  * removed CWIID_CMP_LEN macro and cwiid_findfirst prototype
  *
  *  2007-03-05 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added wiimote parameter to wiimote_err prototype
+ *  * added wiimote parameter to cwiid_err prototype
  *
  *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  *  * type audit (stdint, const, char booleans)
  */
 
-#ifndef WIIMOTE_INTERNAL_H
-#define WIIMOTE_INTERNAL_H
+#ifndef CWIID_INTERNAL_H
+#define CWIID_INTERNAL_H
 
 #include <stdint.h>
 #include <pthread.h>
-#include "wiimote.h"
+#include "cwiid.h"
 
 /* Bluetooth magic numbers */
 #define BT_TRANS_MASK		0xF0
@@ -139,7 +142,7 @@ enum rw_status {
 
 struct mesg_array {
 	int count;
-	union wiimote_mesg *mesg[WIIMOTE_MAX_MESG_COUNT];
+	union cwiid_mesg *mesg[CWIID_MAX_MESG_COUNT];
 };
 
 struct wiimote {
@@ -149,8 +152,8 @@ struct wiimote {
 	uint8_t led_rumble_state;
 	uint8_t rpt_mode_flags;
 	uint16_t buttons;
-	enum wiimote_ext_type extension;
-	wiimote_mesg_callback_t *mesg_callback;
+	enum cwiid_ext_type extension;
+	cwiid_mesg_callback_t *mesg_callback;
 	pthread_t int_listen_thread;
 	pthread_t dispatch_thread;
 	struct queue *dispatch_queue;
@@ -171,7 +174,7 @@ void *dispatch(struct wiimote *wiimote);
 
 int update_rpt_mode(struct wiimote *wiimote, int8_t flags);
 
-void wiimote_err(struct wiimote *wiimote, const char *str, ...);
+void cwiid_err(struct wiimote *wiimote, const char *str, ...);
 int verify_handshake(struct wiimote *wiimote);
 int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
                 size_t len, const void *data);

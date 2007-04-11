@@ -6,9 +6,9 @@ APP_NAME = wmdemo
 
 SOURCES = wmdemo.c
 
-CFLAGS += -I@top_builddir@/wiimote
-LDFLAGS += -L@top_builddir@/wiimote
-LDLIBS += -lwiimote
+CFLAGS += -I@top_builddir@/libcwiid
+LDFLAGS += -L@top_builddir@/libcwiid
+LDLIBS += -lcwiid
 INST_DIR = @bindir@
 
 include $(COMMON)/include/app.mak

@@ -7,11 +7,11 @@ APP_NAME = wminput
 SOURCES = main.c conf.c uinput.c action_enum.c parser.c lexer.c util.c
 
 WMINPUT_CONFIG_DIR = $(CWIID_CONFIG_DIR)/wminput
-CFLAGS += -I@top_builddir@/wiimote \
+CFLAGS += -I@top_builddir@/libcwiid \
 	-DWMINPUT_CONFIG_DIR=\"$(WMINPUT_CONFIG_DIR)\" \
 	-DCWIID_PLUGINS_DIR=\"$(CWIID_PLUGINS_DIR)\"
-LDLIBS += -lwiimote -ldl
-LDFLAGS += -L@top_builddir@/wiimote -rdynamic
+LDLIBS += -lcwiid -ldl
+LDFLAGS += -L@top_builddir@/libcwiid -rdynamic
 INST_DIR = @bindir@
 
 YFLAGS += -d

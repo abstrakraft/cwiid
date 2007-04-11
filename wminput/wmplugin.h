@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for libcwiid rename
+ *
  *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added param structs
  *
@@ -28,7 +31,7 @@
 
 #include <stdint.h>
 #include <linux/input.h>
-#include <wiimote.h>
+#include <cwiid.h>
 
 #define WMPLUGIN_MAX_BUTTON_COUNT	16
 #define WMPLUGIN_MAX_AXIS_COUNT		6
@@ -86,8 +89,8 @@ struct wmplugin_data {
 };
 
 typedef struct wmplugin_info *wmplugin_info_t(void);
-typedef int wmplugin_init_t(int, wiimote_t *);
-typedef struct wmplugin_data *wmplugin_exec_t(int, union wiimote_mesg * []);
+typedef int wmplugin_init_t(int, cwiid_wiimote_t *);
+typedef struct wmplugin_data *wmplugin_exec_t(int, union cwiid_mesg * []);
 
 int wmplugin_set_report_mode(int id, uint8_t flags);
 void wmplugin_err(int id, char *str, ...);

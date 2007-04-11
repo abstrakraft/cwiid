@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for libcwiid rename
+ *
  *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * copied low-pass filter from acc plugin
  *  * initialized params
@@ -44,7 +47,7 @@ static unsigned char info_init = 0;
 static struct wmplugin_info info;
 static struct wmplugin_data data;
 
-static wiimote_t *wiimote;
+static cwiid_wiimote_t *wiimote;
 
 static struct acc acc_zero, acc_one;
 static int plugin_id;
@@ -53,7 +56,7 @@ wmplugin_info_t wmplugin_info;
 wmplugin_init_t wmplugin_init;
 wmplugin_exec_t wmplugin_exec;
 
-static void process_nunchuk(struct wiimote_nunchuk_mesg *mesg);
+static void process_nunchuk(struct cwiid_nunchuk_mesg *mesg);
 
 struct wmplugin_info *wmplugin_info() {
 	if (!info_init) {
@@ -101,34 +104,34 @@ struct wmplugin_info *wmplugin_info() {
 	return &info;
 }
 
-int wmplugin_init(int id, wiimote_t *wiimote_arg)
+int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 {
 	plugin_id = id;
-	wiimote = wiimote_arg;
+	wiimote = arg_wiimote;
 	data.buttons = 0;
 	data.axes[0].valid = 1;
 	data.axes[1].valid = 1;
 	if (wmplugin_set_report_mode(id,
-	                             WIIMOTE_RPT_STATUS | WIIMOTE_RPT_NUNCHUK)) {
+	                             CWIID_RPT_STATUS | CWIID_RPT_NUNCHUK)) {
 		return -1;
 	}
 
 	return 0;
 }
 
-struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
+struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 {
 	int i;
-	enum wiimote_ext_type extension = WIIMOTE_EXT_NONE;
+	enum cwiid_ext_type extension = CWIID_EXT_NONE;
 	unsigned char buf[7];
 	struct wmplugin_data *ret = NULL;
 
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg[i]->type) {
-		case WIIMOTE_MESG_STATUS:
-			if ((mesg[i]->status_mesg.extension == WIIMOTE_EXT_NUNCHUK) &&
-			  (extension != WIIMOTE_EXT_NUNCHUK)) {
-				if (wiimote_read(wiimote, WIIMOTE_RW_REG | WIIMOTE_RW_DECODE,
+		case CWIID_MESG_STATUS:
+			if ((mesg[i]->status_mesg.extension == CWIID_EXT_NUNCHUK) &&
+			  (extension != CWIID_EXT_NUNCHUK)) {
+				if (cwiid_read(wiimote, CWIID_RW_REG | CWIID_RW_DECODE,
 				                 0xA40020, 7, buf)) {
 					wmplugin_err(plugin_id, "unable to read wiimote info");
 				}
@@ -141,7 +144,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 			}
 			extension = mesg[i]->status_mesg.extension;
 			break;
-		case WIIMOTE_MESG_NUNCHUK:
+		case CWIID_MESG_NUNCHUK:
 			process_nunchuk(&mesg[i]->nunchuk_mesg);
 			ret = &data;
 			break;
@@ -157,7 +160,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union wiimote_mesg *mesg[])
 #define OLD_AMOUNT (1.0-NEW_AMOUNT)
 double a_x = 0, a_y = 0, a_z = 0;
 
-static void process_nunchuk(struct wiimote_nunchuk_mesg *mesg)
+static void process_nunchuk(struct cwiid_nunchuk_mesg *mesg)
 {
 	double a;
 	double roll, pitch;

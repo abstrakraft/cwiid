@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <wiimote.h>
+#include <cwiid.h>
 
 /* This is a sample program written to demonstrate basic CWiid libwiimote
  * usage, until _actual_ documentation can be written.  It's quick and dirty
@@ -14,17 +14,17 @@
  * lot of data - the purpose of this program is demonstration, not good
  * interface, and it shows. */
 
-wiimote_mesg_callback_t wiimote_callback;
+cwiid_mesg_callback_t cwiid_callback;
 
 #define toggle_bit(bf,b)	\
 	(bf) = ((bf) & b)		\
 	       ? ((bf) & ~(b))	\
 	       : ((bf) | (b))
 
-void set_led_state(wiimote_t *wiimote, unsigned char led_state);
-void set_rpt_mode(wiimote_t *wiimote, unsigned char rpt_mode);
+void set_led_state(cwiid_wiimote_t *wiimote, unsigned char led_state);
+void set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char rpt_mode);
 
-wiimote_err_t err;
+cwiid_err_t err;
 void err(int id, const char *s, ...)
 {
 	va_list ap;
@@ -37,28 +37,28 @@ void err(int id, const char *s, ...)
 }
 
 /* wiimote handle */
-wiimote_t *wiimote;
+cwiid_wiimote_t *wiimote;
 
 int main(int argc, char *argv[])
 {
 	bdaddr_t bdaddr;	/* bluetooth device address */
-	int wiimote_id;		/* wiimote id: useful for handling multiple wiimotes
+	int cwiid_id;		/* wiimote id: useful for handling multiple wiimotes
 	                       with a single callback */
 	unsigned char led_state = 0;
 	unsigned char rpt_mode = 0;
 	unsigned char rumble = 0;
 	int exit = 0;
 
-	wiimote_set_err(err);
+	cwiid_set_err(err);
 
 	/* Connect to any wiimote */
 	bdaddr = *BDADDR_ANY;
-	/* Connect to address in string WIIMOTE_BDADDR */
-	/* str2ba(WIIMOTE_BDADDR, &bdaddr); */
+	/* Connect to address in string CWIID_BDADDR */
+	/* str2ba(CWIID_BDADDR, &bdaddr); */
 
 	/* Connect to the wiimote */
 	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
-	if (!(wiimote = wiimote_connect(&bdaddr, wiimote_callback, &wiimote_id))) {
+	if (!(wiimote = cwiid_connect(&bdaddr, cwiid_callback, &cwiid_id))) {
 		fprintf(stderr, "Unable to connect to wiimote\n");
 		return -1;
 	}
@@ -80,55 +80,55 @@ int main(int argc, char *argv[])
 	while (!exit) {
 		switch (getchar()) {
 		case '1':
-			toggle_bit(led_state, WIIMOTE_LED1_ON);
+			toggle_bit(led_state, CWIID_LED1_ON);
 			set_led_state(wiimote, led_state);
 			break;
 		case '2':
-			toggle_bit(led_state, WIIMOTE_LED2_ON);
+			toggle_bit(led_state, CWIID_LED2_ON);
 			set_led_state(wiimote, led_state);
 			break;
 		case '3':
-			toggle_bit(led_state, WIIMOTE_LED3_ON);
+			toggle_bit(led_state, CWIID_LED3_ON);
 			set_led_state(wiimote, led_state);
 			break;
 		case '4':
-			toggle_bit(led_state, WIIMOTE_LED4_ON);
+			toggle_bit(led_state, CWIID_LED4_ON);
 			set_led_state(wiimote, led_state);
 			break;
 		case 'a':
-			toggle_bit(rpt_mode, WIIMOTE_RPT_ACC);
+			toggle_bit(rpt_mode, CWIID_RPT_ACC);
 			set_rpt_mode(wiimote, rpt_mode);
 			break;
 		case 'b':
-			toggle_bit(rpt_mode, WIIMOTE_RPT_BTN);
+			toggle_bit(rpt_mode, CWIID_RPT_BTN);
 			set_rpt_mode(wiimote, rpt_mode);
 			break;
 		case 'e':
-			/* WIIMOTE_RPT_EXT is actually
-			 * WIIMOTE_RPT_NUNCHUK | WIIMOTE_RPT_CLASSIC */
-			toggle_bit(rpt_mode, WIIMOTE_RPT_EXT);
+			/* CWIID_RPT_EXT is actually
+			 * CWIID_RPT_NUNCHUK | CWIID_RPT_CLASSIC */
+			toggle_bit(rpt_mode, CWIID_RPT_EXT);
 			set_rpt_mode(wiimote, rpt_mode);
 			break;
 		case 'i':
 			/* libwiimote picks the highest quality IR mode available with the
 			 * other options selected (not including as-yet-undeciphered
 			 * interleaved mode */
-			toggle_bit(rpt_mode, WIIMOTE_RPT_IR);
+			toggle_bit(rpt_mode, CWIID_RPT_IR);
 			set_rpt_mode(wiimote, rpt_mode);
 			break;
 		case 'r':
 			toggle_bit(rumble, 1);
-			if (wiimote_command(wiimote, WIIMOTE_CMD_RUMBLE, rumble)) {
+			if (cwiid_command(wiimote, CWIID_CMD_RUMBLE, rumble)) {
 				fprintf(stderr, "Error setting rumble\n");
 			}
 			break;
 		case 's':
-			if (wiimote_command(wiimote, WIIMOTE_CMD_STATUS, 0)) {
+			if (cwiid_command(wiimote, CWIID_CMD_STATUS, 0)) {
 				fprintf(stderr, "Error requesting status message\n");
 			}
 			break;
 		case 't':
-			toggle_bit(rpt_mode, WIIMOTE_RPT_STATUS);
+			toggle_bit(rpt_mode, CWIID_RPT_STATUS);
 			set_rpt_mode(wiimote, rpt_mode);
 			break;
 		case 'x':
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (wiimote_disconnect(wiimote)) {
+	if (cwiid_disconnect(wiimote)) {
 		fprintf(stderr, "Error on wiimote disconnect\n");
 		return -1;
 	}
@@ -149,31 +149,31 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void set_led_state(wiimote_t *wiimote, unsigned char led_state)
+void set_led_state(cwiid_wiimote_t *wiimote, unsigned char led_state)
 {
-	if (wiimote_command(wiimote, WIIMOTE_CMD_LED, led_state)) {
+	if (cwiid_command(wiimote, CWIID_CMD_LED, led_state)) {
 		fprintf(stderr, "Error setting LEDs \n");
 	}
 }
 	
-void set_rpt_mode(wiimote_t *wiimote, unsigned char rpt_mode)
+void set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char rpt_mode)
 {
-	if (wiimote_command(wiimote, WIIMOTE_CMD_RPT_MODE, rpt_mode)) {
+	if (cwiid_command(wiimote, CWIID_CMD_RPT_MODE, rpt_mode)) {
 		fprintf(stderr, "Error setting report mode\n");
 	}
 }
 
-/* Prototype wiimote_callback with wiimote_callback_t, define it with the actual
+/* Prototype cwiid_callback with cwiid_callback_t, define it with the actual
  * type - this will cause a compile error (rather than some undefined bizarre
- * behavior) if wiimote_callback_t changes */
-/* wiimote_mesg_callback_t has undergone a few changes lately, hopefully this
+ * behavior) if cwiid_callback_t changes */
+/* cwiid_mesg_callback_t has undergone a few changes lately, hopefully this
  * will be the last.  Some programs need to know which messages were received
- * simultaneously (e.g. for correlating acceperometer and IR data), and the
+ * simultaneously (e.g. for correlating accelerometer and IR data), and the
  * sequence number mechanism used previously proved cumbersome, so we just
  * pass an array of messages, all of which were received at the same time.
  * The id is to distinguish between multiple wiimotes using the same callback.
  * */
-void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
+void cwiid_callback(int id, int mesg_count, union cwiid_mesg *mesg[])
 {
 	int i, j;
 	int valid_source;
@@ -181,17 +181,17 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
 	for (i=0; i < mesg_count; i++)
 	{
 		switch (mesg[i]->type) {
-		case WIIMOTE_MESG_STATUS:
+		case CWIID_MESG_STATUS:
 			printf("Status Report: battery=%d extension=",
 			       mesg[i]->status_mesg.battery);
 			switch (mesg[i]->status_mesg.extension) {
-			case WIIMOTE_EXT_NONE:
+			case CWIID_EXT_NONE:
 				printf("none");
 				break;
-			case WIIMOTE_EXT_NUNCHUK:
+			case CWIID_EXT_NUNCHUK:
 				printf("Nunchuk");
 				break;
-			case WIIMOTE_EXT_CLASSIC:
+			case CWIID_EXT_CLASSIC:
 				printf("Classic Controller");
 				break;
 			default:
@@ -200,18 +200,18 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
 			}
 			printf("\n");
 			break;
-		case WIIMOTE_MESG_BTN:
+		case CWIID_MESG_BTN:
 			printf("Button Report: %.4X\n", mesg[i]->btn_mesg.buttons);
 			break;
-		case WIIMOTE_MESG_ACC:
+		case CWIID_MESG_ACC:
 			printf("Acc Report: x=%d, y=%d, z=%d\n", mesg[i]->acc_mesg.x,
 			                                         mesg[i]->acc_mesg.y,
 			                                         mesg[i]->acc_mesg.z);
 			break;
-		case WIIMOTE_MESG_IR:
+		case CWIID_MESG_IR:
 			printf("IR Report: ");
 			valid_source = 0;
-			for (j = 0; j < WIIMOTE_IR_SRC_COUNT; j++) {
+			for (j = 0; j < CWIID_IR_SRC_COUNT; j++) {
 				if (mesg[i]->ir_mesg.src[j].valid) {
 					valid_source = 1;
 					printf("(%d,%d) ", mesg[i]->ir_mesg.src[j].x,
@@ -223,14 +223,14 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
 			}
 			printf("\n");
 			break;
-		case WIIMOTE_MESG_NUNCHUK:
+		case CWIID_MESG_NUNCHUK:
 			printf("Nunchuk Report: btns=%.2X stick=(%d,%d) acc.x=%d acc.y=%d "
 			       "acc.z=%d\n", mesg[i]->nunchuk_mesg.buttons,
 			       mesg[i]->nunchuk_mesg.stick_x,
 			       mesg[i]->nunchuk_mesg.stick_y, mesg[i]->nunchuk_mesg.acc_x,
 			       mesg[i]->nunchuk_mesg.acc_y, mesg[i]->nunchuk_mesg.acc_z);
 			break;
-		case WIIMOTE_MESG_CLASSIC:
+		case CWIID_MESG_CLASSIC:
 			printf("Classic Report: btns=%.4X l_stick=(%d,%d) r_stick=(%d,%d) "
 			       "l=%d r=%d\n", mesg[i]->classic_mesg.buttons,
 			       mesg[i]->classic_mesg.l_stick_x,
@@ -239,8 +239,8 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
 			       mesg[i]->classic_mesg.r_stick_y,
 			       mesg[i]->classic_mesg.l, mesg[i]->classic_mesg.r);
 			break;
-		case WIIMOTE_MESG_ERROR:
-			if (wiimote_disconnect(wiimote)) {
+		case CWIID_MESG_ERROR:
+			if (cwiid_disconnect(wiimote)) {
 				fprintf(stderr, "Error on wiimote disconnect\n");
 				exit(-1);
 			}

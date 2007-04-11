@@ -1,4 +1,7 @@
 # ChangeLog:
+# 2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+# * updated for libcwiid rename
+#
 # 2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
 # * removed --noyywrap from lex
 #
@@ -92,7 +95,7 @@ AC_OUTPUT(
 	[common/include/lib.mak]
 	[doc/Makefile]
 	[man/Makefile]
-	[wiimote/Makefile]
+	[libcwiid/Makefile]
 	[wmdemo/Makefile]
 	[wmgui/Makefile]
 	[wminput/Makefile]

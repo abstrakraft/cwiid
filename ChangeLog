@@ -1,3 +1,20 @@
+2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+	libcwiid
+	* renamed from libwiimote
+	* renamed external data structures
+
+	lswm
+	* updated for libcwiid rename
+
+	wmdemo
+	* updated for libcwiid rename
+
+	wmgui
+	* updated for libcwiid rename
+
+	wminput
+	* updated for libcwiid rename
+
 2007-04-08 Arthur Peters <amp@singingwizard.org>
 	wminput
 	* added debounce and low-pass filter to ir_ptr plugin
