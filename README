@@ -22,7 +22,7 @@ CWiid Wiimote Interface
 DESCRIPTION
 ------------------------------------------------------------------------------------------------
 The CWiid package contains the following parts:
-1.wiimote library - API to the wiimote.
+1.libcwiid - wiimote API.
 2.wmgui - GTK gui to the wiimote.
 3.wminput - an event/joystick/mouse driver for the wiimote.
 4.lswm - list wiimote devices (in the spirit of ls{,pci,usb}, etc.

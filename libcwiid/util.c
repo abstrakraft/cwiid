@@ -15,23 +15,26 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * renamed wiimote to libcwiid, renamed structures accordingly
+ *
  *  2007-04-08 Petter Reinholdtsen <pere@hungry.com>
  *  * fixed signed/unsigned comparison warning in send_report and
  *    exec_write_seq
  *
  *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * removed wiimote_findfirst (moved to bluetooth.c)
+ *  * removed cwiid_findfirst (moved to bluetooth.c)
  *
  *  2007-03-27 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * moved wiimote_findfirst to bluetooth.c
+ *  * moved cwiid_findfirst to bluetooth.c
  *
  *  2007-03-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * audited error checking (coda and error handler sections)
  *
  *  2007-03-05 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * created wiimote_err_func variable
- *  * created wiimote_err_default
- *  * added wiimote parameter to wiimote_err definition and calls
+ *  * created cwiid_err_func variable
+ *  * created cwiid_err_default
+ *  * added wiimote parameter to cwiid_err definition and calls
  *
  *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
@@ -44,22 +47,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "wiimote_internal.h"
+#include "cwiid_internal.h"
 
-static wiimote_err_t wiimote_err_default;
+static cwiid_err_t cwiid_err_default;
 
-static wiimote_err_t *wiimote_err_func = &wiimote_err_default;
+static cwiid_err_t *cwiid_err_func = &cwiid_err_default;
 
-int wiimote_set_err(wiimote_err_t *err)
+int cwiid_set_err(cwiid_err_t *err)
 {
 	/* TODO: assuming pointer assignment is atomic operation */
 	/* if it is, and the user doesn't care about race conditions, we don't
 	 * either */
-	wiimote_err_func = err;
+	cwiid_err_func = err;
 	return 0;
 }
 
-static void wiimote_err_default(int id, const char *str, ...)
+static void cwiid_err_default(int id, const char *str, ...)
 {
 	va_list ap;
 
@@ -69,17 +72,17 @@ static void wiimote_err_default(int id, const char *str, ...)
 	va_end(ap);
 }
 
-void wiimote_err(struct wiimote *wiimote, const char *str, ...)
+void cwiid_err(struct wiimote *wiimote, const char *str, ...)
 {
 	va_list ap;
 
-	if (wiimote_err_func) {
+	if (cwiid_err_func) {
 		va_start(ap, str);
 		if (wiimote) {
-			(*wiimote_err_func)(wiimote->id, str, ap);
+			(*cwiid_err_func)(wiimote->id, str, ap);
 		}
 		else {
-			(*wiimote_err_func)(-1, str, ap);
+			(*cwiid_err_func)(-1, str, ap);
 		}
 		va_end(ap);
 	}
@@ -89,15 +92,15 @@ int verify_handshake(struct wiimote *wiimote)
 {
 	unsigned char handshake;
 	if (read(wiimote->ctl_socket, &handshake, 1) != 1) {
-		wiimote_err(wiimote, "Error on read handshake");
+		cwiid_err(wiimote, "Error on read handshake");
 		return -1;
 	}
 	else if ((handshake & BT_TRANS_MASK) != BT_TRANS_HANDSHAKE) {
-		wiimote_err(wiimote, "Handshake expected, non-handshake received");
+		cwiid_err(wiimote, "Handshake expected, non-handshake received");
 		return -1;
 	}
 	else if ((handshake & BT_PARAM_MASK) != BT_PARAM_SUCCESSFUL) {
-		wiimote_err(wiimote, "Non-successful handshake");
+		cwiid_err(wiimote, "Non-successful handshake");
 		return -1;
 	}
 
@@ -145,7 +148,7 @@ int exec_write_seq(struct wiimote *wiimote, unsigned int len,
 			}
 			break;
 		case WRITE_SEQ_MEM:
-			if (wiimote_write(wiimote, seq[i].flags, seq[i].report_offset,
+			if (cwiid_write(wiimote, seq[i].flags, seq[i].report_offset,
 			                  seq[i].len, seq[i].data)) {
 				return -1;
 			}

@@ -4,7 +4,7 @@ include @top_builddir@/defs.mak
 
 PLUGIN_NAME = nunchuk_acc
 SOURCES = nunchuk_acc.c
-CFLAGS += -I@top_builddir@/wminput -I@top_builddir@/wiimote
+CFLAGS += -I@top_builddir@/wminput -I@top_builddir@/libcwiid
 LDLIBS += -lm
 INST_DIR = $(CWIID_PLUGINS_DIR)
 

@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for libcwiid rename
+ *
  *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added conf_plugin_param_{int,float} prototypes
  *
@@ -34,7 +37,7 @@
 #include <linux/input.h>
 #include <linux/uinput.h>
 
-#include "wiimote.h"
+#include "cwiid.h"
 #include "wmplugin.h"
 #include "y.tab.h"
 
@@ -162,7 +165,7 @@ struct conf {
 };
 
 struct uinput_listen_data {
-	wiimote_t *wiimote;
+	cwiid_wiimote_t *wiimote;
 	struct conf *conf;
 };
 

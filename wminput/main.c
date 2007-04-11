@@ -15,8 +15,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for libcwiid rename
+ *
  *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * exit on wiimote_error
+ *  * exit on cwiid_error
  *
  *  2007-03-03 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
@@ -32,7 +35,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <wiimote.h>
+#include <cwiid.h>
 
 #include "conf.h"
 #include "util.h"
@@ -46,15 +49,15 @@ extern char *optarg;
 extern int optind, opterr, optopt;
 
 /* Prototypes */
-wiimote_mesg_callback_t wiimote_callback;
+cwiid_mesg_callback_t cwiid_callback;
 int wminput_set_report_mode();
-void process_btn_mesg(struct wiimote_btn_mesg *mesg);
-void process_nunchuk_mesg(struct wiimote_nunchuk_mesg *mesg);
-void process_classic_mesg(struct wiimote_classic_mesg *mesg);
-void process_plugin(struct plugin *, int, union wiimote_mesg * []);
+void process_btn_mesg(struct cwiid_btn_mesg *mesg);
+void process_nunchuk_mesg(struct cwiid_nunchuk_mesg *mesg);
+void process_classic_mesg(struct cwiid_classic_mesg *mesg);
+void process_plugin(struct plugin *, int, union cwiid_mesg * []);
 
 /* Globals */
-wiimote_t *wiimote;
+cwiid_wiimote_t *wiimote;
 char init;
 
 #define DEFAULT_CONFIG_FILE	"default"
@@ -136,9 +139,9 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 	}
-	else if ((str_addr = getenv(WIIMOTE_BDADDR)) != NULL) {
+	else if ((str_addr = getenv(CWIID_BDADDR)) != NULL) {
 		if (str2ba(str_addr, &bdaddr)) {
-			wminput_err("invalid address in %s", WIIMOTE_BDADDR);
+			wminput_err("invalid address in %s", CWIID_BDADDR);
 			bdaddr = *BDADDR_ANY;
 		}
 	}
@@ -149,13 +152,13 @@ int main(int argc, char *argv[])
 	/* Wiimote connect */
 	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
 	if (wait_forever) {
-		if (wiimote_find_wiimote(&bdaddr, -1)) {
+		if (cwiid_find_wiimote(&bdaddr, -1)) {
 			wminput_err("error finding wiimote");
 			conf_unload(&conf);
 			return -1;
 		}
 	}
-	if ((wiimote = wiimote_connect(&bdaddr, wiimote_callback, NULL)) == NULL) {
+	if ((wiimote = cwiid_connect(&bdaddr, cwiid_callback, NULL)) == NULL) {
 		wminput_err("unable to connect");
 		conf_unload(&conf);
 		return -1;
@@ -166,14 +169,14 @@ int main(int argc, char *argv[])
 		if ((*conf.plugins[i].init)(i, wiimote)) {
 			wminput_err("error on %s init", conf.plugins[i].name);
 			conf_unload(&conf);
-			wiimote_disconnect(wiimote);
+			cwiid_disconnect(wiimote);
 			return -1;
 		}
 	}
 
 	if (wminput_set_report_mode()) {
 		conf_unload(&conf);
-		wiimote_disconnect(wiimote);
+		cwiid_disconnect(wiimote);
 		return -1;
 	}
 
@@ -184,7 +187,7 @@ int main(int argc, char *argv[])
 	                   &uinput_listen_data)) {
 		wminput_err("error starting uinput listen thread");
 		conf_unload(&conf);
-		wiimote_disconnect(wiimote);
+		cwiid_disconnect(wiimote);
 		return -1;
 	}
 
@@ -212,7 +215,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* disconnect */
-	if (wiimote_disconnect(wiimote)) {
+	if (cwiid_disconnect(wiimote)) {
 		wminput_err("error on disconnect");
 		ret = -1;
 	}
@@ -246,7 +249,7 @@ int wminput_set_report_mode()
 		rpt_mode_flags |= conf.plugins[i].rpt_mode_flags;
 	}
 
-	if (wiimote_command(wiimote, WIIMOTE_CMD_RPT_MODE, rpt_mode_flags)) {
+	if (cwiid_command(wiimote, CWIID_CMD_RPT_MODE, rpt_mode_flags)) {
 		wminput_err("error setting report mode");
 		return -1;
 	}
@@ -254,22 +257,22 @@ int wminput_set_report_mode()
 	return 0;
 }
 
-void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
+void cwiid_callback(int id, int mesg_count, union cwiid_mesg *mesg[])
 {
 	int i;
 
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg[i]->type) {
-		case WIIMOTE_MESG_BTN:
-			process_btn_mesg((struct wiimote_btn_mesg *) mesg[i]);
+		case CWIID_MESG_BTN:
+			process_btn_mesg((struct cwiid_btn_mesg *) mesg[i]);
 			break;
-		case WIIMOTE_MESG_NUNCHUK:
-			process_nunchuk_mesg((struct wiimote_nunchuk_mesg *) mesg[i]);
+		case CWIID_MESG_NUNCHUK:
+			process_nunchuk_mesg((struct cwiid_nunchuk_mesg *) mesg[i]);
 			break;
-		case WIIMOTE_MESG_CLASSIC:
-			process_classic_mesg((struct wiimote_classic_mesg *) mesg[i]);
+		case CWIID_MESG_CLASSIC:
+			process_classic_mesg((struct cwiid_classic_mesg *) mesg[i]);
 			break;
-		case WIIMOTE_MESG_ERROR:
+		case CWIID_MESG_ERROR:
 			if (kill(getpid(),SIGINT)) {
 				wminput_err("error sending SIGINT");
 			}
@@ -284,7 +287,7 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg[])
 	send_event(&conf, EV_SYN, SYN_REPORT, 0);
 }
 
-void process_btn_mesg(struct wiimote_btn_mesg *mesg)
+void process_btn_mesg(struct cwiid_btn_mesg *mesg)
 {
 	static uint16_t prev_buttons = 0;
 	uint16_t pressed, released;
@@ -309,10 +312,10 @@ void process_btn_mesg(struct wiimote_btn_mesg *mesg)
 	/* Wiimote.Dpad.X */
 	if (conf.amap[CONF_WM_AXIS_DPAD_X].active) {
 		axis_value = 0;
-		if (mesg->buttons & WIIMOTE_BTN_LEFT) {
+		if (mesg->buttons & CWIID_BTN_LEFT) {
 			axis_value = -1;
 		}
-		else if (mesg->buttons & WIIMOTE_BTN_RIGHT) {
+		else if (mesg->buttons & CWIID_BTN_RIGHT) {
 			axis_value = 1;
 		}
 		if (conf.amap[CONF_WM_AXIS_DPAD_X].flags & CONF_INVERT) {
@@ -325,10 +328,10 @@ void process_btn_mesg(struct wiimote_btn_mesg *mesg)
 	/* Wiimote.Dpad.Y */
 	if (conf.amap[CONF_WM_AXIS_DPAD_Y].active) {
 		axis_value = 0;
-		if (mesg->buttons & WIIMOTE_BTN_DOWN) {
+		if (mesg->buttons & CWIID_BTN_DOWN) {
 			axis_value = -1;
 		}
-		else if (mesg->buttons & WIIMOTE_BTN_UP) {
+		else if (mesg->buttons & CWIID_BTN_UP) {
 			axis_value = 1;
 		}
 		if (conf.amap[CONF_WM_AXIS_DPAD_Y].flags & CONF_INVERT) {
@@ -339,7 +342,7 @@ void process_btn_mesg(struct wiimote_btn_mesg *mesg)
 	}
 }
 
-void process_nunchuk_mesg(struct wiimote_nunchuk_mesg *mesg)
+void process_nunchuk_mesg(struct cwiid_nunchuk_mesg *mesg)
 {
 	static uint8_t prev_buttons = 0;
 	uint8_t pressed, released;
@@ -382,7 +385,7 @@ void process_nunchuk_mesg(struct wiimote_nunchuk_mesg *mesg)
 	}
 }
 
-void process_classic_mesg(struct wiimote_classic_mesg *mesg)
+void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 {
 	static uint16_t prev_buttons = 0;
 	uint16_t pressed, released;
@@ -407,10 +410,10 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	/* Classic.Dpad.X */
 	if (conf.amap[CONF_CC_AXIS_DPAD_X].active) {
 		axis_value = 0;
-		if (mesg->buttons & WIIMOTE_CLASSIC_BTN_LEFT) {
+		if (mesg->buttons & CWIID_CLASSIC_BTN_LEFT) {
 			axis_value = -1;
 		}
-		else if (mesg->buttons & WIIMOTE_CLASSIC_BTN_RIGHT) {
+		else if (mesg->buttons & CWIID_CLASSIC_BTN_RIGHT) {
 			axis_value = 1;
 		}
 		if (conf.amap[CONF_CC_AXIS_DPAD_X].flags & CONF_INVERT) {
@@ -423,10 +426,10 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	/* Classic.Dpad.Y */
 	if (conf.amap[CONF_CC_AXIS_DPAD_Y].active) {
 		axis_value = 0;
-		if (mesg->buttons & WIIMOTE_CLASSIC_BTN_DOWN) {
+		if (mesg->buttons & CWIID_CLASSIC_BTN_DOWN) {
 			axis_value = -1;
 		}
-		else if (mesg->buttons & WIIMOTE_CLASSIC_BTN_UP) {
+		else if (mesg->buttons & CWIID_CLASSIC_BTN_UP) {
 			axis_value = 1;
 		}
 		if (conf.amap[CONF_CC_AXIS_DPAD_Y].flags & CONF_INVERT) {
@@ -440,7 +443,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	if (conf.amap[CONF_CC_AXIS_L_STICK_X].active) {
 		axis_value = mesg->l_stick_x;
 		if (conf.amap[CONF_CC_AXIS_L_STICK_X].flags & CONF_INVERT) {
-			axis_value = WIIMOTE_CLASSIC_L_STICK_MAX - axis_value;
+			axis_value = CWIID_CLASSIC_L_STICK_MAX - axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_L_STICK_X].axis_type,
 		           conf.amap[CONF_CC_AXIS_L_STICK_X].action, axis_value);
@@ -450,7 +453,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	if (conf.amap[CONF_CC_AXIS_L_STICK_Y].active) {
 		axis_value = mesg->l_stick_y;
 		if (conf.amap[CONF_CC_AXIS_L_STICK_Y].flags & CONF_INVERT) {
-			axis_value = WIIMOTE_CLASSIC_L_STICK_MAX - axis_value;
+			axis_value = CWIID_CLASSIC_L_STICK_MAX - axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_L_STICK_Y].axis_type,
 		           conf.amap[CONF_CC_AXIS_L_STICK_Y].action, axis_value);
@@ -460,7 +463,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	if (conf.amap[CONF_CC_AXIS_R_STICK_X].active) {
 		axis_value = mesg->r_stick_x;
 		if (conf.amap[CONF_CC_AXIS_R_STICK_X].flags & CONF_INVERT) {
-			axis_value = WIIMOTE_CLASSIC_R_STICK_MAX - axis_value;
+			axis_value = CWIID_CLASSIC_R_STICK_MAX - axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_R_STICK_X].axis_type,
 		           conf.amap[CONF_CC_AXIS_R_STICK_X].action, axis_value);
@@ -470,7 +473,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	if (conf.amap[CONF_CC_AXIS_R_STICK_Y].active) {
 		axis_value = mesg->r_stick_y;
 		if (conf.amap[CONF_CC_AXIS_R_STICK_Y].flags & CONF_INVERT) {
-			axis_value = WIIMOTE_CLASSIC_R_STICK_MAX - axis_value;
+			axis_value = CWIID_CLASSIC_R_STICK_MAX - axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_R_STICK_Y].axis_type,
 		           conf.amap[CONF_CC_AXIS_R_STICK_Y].action, axis_value);
@@ -480,7 +483,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	if (conf.amap[CONF_CC_AXIS_L].active) {
 		axis_value = mesg->l;
 		if (conf.amap[CONF_CC_AXIS_L].flags & CONF_INVERT) {
-			axis_value = WIIMOTE_CLASSIC_LR_MAX - axis_value;
+			axis_value = CWIID_CLASSIC_LR_MAX - axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_L].axis_type,
 		           conf.amap[CONF_CC_AXIS_L].action, axis_value);
@@ -490,7 +493,7 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 	if (conf.amap[CONF_CC_AXIS_R].active) {
 		axis_value = mesg->r;
 		if (conf.amap[CONF_CC_AXIS_R].flags & CONF_INVERT) {
-			axis_value = WIIMOTE_CLASSIC_LR_MAX - axis_value;
+			axis_value = CWIID_CLASSIC_LR_MAX - axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_R].axis_type,
 		           conf.amap[CONF_CC_AXIS_R].action, axis_value);
@@ -498,9 +501,9 @@ void process_classic_mesg(struct wiimote_classic_mesg *mesg)
 }
 
 void process_plugin(struct plugin *plugin, int mesg_count,
-                    union wiimote_mesg *mesg[])
+                    union cwiid_mesg *mesg[])
 {
-	union wiimote_mesg *plugin_mesg[WIIMOTE_MAX_MESG_COUNT];
+	union cwiid_mesg *plugin_mesg[CWIID_MAX_MESG_COUNT];
 	int plugin_mesg_count = 0;
 	int i;
 	uint8_t flag;
@@ -510,23 +513,23 @@ void process_plugin(struct plugin *plugin, int mesg_count,
 
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg[i]->type) {
-		case WIIMOTE_MESG_STATUS:
-			flag = WIIMOTE_RPT_STATUS;
+		case CWIID_MESG_STATUS:
+			flag = CWIID_RPT_STATUS;
 			break;
-		case WIIMOTE_MESG_BTN:
-			flag = WIIMOTE_RPT_BTN;
+		case CWIID_MESG_BTN:
+			flag = CWIID_RPT_BTN;
 			break;
-		case WIIMOTE_MESG_ACC:
-			flag = WIIMOTE_RPT_ACC;
+		case CWIID_MESG_ACC:
+			flag = CWIID_RPT_ACC;
 			break;
-		case WIIMOTE_MESG_IR:
-			flag = WIIMOTE_RPT_IR;
+		case CWIID_MESG_IR:
+			flag = CWIID_RPT_IR;
 			break;
-		case WIIMOTE_MESG_NUNCHUK:
-			flag = WIIMOTE_RPT_NUNCHUK;
+		case CWIID_MESG_NUNCHUK:
+			flag = CWIID_RPT_NUNCHUK;
 			break;
-		case WIIMOTE_MESG_CLASSIC:
-			flag = WIIMOTE_RPT_CLASSIC;
+		case CWIID_MESG_CLASSIC:
+			flag = CWIID_RPT_CLASSIC;
 			break;
 		default:
 			break;

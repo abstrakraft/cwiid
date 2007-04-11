@@ -15,14 +15,17 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for libcwiid rename
+ *
  *  2007-04-08 L. Donnie Smith <cwiid@anstrakraft.org>
  *  * fixed signed/unsigned comparison warning in btnRead_clicked
  *
  *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * disconnect on wiimote_mesg_error
+ *  * disconnect on cwiid_mesg_error
  *
  *  2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * commented custom wiimote_err (causing Xlib errors)
+ *  * commented custom cwiid_err (causing Xlib errors)
  *
  *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial Changelog
@@ -50,7 +53,7 @@
 #include "support.h"
 
 #include <bluetooth/bluetooth.h>
-#include "wiimote.h"
+#include "cwiid.h"
 
 #define PI	3.14159265358979323
 
@@ -68,10 +71,10 @@ struct stick {
 };
 
 /* Globals */
-wiimote_t *wiimote = NULL;
+cwiid_wiimote_t *wiimote = NULL;
 bdaddr_t bdaddr;
 struct acc acc_zero, acc_one;
-struct wiimote_ir_mesg ir_data;
+struct cwiid_ir_mesg ir_data;
 struct acc nc_acc_zero, nc_acc_one;
 struct stick nc_stick;
 struct stick cc_l_stick, cc_r_stick;
@@ -162,14 +165,14 @@ void btnBeep_clicked(void);
 void set_report_mode(void);
 
 /* Wiimote Callback */
-wiimote_mesg_callback_t wiimote_callback;
+cwiid_mesg_callback_t cwiid_callback;
 
 /* Wiimote Handler Functions */
-void wiimote_btn(struct wiimote_btn_mesg *);
-void wiimote_acc(struct wiimote_acc_mesg *);
-void wiimote_ir(struct wiimote_ir_mesg *);
-void wiimote_nunchuk(struct wiimote_nunchuk_mesg *);
-void wiimote_classic(struct wiimote_classic_mesg *);
+void cwiid_btn(struct cwiid_btn_mesg *);
+void cwiid_acc(struct cwiid_acc_mesg *);
+void cwiid_ir(struct cwiid_ir_mesg *);
+void cwiid_nunchuk(struct cwiid_nunchuk_mesg *);
+void cwiid_classic(struct cwiid_classic_mesg *);
 
 /* GetOpt */
 #define OPTSTRING	"h"
@@ -179,7 +182,7 @@ extern int optind, opterr, optopt;
 #define USAGE "usage:%s [-h] [BDADDR]\n"
 
 /*
-wiimote_err_t err;
+cwiid_err_t err;
 
 void err(int id, const char *s, ...)
 {
@@ -201,7 +204,7 @@ int main (int argc, char *argv[])
 	gdk_threads_init();
 	gdk_threads_enter();
 
-	/* wiimote_set_err(err); */
+	/* cwiid_set_err(err); */
 
 	/* Parse Options */
 	while ((c = getopt(argc, argv, OPTSTRING)) != -1) {
@@ -232,9 +235,9 @@ int main (int argc, char *argv[])
 			return -1;
 		}
 	}
-	else if ((str_addr = getenv(WIIMOTE_BDADDR)) != NULL) {
+	else if ((str_addr = getenv(CWIID_BDADDR)) != NULL) {
 		if (str2ba(str_addr, &bdaddr)) {
-			printf("invalid address in %s\n", WIIMOTE_BDADDR);
+			printf("invalid address in %s\n", CWIID_BDADDR);
 			bdaddr = *BDADDR_ANY;
 		}
 	}
@@ -417,8 +420,8 @@ int main (int argc, char *argv[])
 	btn_off = gtk_widget_get_style(evUp)->bg[GTK_STATE_NORMAL];
 
 	nc_stick.max = 0xFF;
-	cc_l_stick.max = WIIMOTE_CLASSIC_L_STICK_MAX;
-	cc_r_stick.max = WIIMOTE_CLASSIC_R_STICK_MAX;
+	cc_l_stick.max = CWIID_CLASSIC_L_STICK_MAX;
+	cc_r_stick.max = CWIID_CLASSIC_R_STICK_MAX;
 
 	set_gui_state();
 	clear_widgets();
@@ -572,7 +575,7 @@ void clear_ir_data()
 {
 	int i;
 
-	for (i=0; i < WIIMOTE_IR_SRC_COUNT; i++) {
+	for (i=0; i < CWIID_IR_SRC_COUNT; i++) {
 		ir_data.src[i].x = -1;
 		ir_data.src[i].y = -1;
 		ir_data.src[i].size = -1;
@@ -632,13 +635,13 @@ void menuConnect_activate(void)
 	message(GTK_MESSAGE_INFO,
 	        "Put Wiimote in discoverable mode (press 1+2) and press OK",
 	         GTK_WINDOW(winMain));
-	if ((wiimote = wiimote_connect(&bdaddr, &wiimote_callback, NULL)) == NULL) {
+	if ((wiimote = cwiid_connect(&bdaddr, &cwiid_callback, NULL)) == NULL) {
 		message(GTK_MESSAGE_ERROR, "Unable to connect", GTK_WINDOW(winMain));
 		status("No connection");
 	}
 	else {
 		status("Connected");
-		if (wiimote_read(wiimote, WIIMOTE_RW_EEPROM, 0x16, 7, buf)) {
+		if (cwiid_read(wiimote, CWIID_RW_EEPROM, 0x16, 7, buf)) {
 			message(GTK_MESSAGE_ERROR, "Unable to retrieve accelerometer "
 			        "calibration", GTK_WINDOW(winMain));
 		}
@@ -652,7 +655,7 @@ void menuConnect_activate(void)
 		}
 		set_gui_state();
 		set_report_mode();
-		wiimote_command(wiimote, WIIMOTE_CMD_STATUS, 0);
+		cwiid_command(wiimote, CWIID_CMD_STATUS, 0);
 	}
 
 	if (reset_bdaddr) {
@@ -662,7 +665,7 @@ void menuConnect_activate(void)
 
 void menuDisconnect_activate(void)
 {
-	if (wiimote_disconnect(wiimote)) {
+	if (cwiid_disconnect(wiimote)) {
 		message(GTK_MESSAGE_ERROR, "Error on disconnect", GTK_WINDOW(winMain));
 	}
 	wiimote = NULL;
@@ -735,14 +738,14 @@ void chkLED_toggled(void)
 	if (wiimote) {
 		LED_state =
 		  (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkLED1))
-		    ? WIIMOTE_LED1_ON : 0) |
+		    ? CWIID_LED1_ON : 0) |
 		  (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkLED2))
-		    ? WIIMOTE_LED2_ON : 0) |
+		    ? CWIID_LED2_ON : 0) |
 		  (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkLED3))
-		    ? WIIMOTE_LED3_ON : 0) |
+		    ? CWIID_LED3_ON : 0) |
 		  (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkLED4))
-		    ? WIIMOTE_LED4_ON : 0);
-		if (wiimote_command(wiimote, WIIMOTE_CMD_LED, LED_state)) {
+		    ? CWIID_LED4_ON : 0);
+		if (cwiid_command(wiimote, CWIID_CMD_LED, LED_state)) {
 			message(GTK_MESSAGE_ERROR, "error setting LEDs",
 			        GTK_WINDOW(winMain));
 		}
@@ -752,7 +755,7 @@ void chkLED_toggled(void)
 void chkRumble_toggled(void)
 {
 	if (wiimote) {
-		if (wiimote_command(wiimote, WIIMOTE_CMD_RUMBLE,
+		if (cwiid_command(wiimote, CWIID_CMD_RUMBLE,
 		  gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkRumble)))) {
 			message(GTK_MESSAGE_ERROR, "error setting rumble",
 			        GTK_WINDOW(winMain));
@@ -768,7 +771,7 @@ void drawIR_expose_event(void)
 
 	gdk_window_get_geometry(drawIR->window, NULL, NULL, &width, &height, NULL);
 
-	for (i=0; i < WIIMOTE_IR_SRC_COUNT; i++) {
+	for (i=0; i < CWIID_IR_SRC_COUNT; i++) {
 		if (ir_data.src[i].valid) {
 			if (ir_data.src[i].size == -1) {
 				size = 3;
@@ -779,8 +782,8 @@ void drawIR_expose_event(void)
 			gdk_draw_arc(drawIR->window,
 			             drawIR->style->fg_gc[GTK_WIDGET_STATE(drawIR)],
 			             TRUE,
-						 ir_data.src[i].x*width/WIIMOTE_IR_X_MAX,
-						 height - ir_data.src[i].y*height/WIIMOTE_IR_Y_MAX,
+						 ir_data.src[i].x*width/CWIID_IR_X_MAX,
+						 height - ir_data.src[i].y*height/CWIID_IR_Y_MAX,
 						 size, size,
 						 0, 64 * 360);
 		}
@@ -810,8 +813,8 @@ void drawStick_expose_event(GtkWidget *drawStick, GdkEventExpose *event,
 
 void btnRead_clicked(void)
 {
-	static unsigned char buf[WIIMOTE_MAX_READ_LEN];
-	static char txt[WIIMOTE_MAX_READ_LEN*4+50]; /* 3 chars per byte, with
+	static unsigned char buf[CWIID_MAX_READ_LEN];
+	static char txt[CWIID_MAX_READ_LEN*4+50]; /* 3 chars per byte, with
 	                                             * plenty extra */
 	GtkTextIter text_iter;
 	GtkTextMark *p_text_mark;
@@ -831,14 +834,14 @@ void btnRead_clicked(void)
 		message(GTK_MESSAGE_ERROR, "Invalid read len", GTK_WINDOW(winRW));
 	}
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radReadReg))) {
-		flags = WIIMOTE_RW_REG;
+		flags = CWIID_RW_REG;
 	}
 	else {
-		flags = WIIMOTE_RW_EEPROM;
+		flags = CWIID_RW_EEPROM;
 	}
 
 	/* Make the call */
-	if (wiimote_read(wiimote, flags, offset, len, buf)) {
+	if (cwiid_read(wiimote, flags, offset, len, buf)) {
 		message(GTK_MESSAGE_ERROR, "Wiimote read error", GTK_WINDOW(winRW));
 	}
 	else {
@@ -905,10 +908,10 @@ void btnWrite_clicked(void)
 	}
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radWriteReg))) {
-		flags = WIIMOTE_RW_REG;
+		flags = CWIID_RW_REG;
 	}
 	else {
-		flags = WIIMOTE_RW_EEPROM;
+		flags = CWIID_RW_EEPROM;
 	}
 
 	data = (char *) gtk_entry_get_text(GTK_ENTRY(txtWriteData));
@@ -955,7 +958,7 @@ void btnWrite_clicked(void)
 	}
 
 	/* Make the call */
-	if (wiimote_write(wiimote, flags, offset, len, buf)) {
+	if (cwiid_write(wiimote, flags, offset, len, buf)) {
 		message(GTK_MESSAGE_ERROR, "Wiimote write error", GTK_WINDOW(winRW));
 	}
 	else {
@@ -971,7 +974,7 @@ void btnRWClose_clicked(void)
 
 void btnBeep_clicked(void)
 {
-	/*if (wiimote_beep(wiimote)) {
+	/*if (cwiid_beep(wiimote)) {
 		message(GTK_MESSAGE_ERROR, "Wiimote sound error", GTK_WINDOW(winMain));
 	}*/
 }
@@ -980,49 +983,49 @@ void set_report_mode(void)
 {
 	uint8_t rpt_mode;
 	
-	rpt_mode = WIIMOTE_RPT_STATUS | WIIMOTE_RPT_BTN;
+	rpt_mode = CWIID_RPT_STATUS | CWIID_RPT_BTN;
 
 	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkIR))) {
-		rpt_mode |= WIIMOTE_RPT_IR;
+		rpt_mode |= CWIID_RPT_IR;
 	}
 	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkAcc))) {
-		rpt_mode |= WIIMOTE_RPT_ACC;
+		rpt_mode |= CWIID_RPT_ACC;
 	}
 	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkExt))) {
-		rpt_mode |= WIIMOTE_RPT_EXT;
+		rpt_mode |= CWIID_RPT_EXT;
 	}
-	if (wiimote_command(wiimote, WIIMOTE_CMD_RPT_MODE, rpt_mode)) {
+	if (cwiid_command(wiimote, CWIID_CMD_RPT_MODE, rpt_mode)) {
 		message(GTK_MESSAGE_ERROR, "error setting report mode",
 		        GTK_WINDOW(winMain));
 	}
 }
 
 #define BATTERY_STR_LEN	14	/* "Battery: 100%" + '\0' */
-void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg_array[])
+void cwiid_callback(int id, int mesg_count, union cwiid_mesg *mesg_array[])
 {
 	int i;
 	char battery[BATTERY_STR_LEN];
 	char *ext_str;
 	unsigned char buf[7];
-	static enum wiimote_ext_type ext_type = WIIMOTE_EXT_NONE;
+	static enum cwiid_ext_type ext_type = CWIID_EXT_NONE;
 
 	gdk_threads_enter();
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg_array[i]->type) {
-		case WIIMOTE_MESG_STATUS:
+		case CWIID_MESG_STATUS:
 			snprintf(battery, BATTERY_STR_LEN,"Battery:%d%%",
 			         (int) (100.0 * mesg_array[i]->status_mesg.battery /
-			                WIIMOTE_BATTERY_MAX));
+			                CWIID_BATTERY_MAX));
 			gtk_statusbar_push(GTK_STATUSBAR(statBattery), 0, battery);
 			switch (mesg_array[i]->status_mesg.extension) {
-			case WIIMOTE_EXT_NONE:
+			case CWIID_EXT_NONE:
 				ext_str = "No extension";
 				break;
-			case WIIMOTE_EXT_NUNCHUK:
+			case CWIID_EXT_NUNCHUK:
 				ext_str = "Nunchuk";
-				if (ext_type != WIIMOTE_EXT_NUNCHUK) {
-					if (wiimote_read(wiimote,
-					                 WIIMOTE_RW_REG | WIIMOTE_RW_DECODE,
+				if (ext_type != CWIID_EXT_NUNCHUK) {
+					if (cwiid_read(wiimote,
+					                 CWIID_RW_REG | CWIID_RW_DECODE,
 				                     0xA40020, 7, buf)) {
 						message(GTK_MESSAGE_ERROR, "Unable to retrieve "
 						        "nunchuk calibration", GTK_WINDOW(winMain));
@@ -1037,10 +1040,10 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg_array[])
 					}
 				}
 				break;
-			case WIIMOTE_EXT_CLASSIC:
+			case CWIID_EXT_CLASSIC:
 				ext_str = "Classic controller";
 				break;
-			case WIIMOTE_EXT_UNKNOWN:
+			case CWIID_EXT_UNKNOWN:
 				ext_str = "Unknown extension";
 				break;
 			}
@@ -1049,22 +1052,22 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg_array[])
 			clear_classic_widgets();
 			ext_type = mesg_array[i]->status_mesg.extension;
 			break;
-		case WIIMOTE_MESG_BTN:
-			wiimote_btn(&mesg_array[i]->btn_mesg);
+		case CWIID_MESG_BTN:
+			cwiid_btn(&mesg_array[i]->btn_mesg);
 			break;
-		case WIIMOTE_MESG_ACC:
-			wiimote_acc(&mesg_array[i]->acc_mesg);
+		case CWIID_MESG_ACC:
+			cwiid_acc(&mesg_array[i]->acc_mesg);
 			break;
-		case WIIMOTE_MESG_IR:
-			wiimote_ir(&mesg_array[i]->ir_mesg);
+		case CWIID_MESG_IR:
+			cwiid_ir(&mesg_array[i]->ir_mesg);
 			break;
-		case WIIMOTE_MESG_NUNCHUK:
-			wiimote_nunchuk(&mesg_array[i]->nunchuk_mesg);
+		case CWIID_MESG_NUNCHUK:
+			cwiid_nunchuk(&mesg_array[i]->nunchuk_mesg);
 			break;
-		case WIIMOTE_MESG_CLASSIC:
-			wiimote_classic(&mesg_array[i]->classic_mesg);
+		case CWIID_MESG_CLASSIC:
+			cwiid_classic(&mesg_array[i]->classic_mesg);
 			break;
-		case WIIMOTE_MESG_ERROR:
+		case CWIID_MESG_ERROR:
 			menuDisconnect_activate();
 			break;
 		default:
@@ -1075,34 +1078,34 @@ void wiimote_callback(int id, int mesg_count, union wiimote_mesg *mesg_array[])
 	gdk_threads_leave();
 }
 
-void wiimote_btn(struct wiimote_btn_mesg *mesg)
+void cwiid_btn(struct cwiid_btn_mesg *mesg)
 {
 	gtk_widget_modify_bg(evUp, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_UP) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_UP) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(evDown, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_DOWN) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_DOWN) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(evLeft, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_LEFT) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_LEFT) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(evRight, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_RIGHT) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_RIGHT) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(evA, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_A) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_A) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(evB, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_B) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_B) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(evMinus, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_MINUS) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_MINUS) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(evPlus, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_PLUS) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_PLUS) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(evHome, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_HOME) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_HOME) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(ev1, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_1) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_1) ? &btn_on : &btn_off);
 	gtk_widget_modify_bg(ev2, GTK_STATE_NORMAL,
-	    (mesg->buttons & WIIMOTE_BTN_2) ? &btn_on : &btn_off);
+	    (mesg->buttons & CWIID_BTN_2) ? &btn_on : &btn_off);
 }
 
 #define LBLVAL_LEN 6
-void wiimote_acc(struct wiimote_acc_mesg *mesg)
+void cwiid_acc(struct cwiid_acc_mesg *mesg)
 {
 	static gchar str[LBLVAL_LEN];
 	double a_x, a_y, a_z, a;
@@ -1147,16 +1150,16 @@ void wiimote_acc(struct wiimote_acc_mesg *mesg)
 	}
 }
 
-void wiimote_ir(struct wiimote_ir_mesg *mesg)
+void cwiid_ir(struct cwiid_ir_mesg *mesg)
 {
 	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkIR))) {
-		/* memcpy(&ir_data, mesg, sizeof(struct wiimote_ir_mesg)); */
+		/* memcpy(&ir_data, mesg, sizeof(struct cwiid_ir_mesg)); */
 		ir_data = *mesg;
 		gtk_widget_queue_draw(drawIR);
 	}
 }
 
-void wiimote_nunchuk(struct wiimote_nunchuk_mesg *mesg)
+void cwiid_nunchuk(struct cwiid_nunchuk_mesg *mesg)
 {
 	static gchar str[LBLVAL_LEN];
 	double a_x, a_y, a_z, a;
@@ -1164,9 +1167,9 @@ void wiimote_nunchuk(struct wiimote_nunchuk_mesg *mesg)
 	
 	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkExt))) {
 		gtk_widget_modify_bg(evNCC, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_NUNCHUK_BTN_C) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_NUNCHUK_BTN_C) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evNCZ, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_NUNCHUK_BTN_Z) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_NUNCHUK_BTN_Z) ? &btn_on : &btn_off);
 
 		nc_stick.valid = 1;
 		nc_stick.x = mesg->stick_x;
@@ -1211,37 +1214,37 @@ void wiimote_nunchuk(struct wiimote_nunchuk_mesg *mesg)
 	}
 }
 
-void wiimote_classic(struct wiimote_classic_mesg *mesg)
+void cwiid_classic(struct cwiid_classic_mesg *mesg)
 {
 	static gchar str[LBLVAL_LEN];
 
 	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkExt))) {
 		gtk_widget_modify_bg(evCCUp, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_UP) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_UP) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCDown, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_DOWN) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_DOWN) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCLeft, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_LEFT) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_LEFT) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCRight, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_RIGHT) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_RIGHT) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCMinus, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_MINUS) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_MINUS) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCPlus, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_PLUS) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_PLUS) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCHome, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_HOME) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_HOME) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCA, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_A) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_A) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCB, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_B) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_B) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCX, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_X) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_X) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCY, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_Y) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_Y) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCZL, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_ZL) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_ZL) ? &btn_on : &btn_off);
 		gtk_widget_modify_bg(evCCZR, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_ZR) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_ZR) ? &btn_on : &btn_off);
 
 		cc_l_stick.valid = 1;
 		cc_l_stick.x = mesg->l_stick_x;
@@ -1256,15 +1259,15 @@ void wiimote_classic(struct wiimote_classic_mesg *mesg)
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->l);
 		gtk_label_set_text(GTK_LABEL(lblCCLVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progCCL),
-		                              (double)mesg->l/WIIMOTE_CLASSIC_LR_MAX);
+		                              (double)mesg->l/CWIID_CLASSIC_LR_MAX);
 		gtk_widget_modify_bg(evCCL, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_L) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_L) ? &btn_on : &btn_off);
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->r);
 		gtk_label_set_text(GTK_LABEL(lblCCRVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progCCR),
-		                              (double)mesg->r/WIIMOTE_CLASSIC_LR_MAX);
+		                              (double)mesg->r/CWIID_CLASSIC_LR_MAX);
 		gtk_widget_modify_bg(evCCR, GTK_STATE_NORMAL,
-		    (mesg->buttons & WIIMOTE_CLASSIC_BTN_R) ? &btn_on : &btn_off);
+		    (mesg->buttons & CWIID_CLASSIC_BTN_R) ? &btn_on : &btn_off);
 	}
 }
 

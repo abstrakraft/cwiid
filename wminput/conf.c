@@ -109,17 +109,17 @@ int conf_button(struct conf *conf, int source, __u16 button, __u16 action)
 {
 	switch (source) {
 	case CONF_WM:
-		conf->rpt_mode_flags |= WIIMOTE_RPT_BTN;
+		conf->rpt_mode_flags |= CWIID_RPT_BTN;
 		conf->wiimote_bmap[button].active = 1;
 		conf->wiimote_bmap[button].action = action;
 		break;
 	case CONF_NC:
-		conf->rpt_mode_flags |= WIIMOTE_RPT_NUNCHUK;
+		conf->rpt_mode_flags |= CWIID_RPT_NUNCHUK;
 		conf->nunchuk_bmap[button].active = 1;
 		conf->nunchuk_bmap[button].action = action;
 		break;
 	case CONF_CC:
-		conf->rpt_mode_flags |= WIIMOTE_RPT_CLASSIC;
+		conf->rpt_mode_flags |= CWIID_RPT_CLASSIC;
 		conf->nunchuk_bmap[button].active = 1;
 		conf->classic_bmap[button].action = action;
 		break;
@@ -146,7 +146,7 @@ int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
 	switch (axis) {
 	case CONF_WM_AXIS_DPAD_X:
 	case CONF_WM_AXIS_DPAD_Y:
-		conf->rpt_mode_flags |= WIIMOTE_RPT_BTN;
+		conf->rpt_mode_flags |= CWIID_RPT_BTN;
 		if (axis_type == EV_ABS) {
 			conf->dev.absmax[action] = 1;
 			conf->dev.absmin[action] = -1;
@@ -156,7 +156,7 @@ int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
 		break;
 	case CONF_NC_AXIS_STICK_X:
 	case CONF_NC_AXIS_STICK_Y:
-		conf->rpt_mode_flags |= WIIMOTE_RPT_NUNCHUK;
+		conf->rpt_mode_flags |= CWIID_RPT_NUNCHUK;
 		if (axis_type == EV_ABS) {
 			conf->dev.absmax[action] = 0xFF;
 			conf->dev.absmin[action] = 0;
@@ -166,7 +166,7 @@ int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
 		break;
 	case CONF_CC_AXIS_DPAD_X:
 	case CONF_CC_AXIS_DPAD_Y:
-		conf->rpt_mode_flags |= WIIMOTE_RPT_CLASSIC;
+		conf->rpt_mode_flags |= CWIID_RPT_CLASSIC;
 		if (axis_type == EV_ABS) {
 			conf->dev.absmax[action] = 1;
 			conf->dev.absmin[action] = -1;
@@ -176,9 +176,9 @@ int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
 		break;
 	case CONF_CC_AXIS_L_STICK_X:
 	case CONF_CC_AXIS_L_STICK_Y:
-		conf->rpt_mode_flags |= WIIMOTE_RPT_CLASSIC;
+		conf->rpt_mode_flags |= CWIID_RPT_CLASSIC;
 		if (axis_type == EV_ABS) {
-			conf->dev.absmax[action] = WIIMOTE_CLASSIC_L_STICK_MAX;
+			conf->dev.absmax[action] = CWIID_CLASSIC_L_STICK_MAX;
 			conf->dev.absmin[action] = 0;
 			conf->dev.absfuzz[action] = 0;
 			conf->dev.absflat[action] = 0;
@@ -186,9 +186,9 @@ int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
 		break;
 	case CONF_CC_AXIS_R_STICK_X:
 	case CONF_CC_AXIS_R_STICK_Y:
-		conf->rpt_mode_flags |= WIIMOTE_RPT_CLASSIC;
+		conf->rpt_mode_flags |= CWIID_RPT_CLASSIC;
 		if (axis_type == EV_ABS) {
-			conf->dev.absmax[action] = WIIMOTE_CLASSIC_R_STICK_MAX;
+			conf->dev.absmax[action] = CWIID_CLASSIC_R_STICK_MAX;
 			conf->dev.absmin[action] = 0;
 			conf->dev.absfuzz[action] = 0;
 			conf->dev.absflat[action] = 0;
@@ -196,9 +196,9 @@ int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
 		break;
 	case CONF_CC_AXIS_L:
 	case CONF_CC_AXIS_R:
-		conf->rpt_mode_flags |= WIIMOTE_RPT_CLASSIC;
+		conf->rpt_mode_flags |= CWIID_RPT_CLASSIC;
 		if (axis_type == EV_ABS) {
-			conf->dev.absmax[action] = WIIMOTE_CLASSIC_LR_MAX;
+			conf->dev.absmax[action] = CWIID_CLASSIC_LR_MAX;
 			conf->dev.absmin[action] = 0;
 			conf->dev.absfuzz[action] = 0;
 			conf->dev.absflat[action] = 0;
@@ -405,34 +405,34 @@ void conf_init(struct conf *conf)
 		conf->dev.absflat[i] = -1;
 	}
 	conf->ff = 0;
-	conf->wiimote_bmap[CONF_WM_BTN_UP].mask = WIIMOTE_BTN_UP;
-	conf->wiimote_bmap[CONF_WM_BTN_DOWN].mask = WIIMOTE_BTN_DOWN;
-	conf->wiimote_bmap[CONF_WM_BTN_LEFT].mask = WIIMOTE_BTN_LEFT;
-	conf->wiimote_bmap[CONF_WM_BTN_RIGHT].mask = WIIMOTE_BTN_RIGHT;
-	conf->wiimote_bmap[CONF_WM_BTN_A].mask = WIIMOTE_BTN_A;
-	conf->wiimote_bmap[CONF_WM_BTN_B].mask = WIIMOTE_BTN_B;
-	conf->wiimote_bmap[CONF_WM_BTN_MINUS].mask = WIIMOTE_BTN_MINUS;
-	conf->wiimote_bmap[CONF_WM_BTN_PLUS].mask = WIIMOTE_BTN_PLUS;
-	conf->wiimote_bmap[CONF_WM_BTN_HOME].mask = WIIMOTE_BTN_HOME;
-	conf->wiimote_bmap[CONF_WM_BTN_1].mask = WIIMOTE_BTN_1;
-	conf->wiimote_bmap[CONF_WM_BTN_2].mask = WIIMOTE_BTN_2;
-	conf->nunchuk_bmap[CONF_NC_BTN_C].mask = WIIMOTE_NUNCHUK_BTN_C;
-	conf->nunchuk_bmap[CONF_NC_BTN_Z].mask = WIIMOTE_NUNCHUK_BTN_Z;
-	conf->classic_bmap[CONF_CC_BTN_UP].mask = WIIMOTE_CLASSIC_BTN_UP;
-	conf->classic_bmap[CONF_CC_BTN_DOWN].mask = WIIMOTE_CLASSIC_BTN_DOWN;
-	conf->classic_bmap[CONF_CC_BTN_LEFT].mask = WIIMOTE_CLASSIC_BTN_LEFT;
-	conf->classic_bmap[CONF_CC_BTN_RIGHT].mask = WIIMOTE_CLASSIC_BTN_RIGHT;
-	conf->classic_bmap[CONF_CC_BTN_MINUS].mask = WIIMOTE_CLASSIC_BTN_MINUS;
-	conf->classic_bmap[CONF_CC_BTN_PLUS].mask = WIIMOTE_CLASSIC_BTN_PLUS;
-	conf->classic_bmap[CONF_CC_BTN_HOME].mask = WIIMOTE_CLASSIC_BTN_HOME;
-	conf->classic_bmap[CONF_CC_BTN_A].mask = WIIMOTE_CLASSIC_BTN_A;
-	conf->classic_bmap[CONF_CC_BTN_B].mask = WIIMOTE_CLASSIC_BTN_B;
-	conf->classic_bmap[CONF_CC_BTN_X].mask = WIIMOTE_CLASSIC_BTN_X;
-	conf->classic_bmap[CONF_CC_BTN_Y].mask = WIIMOTE_CLASSIC_BTN_Y;
-	conf->classic_bmap[CONF_CC_BTN_ZL].mask = WIIMOTE_CLASSIC_BTN_ZL;
-	conf->classic_bmap[CONF_CC_BTN_ZR].mask = WIIMOTE_CLASSIC_BTN_ZR;
-	conf->classic_bmap[CONF_CC_BTN_L].mask = WIIMOTE_CLASSIC_BTN_L;
-	conf->classic_bmap[CONF_CC_BTN_R].mask = WIIMOTE_CLASSIC_BTN_R;
+	conf->wiimote_bmap[CONF_WM_BTN_UP].mask = CWIID_BTN_UP;
+	conf->wiimote_bmap[CONF_WM_BTN_DOWN].mask = CWIID_BTN_DOWN;
+	conf->wiimote_bmap[CONF_WM_BTN_LEFT].mask = CWIID_BTN_LEFT;
+	conf->wiimote_bmap[CONF_WM_BTN_RIGHT].mask = CWIID_BTN_RIGHT;
+	conf->wiimote_bmap[CONF_WM_BTN_A].mask = CWIID_BTN_A;
+	conf->wiimote_bmap[CONF_WM_BTN_B].mask = CWIID_BTN_B;
+	conf->wiimote_bmap[CONF_WM_BTN_MINUS].mask = CWIID_BTN_MINUS;
+	conf->wiimote_bmap[CONF_WM_BTN_PLUS].mask = CWIID_BTN_PLUS;
+	conf->wiimote_bmap[CONF_WM_BTN_HOME].mask = CWIID_BTN_HOME;
+	conf->wiimote_bmap[CONF_WM_BTN_1].mask = CWIID_BTN_1;
+	conf->wiimote_bmap[CONF_WM_BTN_2].mask = CWIID_BTN_2;
+	conf->nunchuk_bmap[CONF_NC_BTN_C].mask = CWIID_NUNCHUK_BTN_C;
+	conf->nunchuk_bmap[CONF_NC_BTN_Z].mask = CWIID_NUNCHUK_BTN_Z;
+	conf->classic_bmap[CONF_CC_BTN_UP].mask = CWIID_CLASSIC_BTN_UP;
+	conf->classic_bmap[CONF_CC_BTN_DOWN].mask = CWIID_CLASSIC_BTN_DOWN;
+	conf->classic_bmap[CONF_CC_BTN_LEFT].mask = CWIID_CLASSIC_BTN_LEFT;
+	conf->classic_bmap[CONF_CC_BTN_RIGHT].mask = CWIID_CLASSIC_BTN_RIGHT;
+	conf->classic_bmap[CONF_CC_BTN_MINUS].mask = CWIID_CLASSIC_BTN_MINUS;
+	conf->classic_bmap[CONF_CC_BTN_PLUS].mask = CWIID_CLASSIC_BTN_PLUS;
+	conf->classic_bmap[CONF_CC_BTN_HOME].mask = CWIID_CLASSIC_BTN_HOME;
+	conf->classic_bmap[CONF_CC_BTN_A].mask = CWIID_CLASSIC_BTN_A;
+	conf->classic_bmap[CONF_CC_BTN_B].mask = CWIID_CLASSIC_BTN_B;
+	conf->classic_bmap[CONF_CC_BTN_X].mask = CWIID_CLASSIC_BTN_X;
+	conf->classic_bmap[CONF_CC_BTN_Y].mask = CWIID_CLASSIC_BTN_Y;
+	conf->classic_bmap[CONF_CC_BTN_ZL].mask = CWIID_CLASSIC_BTN_ZL;
+	conf->classic_bmap[CONF_CC_BTN_ZR].mask = CWIID_CLASSIC_BTN_ZR;
+	conf->classic_bmap[CONF_CC_BTN_L].mask = CWIID_CLASSIC_BTN_L;
+	conf->classic_bmap[CONF_CC_BTN_R].mask = CWIID_CLASSIC_BTN_R;
 	for (i=0; i < CONF_WM_BTN_COUNT; i++) {
 		conf->wiimote_bmap[i].active = 0;
 	}

@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for libcwiid rename
+ *
  *  2007-04-08 L. Donnie Smith <cwiid@anstrakraft.org>
  *  * fixed signed/unsigned comparison warning in uinput_open
  *
@@ -255,7 +258,7 @@ void *uinput_listen(struct uinput_listen_data *data)
 				if (ioctl(data->conf->fd, UI_BEGIN_FF_UPLOAD, &upload) < 0) {
 					wminput_err("Error on ff upload begin");
 				}
-				if (wiimote_command(data->wiimote, WIIMOTE_CMD_RUMBLE, 1)) {
+				if (cwiid_command(data->wiimote, CWIID_CMD_RUMBLE, 1)) {
 					wminput_err("Error setting rumble");
 				}
 				if (ioctl(data->conf->fd, UI_END_FF_UPLOAD, &upload) < 0) {
@@ -267,7 +270,7 @@ void *uinput_listen(struct uinput_listen_data *data)
 				if (ioctl(data->conf->fd, UI_BEGIN_FF_ERASE, &erase) < 0) {
 					wminput_err("Error on ff erase begin");
 				}
-				if (wiimote_command(data->wiimote, WIIMOTE_CMD_RUMBLE, 0)) {
+				if (cwiid_command(data->wiimote, CWIID_CMD_RUMBLE, 0)) {
 					wminput_err("Error clearing rumble");
 				}
 				if (ioctl(data->conf->fd, UI_END_FF_ERASE, &erase) < 0) {

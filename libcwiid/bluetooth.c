@@ -15,11 +15,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * renamed wiimote to libcwiid, renamed structures accordingly
+ *
  *  2007-04-07 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * changed wiimote_info.class to btclass
+ *  * changed cwiid_info.class to btclass
  *
  *  2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * fixed wiimote_find_wiimote seg fault
+ *  * fixed cwiid_find_wiimote seg fault
  *
  *  2007-04-02 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * exception handling bugs
@@ -33,7 +36,7 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
-#include "wiimote_internal.h"
+#include "cwiid_internal.h"
 
 /* When filtering wiimotes, in order to avoid having to store the
  * remote names before the blue_dev array is malloced (because we don't
@@ -42,8 +45,8 @@
  * reallocing to a smaller chunk should be fast. */
 #define BT_MAX_INQUIRY 256
 /* timeout in 2 second units */
-int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
-                           struct wiimote_info **wm, uint8_t flags)
+int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
+                           struct cwiid_bdinfo **bdinfo, uint8_t flags)
 {
 	/* TODO: I suppose we'll have to sift through BlueZ source to properly
 	 * check errors here...
@@ -52,64 +55,65 @@ int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
 	int max_inquiry;
 	int dev_count;
 	int sock = -1;
-	int wm_count;
+	int bdinfo_count;
 	int i, j;
 	int err = 0;
 	int ret;
 
 	/* NULLify for the benefit of error handling */
-	*wm = NULL;
+	*bdinfo = NULL;
 
 	/* If not given (=-1), get the first available Bluetooth interface */
 	if (dev_id == -1) {
 		if ((dev_id = hci_get_route(NULL)) == -1) {
-			wiimote_err(NULL, "No Bluetooth interface found");
+			cwiid_err(NULL, "No Bluetooth interface found");
 			return -1;
 		}
 	}
 
 	/* Get Bluetooth Device List */
-	if ((flags & BT_NO_WIIMOTE_FILTER) && (max_wm != -1)) {
-		max_inquiry = max_wm;
+	if ((flags & BT_NO_WIIMOTE_FILTER) && (max_bdinfo != -1)) {
+		max_inquiry = max_bdinfo;
 	}
 	else {
 		max_inquiry = BT_MAX_INQUIRY;
 	}
 	if ((dev_count = hci_inquiry(dev_id, timeout, max_inquiry, NULL,
 	                             &dev_list, IREQ_CACHE_FLUSH)) == -1) {
-		wiimote_err(NULL, "Error on bluetooth device inquiry");
+		cwiid_err(NULL, "Error on bluetooth device inquiry");
 		err = 1;
 		goto CODA;
 	}
 
 	if (dev_count == 0) {
-		wm_count = 0;
+		bdinfo_count = 0;
 		goto CODA;
 	}
 
 	/* Open connection to Bluetooth Interface */
 	if ((sock = hci_open_dev(dev_id)) == -1) {
-		wiimote_err(NULL, "Error opening Bluetooth interface");
+		cwiid_err(NULL, "Error opening Bluetooth interface");
 		err = 1;
 		goto CODA;
 	}
 
 	/* Allocate info list */
-	if (max_wm == -1) {
-		max_wm = dev_count;
+	if (max_bdinfo == -1) {
+		max_bdinfo = dev_count;
 	}
-	if ((*wm = malloc(max_wm * sizeof **wm)) == NULL) {
-		wiimote_err(NULL, "Error mallocing wiimote_info array");
+	if ((*bdinfo = malloc(max_bdinfo * sizeof **bdinfo)) == NULL) {
+		cwiid_err(NULL, "Error mallocing bdinfo array");
 		err = 1;
 		goto CODA;
 	}
 
-	/* Copy dev_list to info */
-	for (wm_count=i=0; (i < dev_count) && (wm_count < max_wm); i++) {
+	/* Copy dev_list to bdinfo */
+	for (bdinfo_count=i=0; (i < dev_count) && (bdinfo_count < max_bdinfo);
+	     i++) {
 		/* timeout (5000) in milliseconds */
-		if (hci_remote_name(sock, &dev_list[i].bdaddr, BT_WM_NAME_LEN,
-		                    (*wm)[wm_count].name, 5000)) {
-			wiimote_err(NULL, "Error reading Bluetooth device name");
+		if (hci_remote_name(sock, &dev_list[i].bdaddr, BT_NAME_LEN,
+		                    (*bdinfo)[bdinfo_count].name, 5000)) {
+			cwiid_err(NULL, "Error reading Bluetooth device name");
 			err = 1;
 			goto CODA;
 		}
@@ -118,22 +122,24 @@ int wiimote_get_info_array(int dev_id, unsigned int timeout, int max_wm,
 		  ((dev_list[i].dev_class[0] != WIIMOTE_CLASS_0) ||
 		   (dev_list[i].dev_class[1] != WIIMOTE_CLASS_1) ||
 		   (dev_list[i].dev_class[2] != WIIMOTE_CLASS_2) ||
-		   (strncmp((*wm)[wm_count].name, WIIMOTE_NAME, BT_WM_NAME_LEN)))) {
+		   (strncmp((*bdinfo)[bdinfo_count].name, WIIMOTE_NAME,
+		            BT_NAME_LEN)))) {
 			continue;
 		}
-		bacpy(&(*wm)[wm_count].bdaddr, &dev_list[i].bdaddr);
+		bacpy(&(*bdinfo)[bdinfo_count].bdaddr, &dev_list[i].bdaddr);
 		for (j=0; j<3; j++) {
-			(*wm)[wm_count].btclass[j] = dev_list[i].dev_class[j];
+			(*bdinfo)[bdinfo_count].btclass[j] = dev_list[i].dev_class[j];
 		}
-		wm_count++;
+		bdinfo_count++;
 	}
 
-	if (wm_count == 0) {
-		free(*wm);
+	if (bdinfo_count == 0) {
+		free(*bdinfo);
 	}
-	else if (wm_count < max_wm) {
-		if ((*wm = realloc(*wm, wm_count * sizeof **wm)) == NULL) {
-			wiimote_err(NULL, "Error reallocing wiimote_info array");
+	else if (bdinfo_count < max_bdinfo) {
+		if ((*bdinfo = realloc(*bdinfo, bdinfo_count * sizeof **bdinfo))
+		  == NULL) {
+			cwiid_err(NULL, "Error reallocing bdinfo array");
 			err = 1;
 			goto CODA;
 		}
@@ -143,38 +149,39 @@ CODA:
 	if (dev_list) free(dev_list);
 	if (sock != -1) hci_close_dev(sock);
 	if (err) {
-		if (*wm) free(*wm);
+		if (*bdinfo) free(*bdinfo);
 		ret = -1;
 	}
 	else {
-		ret = wm_count;
+		ret = bdinfo_count;
 	}
 	return ret;
 }
 
-int wiimote_find_wiimote(bdaddr_t *bdaddr, int timeout)
+int cwiid_find_wiimote(bdaddr_t *bdaddr, int timeout)
 {
-	struct wiimote_info *wm;
-	int wm_count;
+	struct cwiid_bdinfo *bdinfo;
+	int bdinfo_count;
 
 	if (timeout == -1) {
-		while ((wm_count = wiimote_get_info_array(-1, 2, 1, &wm, 0)) == 0);
-		if (wm_count == -1) {
+		while ((bdinfo_count = cwiid_get_bdinfo_array(-1, 2, 1, &bdinfo, 0))
+		       == 0);
+		if (bdinfo_count == -1) {
 			return -1;
 		}
 	}
 	else {
-		wm_count = wiimote_get_info_array(-1, timeout, 1, &wm, 0);
-		if (wm_count == -1) {
+		bdinfo_count = cwiid_get_bdinfo_array(-1, timeout, 1, &bdinfo, 0);
+		if (bdinfo_count == -1) {
 			return -1;
 		}
-		else if (wm_count == 0) {
-			wiimote_err(NULL, "No wiimotes found");
+		else if (bdinfo_count == 0) {
+			cwiid_err(NULL, "No wiimotes found");
 			return -1;
 		}
 	}
 
-	bacpy(bdaddr, &wm[0].bdaddr);
-	free(wm);
+	bacpy(bdaddr, &bdinfo[0].bdaddr);
+	free(bdinfo);
 	return 0;
 }
