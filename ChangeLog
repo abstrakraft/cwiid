@@ -1,3 +1,7 @@
+2007-04-12 L. Donnie Smith <cwiid@abstrakraft.org>
+	libcwiid
+	* streamlined wiimote filter
+
 2007-04-12 Petter Reinholdtsen <pere@hungry.com>
 	wmdemo
 	* added command-line WIIMOTE_BDADDR
