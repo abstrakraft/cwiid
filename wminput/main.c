@@ -139,9 +139,9 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 	}
-	else if ((str_addr = getenv(CWIID_BDADDR)) != NULL) {
+	else if ((str_addr = getenv(WIIMOTE_BDADDR)) != NULL) {
 		if (str2ba(str_addr, &bdaddr)) {
-			wminput_err("invalid address in %s", CWIID_BDADDR);
+			wminput_err("invalid address in %s", WIIMOTE_BDADDR);
 			bdaddr = *BDADDR_ANY;
 		}
 	}

@@ -114,7 +114,7 @@
 #define CWIID_CLASSIC_LR_MAX	0x1F
 
 /* Environment Variables */
-#define CWIID_BDADDR	"CWIID_BDADDR"
+#define WIIMOTE_BDADDR	"WIIMOTE_BDADDR"
 
 /* Callback Maximum Message Count */
 #define CWIID_MAX_MESG_COUNT	5
