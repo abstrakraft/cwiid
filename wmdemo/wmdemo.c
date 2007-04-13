@@ -48,13 +48,19 @@ int main(int argc, char *argv[])
 	unsigned char rpt_mode = 0;
 	unsigned char rumble = 0;
 	int exit = 0;
+	char *str_addr;
+	int c;
 
 	cwiid_set_err(err);
 
-	/* Connect to any wiimote */
-	bdaddr = *BDADDR_ANY;
-	/* Connect to address in string CWIID_BDADDR */
-	/* str2ba(CWIID_BDADDR, &bdaddr); */
+	
+	/* Connect to address given on command-line, if present */
+	if (argc > 1) {
+		str2ba(argv[1], &bdaddr);
+	}
+	else {
+		bdaddr = *BDADDR_ANY;
+	}
 
 	/* Connect to the wiimote */
 	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
