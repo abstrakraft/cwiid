@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-12 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * streamlined wiimote filter
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * renamed wiimote to libcwiid, renamed structures accordingly
  *
@@ -48,9 +51,6 @@
 int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
                            struct cwiid_bdinfo **bdinfo, uint8_t flags)
 {
-	/* TODO: I suppose we'll have to sift through BlueZ source to properly
-	 * check errors here...
-	 */
 	inquiry_info *dev_list = NULL;
 	int max_inquiry;
 	int dev_count;
@@ -110,25 +110,33 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 	/* Copy dev_list to bdinfo */
 	for (bdinfo_count=i=0; (i < dev_count) && (bdinfo_count < max_bdinfo);
 	     i++) {
-		/* timeout (5000) in milliseconds */
+		/* Filter by class */
+		if (!(flags & BT_NO_WIIMOTE_FILTER) &&
+		  ((dev_list[i].dev_class[0] != WIIMOTE_CLASS_0) ||
+		   (dev_list[i].dev_class[1] != WIIMOTE_CLASS_1) ||
+		   (dev_list[i].dev_class[2] != WIIMOTE_CLASS_2))) {
+			continue;
+		}
+
+		/* timeout (10000) in milliseconds */
 		if (hci_remote_name(sock, &dev_list[i].bdaddr, BT_NAME_LEN,
-		                    (*bdinfo)[bdinfo_count].name, 5000)) {
+		                    (*bdinfo)[bdinfo_count].name, 10000)) {
 			cwiid_err(NULL, "Error reading Bluetooth device name");
 			err = 1;
 			goto CODA;
 		}
-		/* Filter? */
+
+		/* Filter by name */
 		if (!(flags & BT_NO_WIIMOTE_FILTER) &&
-		  ((dev_list[i].dev_class[0] != WIIMOTE_CLASS_0) ||
-		   (dev_list[i].dev_class[1] != WIIMOTE_CLASS_1) ||
-		   (dev_list[i].dev_class[2] != WIIMOTE_CLASS_2) ||
-		   (strncmp((*bdinfo)[bdinfo_count].name, WIIMOTE_NAME,
-		            BT_NAME_LEN)))) {
+		  strncmp((*bdinfo)[bdinfo_count].name, WIIMOTE_NAME, BT_NAME_LEN)) {
 			continue;
 		}
+
+		/* Passed filter, add to bdinfo */
 		bacpy(&(*bdinfo)[bdinfo_count].bdaddr, &dev_list[i].bdaddr);
 		for (j=0; j<3; j++) {
-			(*bdinfo)[bdinfo_count].btclass[j] = dev_list[i].dev_class[j];
+			(*bdinfo)[bdinfo_count].btclass[j] =
+			            dev_list[i].dev_class[j];
 		}
 		bdinfo_count++;
 	}
