@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-15 <work.eric@gmail.com>
+ *  * fixed classic controller configuration bug
+ *
  *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * fixed pointer qualifier warning in get_plugin
  *  * created conf_plugin_param_{int,float} functions
@@ -120,7 +123,7 @@ int conf_button(struct conf *conf, int source, __u16 button, __u16 action)
 		break;
 	case CONF_CC:
 		conf->rpt_mode_flags |= WIIMOTE_RPT_CLASSIC;
-		conf->nunchuk_bmap[button].active = 1;
+		conf->classic_bmap[button].active = 1;
 		conf->classic_bmap[button].action = action;
 		break;
 	}
