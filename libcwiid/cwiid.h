@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * rewrite for API overhaul
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * renamed wiimote to libcwiid, renamed structures accordingly
  *
@@ -42,8 +45,15 @@
 #ifndef CWIID_H
 #define CWIID_H
 
+#include <stdarg.h>
 #include <stdint.h>
 #include <bluetooth/bluetooth.h>	/* bdaddr_t */
+
+/* Flags */
+#define CWIID_FLAG_MESG_IFC		0x01
+#define CWIID_FLAG_CONTINUOUS	0x02
+#define CWIID_FLAG_REPEAT_BTN	0x04
+#define CWIID_FLAG_NONBLOCK		0x08
 
 /* Report Mode Flags */
 #define CWIID_RPT_STATUS	0x01
@@ -55,10 +65,10 @@
 #define CWIID_RPT_EXT		(CWIID_RPT_NUNCHUK | CWIID_RPT_CLASSIC)
 
 /* LED flags */
-#define CWIID_LED1_ON		0x01
-#define CWIID_LED2_ON		0x02
-#define CWIID_LED3_ON		0x04
-#define CWIID_LED4_ON		0x08
+#define CWIID_LED1_ON	0x01
+#define CWIID_LED2_ON	0x02
+#define CWIID_LED3_ON	0x04
+#define CWIID_LED4_ON	0x08
 
 /* Button flags */
 #define CWIID_BTN_2		0x0001
@@ -70,20 +80,20 @@
 #define CWIID_BTN_LEFT	0x0100
 #define CWIID_BTN_RIGHT	0x0200
 #define CWIID_BTN_DOWN	0x0400
-#define CWIID_BTN_UP		0x0800
+#define CWIID_BTN_UP	0x0800
 #define CWIID_BTN_PLUS	0x1000
 
 #define CWIID_NUNCHUK_BTN_Z	0x01
 #define CWIID_NUNCHUK_BTN_C	0x02
 
-#define CWIID_CLASSIC_BTN_UP		0x0001
+#define CWIID_CLASSIC_BTN_UP	0x0001
 #define CWIID_CLASSIC_BTN_LEFT	0x0002
-#define CWIID_CLASSIC_BTN_ZR		0x0004
+#define CWIID_CLASSIC_BTN_ZR	0x0004
 #define CWIID_CLASSIC_BTN_X		0x0008
 #define CWIID_CLASSIC_BTN_A		0x0010
 #define CWIID_CLASSIC_BTN_Y		0x0020
 #define CWIID_CLASSIC_BTN_B		0x0040
-#define CWIID_CLASSIC_BTN_ZL		0x0080
+#define CWIID_CLASSIC_BTN_ZL	0x0080
 #define CWIID_CLASSIC_BTN_R		0x0200
 #define CWIID_CLASSIC_BTN_PLUS	0x0400
 #define CWIID_CLASSIC_BTN_HOME	0x0800
@@ -94,11 +104,19 @@
 
 /* Data Read/Write flags */
 #define CWIID_RW_EEPROM	0x00
-#define CWIID_RW_REG		0x04
+#define CWIID_RW_REG	0x04
 #define CWIID_RW_DECODE	0x01
 
 /* Maximum Data Read Length */
 #define CWIID_MAX_READ_LEN	0xFFFF
+
+/* Array Index Defs */
+#define CWIID_X		0
+#define CWIID_Y		1
+#define CWIID_Z		2
+
+/* Acc Defs */
+#define CWIID_ACC_MAX	0xFF
 
 /* IR Defs */
 #define CWIID_IR_SRC_COUNT	4
@@ -119,6 +137,7 @@
 /* Callback Maximum Message Count */
 #define CWIID_MAX_MESG_COUNT	5
 
+/* Enumerations */
 enum cwiid_command {
 	CWIID_CMD_STATUS,
 	CWIID_CMD_LED,
@@ -145,14 +164,16 @@ enum cwiid_ext_type {
 };
 
 enum cwiid_error {
+	CWIID_ERROR_NONE,
 	CWIID_ERROR_DISCONNECT,
-	CWIID_ERROR_COMM,
+	CWIID_ERROR_COMM
 };
 
+/* Message Structs */
 struct cwiid_status_mesg {
 	enum cwiid_mesg_type type;
 	uint8_t battery;
-	enum cwiid_ext_type extension;
+	enum cwiid_ext_type ext_type;
 };	
 
 struct cwiid_btn_mesg {
@@ -162,15 +183,12 @@ struct cwiid_btn_mesg {
 
 struct cwiid_acc_mesg {
 	enum cwiid_mesg_type type;
-	uint8_t x;
-	uint8_t y;
-	uint8_t z;
+	uint8_t acc[3];
 };
 
 struct cwiid_ir_src {
-	int valid;
-	uint16_t x;
-	uint16_t y;
+	char valid;
+	uint16_t pos[2];
 	int8_t size;
 };
 
@@ -181,20 +199,15 @@ struct cwiid_ir_mesg {
 
 struct cwiid_nunchuk_mesg {
 	enum cwiid_mesg_type type;
-	uint8_t stick_x;
-	uint8_t stick_y;
-	uint8_t acc_x;
-	uint8_t acc_y;
-	uint8_t acc_z;
+	uint8_t stick[2];
+	uint8_t acc[3];
 	uint8_t buttons;
 };
 
 struct cwiid_classic_mesg {
 	enum cwiid_mesg_type type;
-	uint8_t l_stick_x;
-	uint8_t l_stick_y;
-	uint8_t r_stick_x;
-	uint8_t r_stick_y;
+	uint8_t l_stick[2];
+	uint8_t r_stick[2];
 	uint8_t l;
 	uint8_t r;
 	uint16_t buttons;
@@ -216,12 +229,47 @@ union cwiid_mesg {
 	struct cwiid_error_mesg error_mesg;
 };
 
+/* State Structs */
+struct nunchuk_state {
+	uint8_t stick[2];
+	uint8_t acc[3];
+	uint8_t buttons;
+};
+
+struct classic_state {
+	uint8_t l_stick[2];
+	uint8_t r_stick[2];
+	uint8_t l;
+	uint8_t r;
+	uint16_t buttons;
+};
+
+union ext_state {
+	struct nunchuk_state nunchuk;
+	struct classic_state classic;
+};
+
+struct cwiid_state {
+	uint8_t rpt_mode;
+	uint8_t led;
+	uint8_t rumble;
+	uint8_t battery;
+	uint16_t buttons;
+	uint8_t acc[3];
+	struct cwiid_ir_src ir_src[CWIID_IR_SRC_COUNT];
+	enum cwiid_ext_type ext_type;
+	union ext_state ext;
+	enum cwiid_error error;
+};
+
+/* Typedefs */
 typedef struct wiimote cwiid_wiimote_t;
 
-typedef void cwiid_mesg_callback_t(int, int, union cwiid_mesg* []);
-typedef void cwiid_err_t(int, const char *, ...);
+typedef void cwiid_mesg_callback_t(cwiid_wiimote_t *, int,
+                                   union cwiid_mesg []);
+typedef void cwiid_err_t(cwiid_wiimote_t *, const char *, va_list ap);
 
-/* getinfo flags */
+/* get_bdinfo */
 #define BT_NO_WIIMOTE_FILTER 0x01
 #define BT_NAME_LEN 32
 
@@ -235,18 +283,36 @@ struct cwiid_bdinfo {
 extern "C" {
 #endif
 
+/* Error reporting (library wide) */
 int cwiid_set_err(cwiid_err_t *err);
-cwiid_wiimote_t *cwiid_connect(bdaddr_t *bdaddr,
-                               cwiid_mesg_callback_t *mesg_callback,
-                               int *id);
+
+/* Connection */
+cwiid_wiimote_t *cwiid_connect(bdaddr_t *bdaddr, int flags);
 int cwiid_disconnect(cwiid_wiimote_t *wiimote);
+
+int cwiid_get_id(cwiid_wiimote_t *wiimote);
+int cwiid_set_data(cwiid_wiimote_t *wiimote, const void *data);
+const void *cwiid_get_data(cwiid_wiimote_t *wiimote);
+int cwiid_enable(cwiid_wiimote_t *wiimote, int flags);
+int cwiid_disable(cwiid_wiimote_t *wiimote, int flags);
+
+/* Interfaces */
+int cwiid_set_mesg_callback(cwiid_wiimote_t *wiimote,
+                       cwiid_mesg_callback_t *callback);
+int cwiid_get_mesg(cwiid_wiimote_t *wiimote, int *mesg_count,
+                   union cwiid_mesg *mesg[]);
+int cwiid_get_state(cwiid_wiimote_t *wiimote, struct cwiid_state *state);
+
+/* Operations */
 int cwiid_command(cwiid_wiimote_t *wiimote, enum cwiid_command command,
-                  uint8_t flags);
+                  int flags);
 int cwiid_read(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
                uint16_t len, void *data);
 int cwiid_write(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
                 uint16_t len, const void *data);
 /* int cwiid_beep(cwiid_wiimote_t *wiimote); */
+
+/* HCI functions */
 int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
                            struct cwiid_bdinfo **bdinfo, uint8_t flags);
 int cwiid_find_wiimote(bdaddr_t *bdaddr, int timeout);
@@ -256,4 +322,3 @@ int cwiid_find_wiimote(bdaddr_t *bdaddr, int timeout);
 #endif
 
 #endif
-

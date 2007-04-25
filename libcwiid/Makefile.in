@@ -5,7 +5,8 @@ include @top_builddir@/defs.mak
 LIB_NAME = cwiid
 MAJOR_VER = 0
 MINOR_VER = 1
-SOURCES = connect.c command.c event.c rw.c bluetooth.c util.c queue.c
+SOURCES = bluetooth.c command.c connect.c interface.c process.c state.c \
+          thread.c util.c
 LDLIBS += -lbluetooth -lpthread -lrt
 LIB_INST_DIR = @libdir@
 INC_INST_DIR = @includedir@

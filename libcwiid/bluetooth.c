@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-24 L. Donnie Smith (cwiid@abstrakraft.org>
+ *  * revised error messages
+ *
  *  2007-04-12 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * streamlined wiimote filter
  *
@@ -80,7 +83,7 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 	}
 	if ((dev_count = hci_inquiry(dev_id, timeout, max_inquiry, NULL,
 	                             &dev_list, IREQ_CACHE_FLUSH)) == -1) {
-		cwiid_err(NULL, "Error on bluetooth device inquiry");
+		cwiid_err(NULL, "Bluetooth device inquiry error");
 		err = 1;
 		goto CODA;
 	}
@@ -92,7 +95,7 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 
 	/* Open connection to Bluetooth Interface */
 	if ((sock = hci_open_dev(dev_id)) == -1) {
-		cwiid_err(NULL, "Error opening Bluetooth interface");
+		cwiid_err(NULL, "Bluetooth interface open error");
 		err = 1;
 		goto CODA;
 	}
@@ -102,7 +105,7 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 		max_bdinfo = dev_count;
 	}
 	if ((*bdinfo = malloc(max_bdinfo * sizeof **bdinfo)) == NULL) {
-		cwiid_err(NULL, "Error mallocing bdinfo array");
+		cwiid_err(NULL, "Memory allocation error (bdinfo array)");
 		err = 1;
 		goto CODA;
 	}
@@ -121,7 +124,7 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 		/* timeout (10000) in milliseconds */
 		if (hci_remote_name(sock, &dev_list[i].bdaddr, BT_NAME_LEN,
 		                    (*bdinfo)[bdinfo_count].name, 10000)) {
-			cwiid_err(NULL, "Error reading Bluetooth device name");
+			cwiid_err(NULL, "Bluetooth name read error");
 			err = 1;
 			goto CODA;
 		}
@@ -147,7 +150,7 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 	else if (bdinfo_count < max_bdinfo) {
 		if ((*bdinfo = realloc(*bdinfo, bdinfo_count * sizeof **bdinfo))
 		  == NULL) {
-			cwiid_err(NULL, "Error reallocing bdinfo array");
+			cwiid_err(NULL, "Memory reallocation error (bdinfo array)");
 			err = 1;
 			goto CODA;
 		}

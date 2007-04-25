@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for API overhaul
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for libcwiid rename
  *
@@ -159,11 +162,11 @@ static void process_acc(struct cwiid_acc_mesg *mesg)
 	double a;
 	double roll, pitch;
 
-	a_x = (((double)mesg->x - acc_zero.x) /
+	a_x = (((double)mesg->acc[CWIID_X] - acc_zero.x) /
 	      (acc_one.x - acc_zero.x))*NEW_AMOUNT + a_x*OLD_AMOUNT;
-	a_y = (((double)mesg->y - acc_zero.y) /
+	a_y = (((double)mesg->acc[CWIID_Y] - acc_zero.y) /
 	      (acc_one.y - acc_zero.y))*NEW_AMOUNT + a_y*OLD_AMOUNT;
-	a_z = (((double)mesg->z - acc_zero.z) /
+	a_z = (((double)mesg->acc[CWIID_Z] - acc_zero.z) /
 	      (acc_one.z - acc_zero.z))*NEW_AMOUNT + a_z*OLD_AMOUNT;
 
 	a = sqrt(pow(a_x,2)+pow(a_y,2)+pow(a_z,2));

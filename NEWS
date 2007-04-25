@@ -1,3 +1,6 @@
+0.5.03
+	- Bugfixes, lswm utility, disconnect messages, wminput infinite wait
+
 0.5.02
 	- Bugfixes, configure --disable-ldconfig
 

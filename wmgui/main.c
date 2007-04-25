@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for API overhaul
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for libcwiid rename
  *
@@ -576,8 +579,8 @@ void clear_ir_data()
 	int i;
 
 	for (i=0; i < CWIID_IR_SRC_COUNT; i++) {
-		ir_data.src[i].x = -1;
-		ir_data.src[i].y = -1;
+		ir_data.src[i].pos[CWIID_X] = -1;
+		ir_data.src[i].pos[CWIID_Y] = -1;
 		ir_data.src[i].size = -1;
 	}
 	gtk_widget_queue_draw(drawIR);
@@ -635,8 +638,18 @@ void menuConnect_activate(void)
 	message(GTK_MESSAGE_INFO,
 	        "Put Wiimote in discoverable mode (press 1+2) and press OK",
 	         GTK_WINDOW(winMain));
-	if ((wiimote = cwiid_connect(&bdaddr, &cwiid_callback, NULL)) == NULL) {
+	if ((wiimote = cwiid_connect(&bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
 		message(GTK_MESSAGE_ERROR, "Unable to connect", GTK_WINDOW(winMain));
+		status("No connection");
+	}
+	else if (cwiid_set_mesg_callback(wiimote, &cwiid_callback)) {
+		message(GTK_MESSAGE_ERROR, "Error setting callback",
+		        GTK_WINDOW(winMain));
+		if (cwiid_disconnect(wiimote)) {
+			message(GTK_MESSAGE_ERROR, "Error on disconnect",
+			        GTK_WINDOW(winMain));
+		}
+		wiimote = NULL;
 		status("No connection");
 	}
 	else {
@@ -782,8 +795,9 @@ void drawIR_expose_event(void)
 			gdk_draw_arc(drawIR->window,
 			             drawIR->style->fg_gc[GTK_WIDGET_STATE(drawIR)],
 			             TRUE,
-						 ir_data.src[i].x*width/CWIID_IR_X_MAX,
-						 height - ir_data.src[i].y*height/CWIID_IR_Y_MAX,
+						 ir_data.src[i].pos[CWIID_X] * width / CWIID_IR_X_MAX,
+						 height - ir_data.src[i].pos[CWIID_Y] * height /
+			                      CWIID_IR_Y_MAX,
 						 size, size,
 						 0, 64 * 360);
 		}
@@ -1001,7 +1015,8 @@ void set_report_mode(void)
 }
 
 #define BATTERY_STR_LEN	14	/* "Battery: 100%" + '\0' */
-void cwiid_callback(int id, int mesg_count, union cwiid_mesg *mesg_array[])
+void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
+                    union cwiid_mesg mesg_array[])
 {
 	int i;
 	char battery[BATTERY_STR_LEN];
@@ -1011,13 +1026,13 @@ void cwiid_callback(int id, int mesg_count, union cwiid_mesg *mesg_array[])
 
 	gdk_threads_enter();
 	for (i=0; i < mesg_count; i++) {
-		switch (mesg_array[i]->type) {
+		switch (mesg_array[i].type) {
 		case CWIID_MESG_STATUS:
 			snprintf(battery, BATTERY_STR_LEN,"Battery:%d%%",
-			         (int) (100.0 * mesg_array[i]->status_mesg.battery /
+			         (int) (100.0 * mesg_array[i].status_mesg.battery /
 			                CWIID_BATTERY_MAX));
 			gtk_statusbar_push(GTK_STATUSBAR(statBattery), 0, battery);
-			switch (mesg_array[i]->status_mesg.extension) {
+			switch (mesg_array[i].status_mesg.ext_type) {
 			case CWIID_EXT_NONE:
 				ext_str = "No extension";
 				break;
@@ -1050,22 +1065,22 @@ void cwiid_callback(int id, int mesg_count, union cwiid_mesg *mesg_array[])
 			gtk_statusbar_push(GTK_STATUSBAR(statExtension), 0, ext_str);
 			clear_nunchuk_widgets();
 			clear_classic_widgets();
-			ext_type = mesg_array[i]->status_mesg.extension;
+			ext_type = mesg_array[i].status_mesg.ext_type;
 			break;
 		case CWIID_MESG_BTN:
-			cwiid_btn(&mesg_array[i]->btn_mesg);
+			cwiid_btn(&mesg_array[i].btn_mesg);
 			break;
 		case CWIID_MESG_ACC:
-			cwiid_acc(&mesg_array[i]->acc_mesg);
+			cwiid_acc(&mesg_array[i].acc_mesg);
 			break;
 		case CWIID_MESG_IR:
-			cwiid_ir(&mesg_array[i]->ir_mesg);
+			cwiid_ir(&mesg_array[i].ir_mesg);
 			break;
 		case CWIID_MESG_NUNCHUK:
-			cwiid_nunchuk(&mesg_array[i]->nunchuk_mesg);
+			cwiid_nunchuk(&mesg_array[i].nunchuk_mesg);
 			break;
 		case CWIID_MESG_CLASSIC:
-			cwiid_classic(&mesg_array[i]->classic_mesg);
+			cwiid_classic(&mesg_array[i].classic_mesg);
 			break;
 		case CWIID_MESG_ERROR:
 			menuDisconnect_activate();
@@ -1112,24 +1127,24 @@ void cwiid_acc(struct cwiid_acc_mesg *mesg)
 	double roll, pitch;
 	
 	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkAcc))) {
-		g_snprintf(str, LBLVAL_LEN, "%X", mesg->x);
+		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_X]);
 		gtk_label_set_text(GTK_LABEL(lblAccXVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccX),
-		                              (double)mesg->x/0xFF);
-		g_snprintf(str, LBLVAL_LEN, "%X", mesg->y);
+		                              (double)mesg->acc[CWIID_X]/0xFF);
+		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Y]);
 		gtk_label_set_text(GTK_LABEL(lblAccYVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccY),
-		                              (double)mesg->y/0xFF);
-		g_snprintf(str, LBLVAL_LEN, "%X", mesg->z);
+		                              (double)mesg->acc[CWIID_Y]/0xFF);
+		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Z]);
 		gtk_label_set_text(GTK_LABEL(lblAccZVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccZ),
-		                              (double)mesg->z/0xFF);
+		                              (double)mesg->acc[CWIID_Z]/0xFF);
 
-		a_x = ((double)mesg->x - acc_zero.x) /
+		a_x = ((double)mesg->acc[CWIID_X] - acc_zero.x) /
 		      (acc_one.x - acc_zero.x);
-		a_y = ((double)mesg->y - acc_zero.y) /
+		a_y = ((double)mesg->acc[CWIID_Y] - acc_zero.y) /
 		      (acc_one.y - acc_zero.y);
-		a_z = ((double)mesg->z - acc_zero.z) /
+		a_z = ((double)mesg->acc[CWIID_Z] - acc_zero.z) /
 		      (acc_one.z - acc_zero.z);
 		a = sqrt(pow(a_x,2)+pow(a_y,2)+pow(a_z,2));
 
@@ -1172,29 +1187,29 @@ void cwiid_nunchuk(struct cwiid_nunchuk_mesg *mesg)
 		    (mesg->buttons & CWIID_NUNCHUK_BTN_Z) ? &btn_on : &btn_off);
 
 		nc_stick.valid = 1;
-		nc_stick.x = mesg->stick_x;
-		nc_stick.y = mesg->stick_y;
+		nc_stick.x = mesg->stick[CWIID_X];
+		nc_stick.y = mesg->stick[CWIID_Y];
 		gtk_widget_queue_draw(drawNCStick);
 
-		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc_x);
+		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_X]);
 		gtk_label_set_text(GTK_LABEL(lblNCAccXVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progNCAccX),
-		                              (double)mesg->acc_x/0xFF);
-		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc_y);
+		                              (double)mesg->acc[CWIID_X]/0xFF);
+		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Y]);
 		gtk_label_set_text(GTK_LABEL(lblNCAccYVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progNCAccY),
-		                              (double)mesg->acc_y/0xFF);
-		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc_z);
+		                              (double)mesg->acc[CWIID_Y]/0xFF);
+		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Z]);
 		gtk_label_set_text(GTK_LABEL(lblNCAccZVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progNCAccZ),
-		                              (double)mesg->acc_z/0xFF);
+		                              (double)mesg->acc[CWIID_Z]/0xFF);
 
 		/* TODO: get nunchuk calibration */
-		a_x = ((double)mesg->acc_x - nc_acc_zero.x) /
+		a_x = ((double)mesg->acc[CWIID_X] - nc_acc_zero.x) /
 		      (nc_acc_one.x - nc_acc_zero.x);
-		a_y = ((double)mesg->acc_y - nc_acc_zero.y) /
+		a_y = ((double)mesg->acc[CWIID_Y] - nc_acc_zero.y) /
 		      (nc_acc_one.y - nc_acc_zero.y);
-		a_z = ((double)mesg->acc_z - nc_acc_zero.z) /
+		a_z = ((double)mesg->acc[CWIID_Z] - nc_acc_zero.z) /
 		      (nc_acc_one.z - nc_acc_zero.z);
 		a = sqrt(pow(a_x,2)+pow(a_y,2)+pow(a_z,2));
 		roll = atan(a_x/a_z);
@@ -1247,13 +1262,13 @@ void cwiid_classic(struct cwiid_classic_mesg *mesg)
 		    (mesg->buttons & CWIID_CLASSIC_BTN_ZR) ? &btn_on : &btn_off);
 
 		cc_l_stick.valid = 1;
-		cc_l_stick.x = mesg->l_stick_x;
-		cc_l_stick.y = mesg->l_stick_y;
+		cc_l_stick.x = mesg->l_stick[CWIID_X];
+		cc_l_stick.y = mesg->l_stick[CWIID_Y];
 		gtk_widget_queue_draw(drawCCLStick);
 
 		cc_r_stick.valid = 1;
-		cc_r_stick.x = mesg->r_stick_x;
-		cc_r_stick.y = mesg->r_stick_y;
+		cc_r_stick.x = mesg->r_stick[CWIID_X];
+		cc_r_stick.y = mesg->r_stick[CWIID_Y];
 		gtk_widget_queue_draw(drawCCRStick);
 		
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->l);
