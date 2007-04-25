@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * rewrite for API overhaul
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * renamed wiimote to libcwiid, renamed structures accordingly
  *
@@ -37,6 +40,7 @@
 
 #include <stdint.h>
 #include <pthread.h>
+#include <sys/types.h>	/* ssize_t */
 #include "cwiid.h"
 
 /* Bluetooth magic numbers */
@@ -116,13 +120,14 @@
 /* Extension Decode */
 #define DECODE(a)	(((a ^ 0x17)+0x17)&0xFF)
 
+/* Write Sequences */
 enum write_seq_type {
 	WRITE_SEQ_RPT,
 	WRITE_SEQ_MEM
 };
 
 /* send_report flags */
-#define SEND_RPT_NO_RUMBLE	0x01
+#define SEND_RPT_NO_RUMBLE    0x01
 
 struct write_seq {
 	enum write_seq_type type;
@@ -134,53 +139,84 @@ struct write_seq {
 
 #define SEQ_LEN(seq) (sizeof(seq)/sizeof(struct write_seq))
 
-enum rw_status {
-	RW_NONE,
-	RW_PENDING,
-	RW_READY
-};
-
+/* Message arrays */
 struct mesg_array {
-	int count;
-	union cwiid_mesg *mesg[CWIID_MAX_MESG_COUNT];
+	uint8_t count;
+	union cwiid_mesg array[CWIID_MAX_MESG_COUNT];
 };
 
+/* RW State/Mesg */
+enum rw_status {
+	RW_IDLE,
+	RW_READ,
+	RW_WRITE,
+	RW_CANCEL
+};
+
+struct rw_mesg {
+	enum rw_status type;
+	uint8_t error;
+	uint32_t offset;
+	uint8_t len;
+	char data[16];
+};
+
+/* Wiimote struct */
 struct wiimote {
-	int id;
+	int flags;
 	int ctl_socket;
 	int int_socket;
-	uint8_t led_rumble_state;
-	uint8_t rpt_mode_flags;
-	uint16_t buttons;
-	enum cwiid_ext_type extension;
-	cwiid_mesg_callback_t *mesg_callback;
-	pthread_t int_listen_thread;
-	pthread_t dispatch_thread;
-	struct queue *dispatch_queue;
-	pthread_mutex_t wiimote_mutex;
-	pthread_mutex_t rw_mutex;
-	pthread_cond_t rw_cond;
-	pthread_mutex_t rw_cond_mutex;
+	pthread_t router_thread;
+	pthread_t status_thread;
+	pthread_t mesg_callback_thread;
+	int mesg_pipe[2];
+	int status_pipe[2];
+	int error_pipe[2];
+	int rw_pipe[2];
+	struct cwiid_state state;
 	enum rw_status rw_status;
-	char rw_error;
-	void *read_buf;
-	uint16_t read_len;
-	uint16_t read_received;
+	cwiid_mesg_callback_t *mesg_callback;
+	pthread_mutex_t state_mutex;
+	pthread_mutex_t rw_mutex;
+	pthread_mutex_t rpt_mutex;
+	int id;
+	const void *data;
 };
 
 /* prototypes */
-void *int_listen(struct wiimote *wiimote);
-void *dispatch(struct wiimote *wiimote);
+/* thread.c */
+void *router_thread(struct wiimote *wiimote);
+void *status_thread(struct wiimote *wiimote);
+void *mesg_callback_thread(struct wiimote *wiimote);
 
-int update_rpt_mode(struct wiimote *wiimote, int8_t flags);
-
+/* util.c */
 void cwiid_err(struct wiimote *wiimote, const char *str, ...);
 int verify_handshake(struct wiimote *wiimote);
 int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
                 size_t len, const void *data);
 int exec_write_seq(struct wiimote *wiimote, unsigned int len,
                    struct write_seq *seq);
-void free_mesg_array(struct mesg_array *array);
+int full_read(int fd, void *buf, size_t len);
+int write_mesg_array(struct wiimote *wiimote, struct mesg_array *ma);
+int read_mesg_array(int fd, struct mesg_array *ma);
+int cancel_rw(struct wiimote *wiimote);
+int cancel_mesg_callback(struct wiimote *wiimote);
+
+/* process.c */
+int process_error(struct wiimote *, ssize_t);
+int process_status(struct wiimote *, const unsigned char *,
+                   struct mesg_array *);
+int process_btn(struct wiimote *, const unsigned char *, struct mesg_array *);
+int process_acc(struct wiimote *, const unsigned char *, struct mesg_array *);
+int process_ir10(struct wiimote *, const unsigned char *, struct mesg_array *);
+int process_ir12(struct wiimote *, const unsigned char *, struct mesg_array *);
+int process_ext(struct wiimote *, unsigned char *, unsigned char,
+                struct mesg_array *);
+int process_read(struct wiimote *, unsigned char *);
+int process_write(struct wiimote *, unsigned char *);
+
+/* state.c */
+int update_state(struct wiimote *wiimote, struct mesg_array *ma);
+int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode);
 
 #endif
-

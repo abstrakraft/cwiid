@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * update for API overhaul
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for libcwiid rename
  *
@@ -54,7 +57,7 @@ int wminput_set_report_mode();
 void process_btn_mesg(struct cwiid_btn_mesg *mesg);
 void process_nunchuk_mesg(struct cwiid_nunchuk_mesg *mesg);
 void process_classic_mesg(struct cwiid_classic_mesg *mesg);
-void process_plugin(struct plugin *, int, union cwiid_mesg * []);
+void process_plugin(struct plugin *, int, union cwiid_mesg []);
 
 /* Globals */
 cwiid_wiimote_t *wiimote;
@@ -158,8 +161,13 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 	}
-	if ((wiimote = cwiid_connect(&bdaddr, cwiid_callback, NULL)) == NULL) {
+	if ((wiimote = cwiid_connect(&bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
 		wminput_err("unable to connect");
+		conf_unload(&conf);
+		return -1;
+	}
+	if (cwiid_set_mesg_callback(wiimote, &cwiid_callback)) {
+		wminput_err("error setting callback");
 		conf_unload(&conf);
 		return -1;
 	}
@@ -257,20 +265,21 @@ int wminput_set_report_mode()
 	return 0;
 }
 
-void cwiid_callback(int id, int mesg_count, union cwiid_mesg *mesg[])
+void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
+                    union cwiid_mesg mesg[])
 {
 	int i;
 
 	for (i=0; i < mesg_count; i++) {
-		switch (mesg[i]->type) {
+		switch (mesg[i].type) {
 		case CWIID_MESG_BTN:
-			process_btn_mesg((struct cwiid_btn_mesg *) mesg[i]);
+			process_btn_mesg((struct cwiid_btn_mesg *) &mesg[i]);
 			break;
 		case CWIID_MESG_NUNCHUK:
-			process_nunchuk_mesg((struct cwiid_nunchuk_mesg *) mesg[i]);
+			process_nunchuk_mesg((struct cwiid_nunchuk_mesg *) &mesg[i]);
 			break;
 		case CWIID_MESG_CLASSIC:
-			process_classic_mesg((struct cwiid_classic_mesg *) mesg[i]);
+			process_classic_mesg((struct cwiid_classic_mesg *) &mesg[i]);
 			break;
 		case CWIID_MESG_ERROR:
 			if (kill(getpid(),SIGINT)) {
@@ -366,7 +375,7 @@ void process_nunchuk_mesg(struct cwiid_nunchuk_mesg *mesg)
 
 	/* Nunchuk.Stick.X */
 	if (conf.amap[CONF_NC_AXIS_STICK_X].active) {
-		axis_value = mesg->stick_x;
+		axis_value = mesg->stick[CWIID_X];
 		if (conf.amap[CONF_NC_AXIS_STICK_X].flags & CONF_INVERT) {
 			axis_value = 0xFF - axis_value;
 		}
@@ -376,7 +385,7 @@ void process_nunchuk_mesg(struct cwiid_nunchuk_mesg *mesg)
 
 	/* Nunchuk.Stick.Y */
 	if (conf.amap[CONF_NC_AXIS_STICK_Y].active) {
-		axis_value = mesg->stick_y;
+		axis_value = mesg->stick[CWIID_Y];
 		if (conf.amap[CONF_NC_AXIS_STICK_Y].flags & CONF_INVERT) {
 			axis_value = 0xFF - axis_value;
 		}
@@ -441,7 +450,7 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 
 	/* Classic.LStick.X */
 	if (conf.amap[CONF_CC_AXIS_L_STICK_X].active) {
-		axis_value = mesg->l_stick_x;
+		axis_value = mesg->l_stick[CWIID_X];
 		if (conf.amap[CONF_CC_AXIS_L_STICK_X].flags & CONF_INVERT) {
 			axis_value = CWIID_CLASSIC_L_STICK_MAX - axis_value;
 		}
@@ -451,7 +460,7 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 
 	/* Classic.LStick.Y */
 	if (conf.amap[CONF_CC_AXIS_L_STICK_Y].active) {
-		axis_value = mesg->l_stick_y;
+		axis_value = mesg->l_stick[CWIID_Y];
 		if (conf.amap[CONF_CC_AXIS_L_STICK_Y].flags & CONF_INVERT) {
 			axis_value = CWIID_CLASSIC_L_STICK_MAX - axis_value;
 		}
@@ -461,7 +470,7 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 
 	/* Classic.RStick.X */
 	if (conf.amap[CONF_CC_AXIS_R_STICK_X].active) {
-		axis_value = mesg->r_stick_x;
+		axis_value = mesg->r_stick[CWIID_X];
 		if (conf.amap[CONF_CC_AXIS_R_STICK_X].flags & CONF_INVERT) {
 			axis_value = CWIID_CLASSIC_R_STICK_MAX - axis_value;
 		}
@@ -471,7 +480,7 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 
 	/* Classic.RStick.Y */
 	if (conf.amap[CONF_CC_AXIS_R_STICK_Y].active) {
-		axis_value = mesg->r_stick_y;
+		axis_value = mesg->r_stick[CWIID_Y];
 		if (conf.amap[CONF_CC_AXIS_R_STICK_Y].flags & CONF_INVERT) {
 			axis_value = CWIID_CLASSIC_R_STICK_MAX - axis_value;
 		}
@@ -501,7 +510,7 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 }
 
 void process_plugin(struct plugin *plugin, int mesg_count,
-                    union cwiid_mesg *mesg[])
+                    union cwiid_mesg mesg[])
 {
 	union cwiid_mesg *plugin_mesg[CWIID_MAX_MESG_COUNT];
 	int plugin_mesg_count = 0;
@@ -512,7 +521,7 @@ void process_plugin(struct plugin *plugin, int mesg_count,
 	__s32 axis_value;
 
 	for (i=0; i < mesg_count; i++) {
-		switch (mesg[i]->type) {
+		switch (mesg[i].type) {
 		case CWIID_MESG_STATUS:
 			flag = CWIID_RPT_STATUS;
 			break;
@@ -535,7 +544,7 @@ void process_plugin(struct plugin *plugin, int mesg_count,
 			break;
 		}
 		if (plugin->rpt_mode_flags & flag) {
-			plugin_mesg[plugin_mesg_count++] = mesg[i];
+			plugin_mesg[plugin_mesg_count++] = &mesg[i];
 		}
 	}
 
@@ -573,4 +582,3 @@ void process_plugin(struct plugin *plugin, int mesg_count,
 		}
 	}
 }
-

@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for API overhaul
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for libcwiid rename
  *
@@ -38,8 +41,7 @@ cwiid_wiimote_t *wiimote;
 
 struct cursor {
 	unsigned char valid;
-	uint16_t x;
-	uint16_t y;
+	uint16_t pos[2];
 };
 int a_debounce, b_debounce;
 
@@ -160,7 +162,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 	}
 	else {
 		a = ir_mesg->src[a_index];
-		a.x = CWIID_IR_X_MAX - a.x;
+		a.pos[CWIID_X] = CWIID_IR_X_MAX - a.pos[CWIID_X];
 		a_debounce = 0;
 	}
 	if (b_index == -1) {
@@ -174,15 +176,16 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 	}
 	else {
 		b = ir_mesg->src[b_index];
-		b.x = CWIID_IR_X_MAX - b.x;
+		b.pos[CWIID_X] = CWIID_IR_X_MAX - b.pos[CWIID_X];
 		b_debounce = 0;
 	}
 
 	/* if both sources are valid, calculate the center */
 	if (a.valid && b.valid) {
 		c.valid = 1;
-		c.x = (a.x + b.x)/2;
-		c.y = (a.y + b.y)/2;
+		for (i=0; i < 2; i++) {
+			c.pos[i] = (a.pos[i] + b.pos[i])/2;
+		}
 	}
 	/* if either source is valid, use best guess */
 	else if (a.valid) {
@@ -190,15 +193,17 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 		 * assume source-center relationship holds */
 		if (prev_a.valid && prev_c.valid) {
 			c.valid = 1;
-			c.x = a.x + (prev_c.x - prev_a.x);
-			c.y = a.y + (prev_c.y - prev_a.y);
+			for (i=0; i < 2; i++) {
+				c.pos[i] = a.pos[i] + (prev_c.pos[i] - prev_a.pos[i]);
+			}
 		}
 		/* if a is new or we don't have a previous center,
 		 * use a as the center */
 		else {
 			c.valid = 1;
-			c.x = a.x;
-			c.y = a.y;
+			for (i=0; i < 2; i++) {
+				c.pos[i] = a.pos[i];
+			}
 		}
 	}
 	else if (b.valid) {
@@ -206,15 +211,17 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 		 * assume source-center relationship holds */
 		if (prev_b.valid && prev_c.valid) {
 			c.valid = 1;
-			c.x = b.x + (prev_c.x - prev_b.x);
-			c.y = b.y + (prev_c.y - prev_b.y);
+			for (i=0; i < 2; i++) {
+				c.pos[i] = b.pos[i] + (prev_c.pos[i] - prev_b.pos[i]);
+			}
 		}
 		/* if b is new or we don't have a previous center,
 		 * use b as the center */
 		else {
 			c.valid = 1;
-			c.x = b.x;
-			c.y = b.y;
+			for (i=0; i < 2; i++) {
+				c.pos[i] = b.pos[i];
+			}
 		}
 	}
 	/* no sources, no guesses */
@@ -237,8 +244,6 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 		flags |= CWIID_LED4_ON;
 	}
 	if (flags != old_flags) {
-		/* TODO: if this message is sent every time, we get a battery meter of
-		 * blinking lights - why? */
 		cwiid_command(wiimote, CWIID_CMD_LED, flags);
 	}
 	old_flags = flags;
@@ -248,9 +253,10 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 #define NEW_AMOUNT 0.6
 #define OLD_AMOUNT (1.0-NEW_AMOUNT)
 
-	data.axes[0].value = c.x*NEW_AMOUNT + data.axes[0].value*OLD_AMOUNT;
-	data.axes[1].value = c.y*NEW_AMOUNT + data.axes[1].value*OLD_AMOUNT;
+	data.axes[0].value = c.pos[CWIID_X]*NEW_AMOUNT +
+	                     data.axes[0].value*OLD_AMOUNT;
+	data.axes[1].value = c.pos[CWIID_Y]*NEW_AMOUNT +
+	                     data.axes[1].value*OLD_AMOUNT;
 
 	return &data;
 }
-
