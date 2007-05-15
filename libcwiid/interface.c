@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added timestamp to cwiid_get_mesg
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created for API overhaul
  */
@@ -93,7 +96,7 @@ int cwiid_set_mesg_callback(struct wiimote *wiimote,
 }
 
 int cwiid_get_mesg(struct wiimote *wiimote, int *mesg_count,
-                   union cwiid_mesg *mesg[])
+                   union cwiid_mesg *mesg[], struct timespec *timestamp)
 {
 	struct mesg_array ma;
 
@@ -108,6 +111,7 @@ int cwiid_get_mesg(struct wiimote *wiimote, int *mesg_count,
 	}
 
 	*mesg_count = ma.count;
+	*timestamp = ma.timestamp;
 
 	if ((*mesg = malloc(ma.count * sizeof ma.array[0])) == NULL) {
 		cwiid_err(wiimote, "Memory allocation error (mesg array)");

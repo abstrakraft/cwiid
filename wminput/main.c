@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added timestamp to message callback
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * update for API overhaul
  *
@@ -266,7 +269,7 @@ int wminput_set_report_mode()
 }
 
 void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
-                    union cwiid_mesg mesg[])
+                    union cwiid_mesg mesg[], struct timespec *timestamp)
 {
 	int i;
 

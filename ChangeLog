@@ -1,3 +1,16 @@
+2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
+	libcwiid
+	* added timestamp to message interfaces
+
+	wmdemo
+	* updated for timestamp addition
+
+	wmgui
+	* updated for timestamp addition
+
+	wminput
+	* updated for timestamp addition
+
 2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
 	libcwiid
 	* rewrite (API overhaul)

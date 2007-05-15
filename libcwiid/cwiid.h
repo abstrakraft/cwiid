@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added timestamp to message functions
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * rewrite for API overhaul
  *
@@ -47,6 +50,7 @@
 
 #include <stdarg.h>
 #include <stdint.h>
+#include <time.h>
 #include <bluetooth/bluetooth.h>	/* bdaddr_t */
 
 /* Flags */
@@ -266,7 +270,7 @@ struct cwiid_state {
 typedef struct wiimote cwiid_wiimote_t;
 
 typedef void cwiid_mesg_callback_t(cwiid_wiimote_t *, int,
-                                   union cwiid_mesg []);
+                                   union cwiid_mesg [], struct timespec *);
 typedef void cwiid_err_t(cwiid_wiimote_t *, const char *, va_list ap);
 
 /* get_bdinfo */
@@ -300,7 +304,7 @@ int cwiid_disable(cwiid_wiimote_t *wiimote, int flags);
 int cwiid_set_mesg_callback(cwiid_wiimote_t *wiimote,
                        cwiid_mesg_callback_t *callback);
 int cwiid_get_mesg(cwiid_wiimote_t *wiimote, int *mesg_count,
-                   union cwiid_mesg *mesg[]);
+                   union cwiid_mesg *mesg[], struct timespec *timestamp);
 int cwiid_get_state(cwiid_wiimote_t *wiimote, struct cwiid_state *state);
 
 /* Operations */

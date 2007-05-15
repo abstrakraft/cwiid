@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added timestamp to mesg_array
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * rewrite for API overhaul
  *
@@ -142,6 +145,7 @@ struct write_seq {
 /* Message arrays */
 struct mesg_array {
 	uint8_t count;
+	struct timespec timestamp;
 	union cwiid_mesg array[CWIID_MAX_MESG_COUNT];
 };
 

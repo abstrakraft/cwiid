@@ -89,7 +89,7 @@ cwiid_wiimote_t *cwiid_connect(bdaddr_t *bdaddr, int flags)
 
 	/* If BDADDR_ANY is given, find available wiimote */
 	if (bacmp(bdaddr, BDADDR_ANY) == 0) {
-		if (cwiid_find_wiimote(bdaddr, 2)) {
+		if (cwiid_find_wiimote(bdaddr, 5)) {
 			goto ERR_HND;
 		}
 	}
