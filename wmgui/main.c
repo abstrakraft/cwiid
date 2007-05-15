@@ -17,6 +17,7 @@
  *  ChangeLog:
  *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added timestamp to message callback
+ *  * use cwiid_get_acc_cal to get acc calibration values
  *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for API overhaul
@@ -63,12 +64,6 @@
 
 #define PI	3.14159265358979323
 
-struct acc {
-	uint8_t x;
-	uint8_t y;
-	uint8_t z;
-};
-
 struct stick {
 	char valid;
 	uint8_t x;
@@ -79,9 +74,8 @@ struct stick {
 /* Globals */
 cwiid_wiimote_t *wiimote = NULL;
 bdaddr_t bdaddr;
-struct acc acc_zero, acc_one;
+struct acc_cal wm_cal, nc_cal;
 struct cwiid_ir_mesg ir_data;
-struct acc nc_acc_zero, nc_acc_one;
 struct stick nc_stick;
 struct stick cc_l_stick, cc_r_stick;
 
@@ -633,7 +627,6 @@ gboolean winRW_delete_event(void)
 void menuConnect_activate(void)
 {
 	char reset_bdaddr = 0;
-	unsigned char buf[7];
 
 	if (bacmp(&bdaddr, BDADDR_ANY) == 0) {
 		reset_bdaddr = 1;
@@ -657,17 +650,9 @@ void menuConnect_activate(void)
 	}
 	else {
 		status("Connected");
-		if (cwiid_read(wiimote, CWIID_RW_EEPROM, 0x16, 7, buf)) {
+		if (cwiid_get_acc_cal(wiimote, CWIID_EXT_NONE, &wm_cal)) {
 			message(GTK_MESSAGE_ERROR, "Unable to retrieve accelerometer "
 			        "calibration", GTK_WINDOW(winMain));
-		}
-		else {
-			acc_zero.x = buf[0];
-			acc_zero.y = buf[1];
-			acc_zero.z = buf[2];
-			acc_one.x  = buf[4];
-			acc_one.y  = buf[5];
-			acc_one.z  = buf[6];
 		}
 		set_gui_state();
 		set_report_mode();
@@ -1024,7 +1009,6 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 	int i;
 	char battery[BATTERY_STR_LEN];
 	char *ext_str;
-	unsigned char buf[7];
 	static enum cwiid_ext_type ext_type = CWIID_EXT_NONE;
 
 	gdk_threads_enter();
@@ -1042,19 +1026,11 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			case CWIID_EXT_NUNCHUK:
 				ext_str = "Nunchuk";
 				if (ext_type != CWIID_EXT_NUNCHUK) {
-					if (cwiid_read(wiimote,
-					                 CWIID_RW_REG | CWIID_RW_DECODE,
-				                     0xA40020, 7, buf)) {
-						message(GTK_MESSAGE_ERROR, "Unable to retrieve "
-						        "nunchuk calibration", GTK_WINDOW(winMain));
-					}
-					else {
-						nc_acc_zero.x = buf[0];
-						nc_acc_zero.y = buf[1];
-						nc_acc_zero.z = buf[2];
-						nc_acc_one.x  = buf[4];
-						nc_acc_one.y  = buf[5];
-						nc_acc_one.z  = buf[6];
+					if (cwiid_get_acc_cal(wiimote, CWIID_EXT_NUNCHUK,
+					                      &nc_cal)) {
+						message(GTK_MESSAGE_ERROR,
+						        "Unable to retrieve accelerometer calibration",
+						        GTK_WINDOW(winMain));
 					}
 				}
 				break;
@@ -1143,12 +1119,12 @@ void cwiid_acc(struct cwiid_acc_mesg *mesg)
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccZ),
 		                              (double)mesg->acc[CWIID_Z]/0xFF);
 
-		a_x = ((double)mesg->acc[CWIID_X] - acc_zero.x) /
-		      (acc_one.x - acc_zero.x);
-		a_y = ((double)mesg->acc[CWIID_Y] - acc_zero.y) /
-		      (acc_one.y - acc_zero.y);
-		a_z = ((double)mesg->acc[CWIID_Z] - acc_zero.z) /
-		      (acc_one.z - acc_zero.z);
+		a_x = ((double)mesg->acc[CWIID_X] - wm_cal.zero[CWIID_X]) /
+		      (wm_cal.one[CWIID_X] - wm_cal.zero[CWIID_X]);
+		a_y = ((double)mesg->acc[CWIID_Y] - wm_cal.zero[CWIID_Y]) /
+		      (wm_cal.one[CWIID_Y] - wm_cal.zero[CWIID_Y]);
+		a_z = ((double)mesg->acc[CWIID_Z] - wm_cal.zero[CWIID_Z]) /
+		      (wm_cal.one[CWIID_Z] - wm_cal.zero[CWIID_Z]);
 		a = sqrt(pow(a_x,2)+pow(a_y,2)+pow(a_z,2));
 
 		roll = atan(a_x/a_z);
@@ -1208,12 +1184,12 @@ void cwiid_nunchuk(struct cwiid_nunchuk_mesg *mesg)
 		                              (double)mesg->acc[CWIID_Z]/0xFF);
 
 		/* TODO: get nunchuk calibration */
-		a_x = ((double)mesg->acc[CWIID_X] - nc_acc_zero.x) /
-		      (nc_acc_one.x - nc_acc_zero.x);
-		a_y = ((double)mesg->acc[CWIID_Y] - nc_acc_zero.y) /
-		      (nc_acc_one.y - nc_acc_zero.y);
-		a_z = ((double)mesg->acc[CWIID_Z] - nc_acc_zero.z) /
-		      (nc_acc_one.z - nc_acc_zero.z);
+		a_x = ((double)mesg->acc[CWIID_X] - nc_cal.zero[CWIID_X]) /
+		      (nc_cal.one[CWIID_X] - nc_cal.zero[CWIID_X]);
+		a_y = ((double)mesg->acc[CWIID_Y] - nc_cal.zero[CWIID_Y]) /
+		      (nc_cal.one[CWIID_Y] - nc_cal.zero[CWIID_Y]);
+		a_z = ((double)mesg->acc[CWIID_Z] - nc_cal.zero[CWIID_Z]) /
+		      (nc_cal.one[CWIID_Z] - nc_cal.zero[CWIID_Z]);
 		a = sqrt(pow(a_x,2)+pow(a_y,2)+pow(a_z,2));
 		roll = atan(a_x/a_z);
 		if (a_z <= 0.0) {
