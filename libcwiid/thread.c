@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added timestamp to message array
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * rewrite for API overhaul (renamed from event.c)
  *
@@ -49,6 +52,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <time.h>
 #include <unistd.h>
 #include "cwiid_internal.h"
 
@@ -58,7 +62,7 @@ void *router_thread(struct wiimote *wiimote)
 	unsigned char buf[READ_BUF_LEN];
 	ssize_t len;
 	struct mesg_array ma;
-	char err;
+	char err, print_clock_err = 1;
 
 	while (1) {
 		/* Read packet */
@@ -74,6 +78,12 @@ void *router_thread(struct wiimote *wiimote)
 				cwiid_err(wiimote, "Invalid packet type");
 			}
 			ma.count = 0;
+			if (clock_gettime(CLOCK_REALTIME, &ma.timestamp)) {
+				if (print_clock_err) {
+					cwiid_err(wiimote, "clock_gettime error");
+					print_clock_err = 0;
+				}
+			}
 			err = 0;
 
 			/* Main switch */
@@ -250,7 +260,7 @@ void *mesg_callback_thread(struct wiimote *wiimote)
 		if (pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancelstate)) {
 			cwiid_err(wiimote, "Cancel state disable error (callback thread)");
 		}
-		callback(wiimote, ma.count, ma.array);
+		callback(wiimote, ma.count, ma.array, &ma.timestamp);
 		if (pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancelstate)) {
 			cwiid_err(wiimote, "Cancel state restore error (callback thread)");
 		}

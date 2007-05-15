@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added timestamp to message callback
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for API overhaul
  *
@@ -1016,7 +1019,7 @@ void set_report_mode(void)
 
 #define BATTERY_STR_LEN	14	/* "Battery: 100%" + '\0' */
 void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
-                    union cwiid_mesg mesg_array[])
+                    union cwiid_mesg mesg_array[], struct timespec *timestamp)
 {
 	int i;
 	char battery[BATTERY_STR_LEN];

@@ -286,7 +286,7 @@ void print_state(struct cwiid_state *state)
  * The id is to distinguish between multiple wiimotes using the same callback.
  * */
 void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
-                    union cwiid_mesg mesg[])
+                    union cwiid_mesg mesg[], struct timespec *timestamp)
 {
 	int i, j;
 	int valid_source;

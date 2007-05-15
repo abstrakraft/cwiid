@@ -213,7 +213,6 @@ int read_mesg_array(int fd, struct mesg_array *ma)
 {
 	ssize_t len;
 
-	/* there may be padding after ma->count */
 	len = (void *)&ma->array[0] - (void *)ma;
 	if (full_read(fd, ma, len)) {
 		return -1;
