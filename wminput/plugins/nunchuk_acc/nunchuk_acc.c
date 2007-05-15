@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * use cwiid_get_acc_cal to get acc calibration values
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for API overhaul
  *
@@ -40,19 +43,13 @@
 
 #define PI	3.14159265358979323
 
-struct acc {
-	uint8_t x;
-	uint8_t y;
-	uint8_t z;
-};
-
 static unsigned char info_init = 0;
 static struct wmplugin_info info;
 static struct wmplugin_data data;
 
 static cwiid_wiimote_t *wiimote;
 
-static struct acc acc_zero, acc_one;
+static struct acc_cal acc_cal;
 static int plugin_id;
 
 wmplugin_info_t wmplugin_info;
@@ -126,7 +123,6 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 {
 	int i;
 	enum cwiid_ext_type ext_type = CWIID_EXT_NONE;
-	unsigned char buf[7];
 	struct wmplugin_data *ret = NULL;
 
 	for (i=0; i < mesg_count; i++) {
@@ -134,16 +130,9 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 		case CWIID_MESG_STATUS:
 			if ((mesg[i]->status_mesg.ext_type == CWIID_EXT_NUNCHUK) &&
 			  (ext_type != CWIID_EXT_NUNCHUK)) {
-				if (cwiid_read(wiimote, CWIID_RW_REG | CWIID_RW_DECODE,
-				                 0xA40020, 7, buf)) {
-					wmplugin_err(plugin_id, "unable to read wiimote info");
+				if (cwiid_get_acc_cal(wiimote, CWIID_EXT_NUNCHUK, &acc_cal)) {
+					wmplugin_err(plugin_id, "calibration error");
 				}
-				acc_zero.x = buf[0];
-				acc_zero.y = buf[1];
-				acc_zero.z = buf[2];
-				acc_one.x  = buf[4];
-				acc_one.y  = buf[5];
-				acc_one.z  = buf[6];
 			}
 			ext_type = mesg[i]->status_mesg.ext_type;
 			break;
@@ -168,12 +157,15 @@ static void process_nunchuk(struct cwiid_nunchuk_mesg *mesg)
 	double a;
 	double roll, pitch;
 
-	a_x = (((double)mesg->acc[CWIID_X] - acc_zero.x) /
-	      (acc_one.x - acc_zero.x))*NEW_AMOUNT + a_x*OLD_AMOUNT;
-	a_y = (((double)mesg->acc[CWIID_Y] - acc_zero.y) /
-	      (acc_one.y - acc_zero.y))*NEW_AMOUNT + a_y*OLD_AMOUNT;
-	a_z = (((double)mesg->acc[CWIID_Z] - acc_zero.z) /
-	      (acc_one.z - acc_zero.z))*NEW_AMOUNT + a_z*OLD_AMOUNT;
+	a_x = (((double)mesg->acc[CWIID_X] - acc_cal.zero[CWIID_X]) /
+	      (acc_cal.one[CWIID_X] - acc_cal.zero[CWIID_X]))*NEW_AMOUNT +
+	      a_x*OLD_AMOUNT;
+	a_y = (((double)mesg->acc[CWIID_Y] - acc_cal.zero[CWIID_Y]) /
+	      (acc_cal.one[CWIID_Y] - acc_cal.zero[CWIID_Y]))*NEW_AMOUNT +
+	      a_y*OLD_AMOUNT;
+	a_z = (((double)mesg->acc[CWIID_Z] - acc_cal.zero[CWIID_Z]) /
+	      (acc_cal.one[CWIID_Z] - acc_cal.zero[CWIID_Z]))*NEW_AMOUNT +
+	      a_z*OLD_AMOUNT;
 
 	a = sqrt(pow(a_x,2)+pow(a_y,2)+pow(a_z,2));
 	roll = atan(a_x/a_z);

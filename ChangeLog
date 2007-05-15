@@ -1,15 +1,18 @@
 2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
 	libcwiid
 	* added timestamp to message interfaces
+	* added cwiid_get_acc_cal
 
 	wmdemo
 	* updated for timestamp addition
 
 	wmgui
 	* updated for timestamp addition
+	* use cwiid_get_acc_cal to get acc calibration values
 
 	wminput
 	* updated for timestamp addition
+	* use cwiid_get_acc_cal to get acc calibration values (acc plugins)
 
 2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
 	libcwiid

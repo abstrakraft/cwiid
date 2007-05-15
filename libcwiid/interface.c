@@ -17,6 +17,7 @@
  *  ChangeLog:
  *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added timestamp to cwiid_get_mesg
+ *  * added cwiid_get_acc_cal
  *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created for API overhaul
@@ -137,6 +138,44 @@ int cwiid_get_state(struct wiimote *wiimote, struct cwiid_state *state)
 		                   "deadlock warning");
 		return -1;
 	}
+
+	return 0;
+}
+
+int cwiid_get_acc_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
+                      struct acc_cal *acc_cal)
+{
+	uint8_t flags;
+	uint32_t offset;
+	unsigned char buf[7];
+	char *err_str;
+
+	switch (ext_type) {
+	case CWIID_EXT_NONE:
+		flags = CWIID_RW_EEPROM;
+		offset = 0x16;
+		err_str = "";
+		break;
+	case CWIID_EXT_NUNCHUK:
+		flags = CWIID_RW_REG | CWIID_RW_DECODE;
+		offset = 0xA40020;
+		err_str = "nunchuk ";
+		break;
+	default:
+		cwiid_err(wiimote, "Unsupported calibration request");
+		return -1;
+	}
+	if (cwiid_read(wiimote, flags, offset, 7, buf)) {
+		cwiid_err(wiimote, "Read error (%scal)", err_str);
+		return -1;
+	}
+
+	acc_cal->zero[CWIID_X] = buf[0];
+	acc_cal->zero[CWIID_Y] = buf[1];
+	acc_cal->zero[CWIID_Z] = buf[2];
+	acc_cal->one[CWIID_X]  = buf[4];
+	acc_cal->one[CWIID_Y]  = buf[5];
+	acc_cal->one[CWIID_Z]  = buf[6];
 
 	return 0;
 }

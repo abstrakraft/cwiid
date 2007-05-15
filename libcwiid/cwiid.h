@@ -17,6 +17,7 @@
  *  ChangeLog:
  *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added timestamp to message functions
+ *  * added cwiid_get_acc_cal
  *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * rewrite for API overhaul
@@ -173,6 +174,11 @@ enum cwiid_error {
 	CWIID_ERROR_COMM
 };
 
+struct acc_cal {
+	uint8_t zero[3];
+	uint8_t one[3];
+};
+
 /* Message Structs */
 struct cwiid_status_mesg {
 	enum cwiid_mesg_type type;
@@ -306,6 +312,8 @@ int cwiid_set_mesg_callback(cwiid_wiimote_t *wiimote,
 int cwiid_get_mesg(cwiid_wiimote_t *wiimote, int *mesg_count,
                    union cwiid_mesg *mesg[], struct timespec *timestamp);
 int cwiid_get_state(cwiid_wiimote_t *wiimote, struct cwiid_state *state);
+int cwiid_get_acc_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
+                      struct acc_cal *acc_cal);
 
 /* Operations */
 int cwiid_command(cwiid_wiimote_t *wiimote, enum cwiid_command command,
