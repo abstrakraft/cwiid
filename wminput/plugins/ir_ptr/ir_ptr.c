@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * changed cwiid_{connect,disconnect,command} to
+ *    cwiid_{open,close,request_status|set_led|set_rumble|set_rpt_mode}
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for API overhaul
  *
@@ -244,7 +248,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 		flags |= CWIID_LED4_ON;
 	}
 	if (flags != old_flags) {
-		cwiid_command(wiimote, CWIID_CMD_LED, flags);
+		cwiid_set_led(wiimote, flags);
 	}
 	old_flags = flags;
 

@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
 	/* Connect to the wiimote */
 	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
-	if (!(wiimote = cwiid_connect(&bdaddr, 0))) {
+	if (!(wiimote = cwiid_open(&bdaddr, 0))) {
 		fprintf(stderr, "Unable to connect to wiimote\n");
 		return -1;
 	}
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 			break;
 		case '5':
 			toggle_bit(rumble, 1);
-			if (cwiid_command(wiimote, CWIID_CMD_RUMBLE, rumble)) {
+			if (cwiid_set_rumble(wiimote, rumble)) {
 				fprintf(stderr, "Error setting rumble\n");
 			}
 			break;
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 			printf("%s", MENU);
 			break;
 		case 'r':
-			if (cwiid_command(wiimote, CWIID_CMD_STATUS, 0)) {
+			if (cwiid_request_status(wiimote)) {
 				fprintf(stderr, "Error requesting status message\n");
 			}
 			break;
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (cwiid_disconnect(wiimote)) {
+	if (cwiid_close(wiimote)) {
 		fprintf(stderr, "Error on wiimote disconnect\n");
 		return -1;
 	}
@@ -191,14 +191,14 @@ int main(int argc, char *argv[])
 
 void set_led_state(cwiid_wiimote_t *wiimote, unsigned char led_state)
 {
-	if (cwiid_command(wiimote, CWIID_CMD_LED, led_state)) {
+	if (cwiid_set_led(wiimote, led_state)) {
 		fprintf(stderr, "Error setting LEDs \n");
 	}
 }
 	
 void set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char rpt_mode)
 {
-	if (cwiid_command(wiimote, CWIID_CMD_RPT_MODE, rpt_mode)) {
+	if (cwiid_set_rpt_mode(wiimote, rpt_mode)) {
 		fprintf(stderr, "Error setting report mode\n");
 	}
 }
@@ -356,7 +356,7 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			       mesg[i].classic_mesg.l, mesg[i].classic_mesg.r);
 			break;
 		case CWIID_MESG_ERROR:
-			if (cwiid_disconnect(wiimote)) {
+			if (cwiid_close(wiimote)) {
 				fprintf(stderr, "Error on wiimote disconnect\n");
 				exit(-1);
 			}
@@ -368,4 +368,3 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 		}
 	}
 }
-
