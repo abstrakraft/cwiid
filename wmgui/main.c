@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * changed cwiid_{connect,disconnect,command} to
+ *    cwiid_{open,close,request_status|set_led|set_rumble|set_rpt_mode}
+ *
  *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added timestamp to message callback
  *  * use cwiid_get_acc_cal to get acc calibration values
@@ -634,14 +638,14 @@ void menuConnect_activate(void)
 	message(GTK_MESSAGE_INFO,
 	        "Put Wiimote in discoverable mode (press 1+2) and press OK",
 	         GTK_WINDOW(winMain));
-	if ((wiimote = cwiid_connect(&bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
+	if ((wiimote = cwiid_open(&bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
 		message(GTK_MESSAGE_ERROR, "Unable to connect", GTK_WINDOW(winMain));
 		status("No connection");
 	}
 	else if (cwiid_set_mesg_callback(wiimote, &cwiid_callback)) {
 		message(GTK_MESSAGE_ERROR, "Error setting callback",
 		        GTK_WINDOW(winMain));
-		if (cwiid_disconnect(wiimote)) {
+		if (cwiid_close(wiimote)) {
 			message(GTK_MESSAGE_ERROR, "Error on disconnect",
 			        GTK_WINDOW(winMain));
 		}
@@ -656,7 +660,7 @@ void menuConnect_activate(void)
 		}
 		set_gui_state();
 		set_report_mode();
-		cwiid_command(wiimote, CWIID_CMD_STATUS, 0);
+		cwiid_request_status(wiimote);
 	}
 
 	if (reset_bdaddr) {
@@ -666,7 +670,7 @@ void menuConnect_activate(void)
 
 void menuDisconnect_activate(void)
 {
-	if (cwiid_disconnect(wiimote)) {
+	if (cwiid_close(wiimote)) {
 		message(GTK_MESSAGE_ERROR, "Error on disconnect", GTK_WINDOW(winMain));
 	}
 	wiimote = NULL;
@@ -746,7 +750,7 @@ void chkLED_toggled(void)
 		    ? CWIID_LED3_ON : 0) |
 		  (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkLED4))
 		    ? CWIID_LED4_ON : 0);
-		if (cwiid_command(wiimote, CWIID_CMD_LED, LED_state)) {
+		if (cwiid_set_led(wiimote, LED_state)) {
 			message(GTK_MESSAGE_ERROR, "error setting LEDs",
 			        GTK_WINDOW(winMain));
 		}
@@ -756,7 +760,7 @@ void chkLED_toggled(void)
 void chkRumble_toggled(void)
 {
 	if (wiimote) {
-		if (cwiid_command(wiimote, CWIID_CMD_RUMBLE,
+		if (cwiid_set_rumble(wiimote,
 		  gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkRumble)))) {
 			message(GTK_MESSAGE_ERROR, "error setting rumble",
 			        GTK_WINDOW(winMain));
@@ -996,7 +1000,7 @@ void set_report_mode(void)
 	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkExt))) {
 		rpt_mode |= CWIID_RPT_EXT;
 	}
-	if (cwiid_command(wiimote, CWIID_CMD_RPT_MODE, rpt_mode)) {
+	if (cwiid_set_rpt_mode(wiimote, rpt_mode)) {
 		message(GTK_MESSAGE_ERROR, "error setting report mode",
 		        GTK_WINDOW(winMain));
 	}

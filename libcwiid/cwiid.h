@@ -15,6 +15,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * changed cwiid_connect, cwiid_disconnect to cwiid_open, cwiid_close
+ *  * added cwiid_request_status, cwiid_set_let, cwiid_set_rumble,
+ *    cwiid_set_rpt_mode
+ *
  *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added timestamp to message functions
  *  * added cwiid_get_acc_cal
@@ -297,8 +302,10 @@ extern "C" {
 int cwiid_set_err(cwiid_err_t *err);
 
 /* Connection */
-cwiid_wiimote_t *cwiid_connect(bdaddr_t *bdaddr, int flags);
-int cwiid_disconnect(cwiid_wiimote_t *wiimote);
+#define cwiid_connect cwiid_open
+#define cwiid_disconnect cwiid_close
+cwiid_wiimote_t *cwiid_open(bdaddr_t *bdaddr, int flags);
+int cwiid_close(cwiid_wiimote_t *wiimote);
 
 int cwiid_get_id(cwiid_wiimote_t *wiimote);
 int cwiid_set_data(cwiid_wiimote_t *wiimote, const void *data);
@@ -318,6 +325,10 @@ int cwiid_get_acc_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
 /* Operations */
 int cwiid_command(cwiid_wiimote_t *wiimote, enum cwiid_command command,
                   int flags);
+int cwiid_request_status(cwiid_wiimote_t *wiimote);
+int cwiid_set_led(cwiid_wiimote_t *wiimote, uint8_t led);
+int cwiid_set_rumble(cwiid_wiimote_t *wiimote, uint8_t rumble);
+int cwiid_set_rpt_mode(cwiid_wiimote_t *wiimote, uint8_t rpt_mode);
 int cwiid_read(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
                uint16_t len, void *data);
 int cwiid_write(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,

@@ -1,3 +1,22 @@
+2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+	libcwiid
+	* removed error_pipe
+	* fixed error message reporting
+	* changed cwiid_connect, cwiid_disconnect to cwiid_open, cwiid_close
+	  (added macros for backward compatibility)
+	* split cwiid_command into cwiid_request_status, cwiid_set_led,
+	  cwiid_set_rumble, cwiid_set_rpt_mode (kept cwiid_command for backward
+	  compatibility)
+
+	wmdemo
+	* updated for function name changes
+
+	wmgui
+	* updated for function name changes
+
+	wminput
+	* updated for function name changes
+
 2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
 	libcwiid
 	* added timestamp to message interfaces

@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added cwiid_request_status, cwiid_set_let, cwiid_set_rumble,
+ *    cwiid_set_rpt_mode
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * rewrite for API overhaul
  *  * added rw and beep functions from rw.c
@@ -44,39 +48,22 @@
 #include <unistd.h>
 #include "cwiid_internal.h"
 
-#define CMD_BUF_LEN	21
 int cwiid_command(struct wiimote *wiimote, enum cwiid_command command,
                   int flags) {
-	int ret = 0;
-	unsigned char buf[CMD_BUF_LEN];
+	int ret;
 
-	/* TODO: assumption: char assignments are atomic, no mutex lock needed */
 	switch (command) {
 	case CWIID_CMD_STATUS:
-		buf[0] = 0;
-		if (send_report(wiimote, 0, RPT_STATUS_REQ, 1, buf)) {
-			cwiid_err(wiimote, "Status request error");
-			ret = -1;
-		}
+		ret = cwiid_request_status(wiimote);
 		break;
 	case CWIID_CMD_LED:
-		wiimote->state.led = flags & 0x0F;
-		buf[0] = wiimote->state.led<<4 | wiimote->state.rumble;
-		if (send_report(wiimote, SEND_RPT_NO_RUMBLE, RPT_LED_RUMBLE, 1, buf)) {
-			cwiid_err(wiimote, "Report send error (led)");
-			ret = -1;
-		}
+		ret = cwiid_set_led(wiimote, flags);
 		break;
 	case CWIID_CMD_RUMBLE:
-		wiimote->state.rumble = flags ? 1 : 0;
-		buf[0] = wiimote->state.led<<4 | wiimote->state.rumble;
-		if (send_report(wiimote, SEND_RPT_NO_RUMBLE, RPT_LED_RUMBLE, 1, buf)) {
-			cwiid_err(wiimote, "Report send error (rumble)");
-			ret = -1;
-		}
+		ret = cwiid_set_rumble(wiimote, flags);
 		break;
 	case CWIID_CMD_RPT_MODE:
-		update_rpt_mode(wiimote, flags);
+		ret = cwiid_set_rpt_mode(wiimote, flags);
 		break;
 	default:
 		ret = -1;
@@ -84,6 +71,54 @@ int cwiid_command(struct wiimote *wiimote, enum cwiid_command command,
 	}
 
 	return ret;
+}
+
+int cwiid_request_status(cwiid_wiimote_t *wiimote)
+{
+	unsigned char data;
+
+	data = 0;
+	if (send_report(wiimote, 0, RPT_STATUS_REQ, 1, &data)) {
+		cwiid_err(wiimote, "Status request error");
+		return -1;
+	}
+
+	return 0;
+}
+
+int cwiid_set_led(cwiid_wiimote_t *wiimote, uint8_t led)
+{
+	unsigned char data;
+
+	/* TODO: assumption: char assignments are atomic, no mutex lock needed */
+	wiimote->state.led = led & 0x0F;
+	data = wiimote->state.led << 4;
+	if (send_report(wiimote, 0, RPT_LED_RUMBLE, 1, &data)) {
+		cwiid_err(wiimote, "Report send error (led)");
+		return -1;
+	}
+
+	return 0;
+}
+
+int cwiid_set_rumble(cwiid_wiimote_t *wiimote, uint8_t rumble)
+{
+	unsigned char data;
+
+	/* TODO: assumption: char assignments are atomic, no mutex lock needed */
+	wiimote->state.rumble = rumble ? 1 : 0;
+	data = wiimote->state.led << 4;
+	if (send_report(wiimote, 0, RPT_LED_RUMBLE, 1, &data)) {
+		cwiid_err(wiimote, "Report send error (led)");
+		return -1;
+	}
+
+	return 0;
+}
+
+int cwiid_set_rpt_mode(cwiid_wiimote_t *wiimote, uint8_t rpt_mode)
+{
+	return update_rpt_mode(wiimote, rpt_mode);
 }
 
 #define RPT_READ_REQ_LEN 6

@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * changed cwiid_{connect,disconnect,command} to
+ *    cwiid_{open,close,request_status|set_led|set_rumble|set_rpt_mode}
+ *
  *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added timestamp to message callback
  *
@@ -164,7 +168,7 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 	}
-	if ((wiimote = cwiid_connect(&bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
+	if ((wiimote = cwiid_open(&bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
 		wminput_err("unable to connect");
 		conf_unload(&conf);
 		return -1;
@@ -180,14 +184,14 @@ int main(int argc, char *argv[])
 		if ((*conf.plugins[i].init)(i, wiimote)) {
 			wminput_err("error on %s init", conf.plugins[i].name);
 			conf_unload(&conf);
-			cwiid_disconnect(wiimote);
+			cwiid_close(wiimote);
 			return -1;
 		}
 	}
 
 	if (wminput_set_report_mode()) {
 		conf_unload(&conf);
-		cwiid_disconnect(wiimote);
+		cwiid_close(wiimote);
 		return -1;
 	}
 
@@ -198,7 +202,7 @@ int main(int argc, char *argv[])
 	                   &uinput_listen_data)) {
 		wminput_err("error starting uinput listen thread");
 		conf_unload(&conf);
-		cwiid_disconnect(wiimote);
+		cwiid_close(wiimote);
 		return -1;
 	}
 
@@ -226,7 +230,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* disconnect */
-	if (cwiid_disconnect(wiimote)) {
+	if (cwiid_close(wiimote)) {
 		wminput_err("error on disconnect");
 		ret = -1;
 	}
@@ -260,7 +264,7 @@ int wminput_set_report_mode()
 		rpt_mode_flags |= conf.plugins[i].rpt_mode_flags;
 	}
 
-	if (cwiid_command(wiimote, CWIID_CMD_RPT_MODE, rpt_mode_flags)) {
+	if (cwiid_set_rpt_mode(wiimote, rpt_mode_flags)) {
 		wminput_err("error setting report mode");
 		return -1;
 	}

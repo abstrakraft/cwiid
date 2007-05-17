@@ -17,6 +17,7 @@
  *  ChangeLog:
  *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * remove error_pipe init and destruct
+ *  * renamed connect and disconnect to open and close
  *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * rewrite for API overhaul
@@ -57,7 +58,7 @@
 pthread_mutex_t global_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int wiimote_id = 0;
 
-cwiid_wiimote_t *cwiid_connect(bdaddr_t *bdaddr, int flags)
+cwiid_wiimote_t *cwiid_open(bdaddr_t *bdaddr, int flags)
 {
 	struct wiimote *wiimote = NULL;
 	struct sockaddr_l2 remote_addr;
@@ -193,8 +194,8 @@ cwiid_wiimote_t *cwiid_connect(bdaddr_t *bdaddr, int flags)
 	/* Success!  Update state */
 	memset(&wiimote->state, 0, sizeof wiimote->state);
 	wiimote->mesg_callback = NULL;
-	cwiid_command(wiimote, CWIID_CMD_LED, 0);
-	cwiid_command(wiimote, CWIID_CMD_STATUS, 0);
+	cwiid_set_led(wiimote, 0);
+	cwiid_request_status(wiimote);
 
 	return wiimote;
 
@@ -271,7 +272,7 @@ ERR_HND:
 	return NULL;
 }
 
-int cwiid_disconnect(struct wiimote *wiimote)
+int cwiid_close(struct wiimote *wiimote)
 {
 	void *pthread_ret;
 
