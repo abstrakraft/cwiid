@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * send error_mesg from process_error
+ *
  *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added timestamp to message array
  *
@@ -67,8 +70,17 @@ void *router_thread(struct wiimote *wiimote)
 	while (1) {
 		/* Read packet */
 		len = read(wiimote->int_socket, buf, READ_BUF_LEN);
+		ma.count = 0;
+		if (clock_gettime(CLOCK_REALTIME, &ma.timestamp)) {
+			if (print_clock_err) {
+				cwiid_err(wiimote, "clock_gettime error");
+				print_clock_err = 0;
+			}
+		}
+		err = 0;
 		if ((len == -1) || (len == 0)) {
-			process_error(wiimote, len);
+			process_error(wiimote, len, &ma);
+			write_mesg_array(wiimote, &ma);
 			/* Quit! */
 			break;
 		}
@@ -77,14 +89,6 @@ void *router_thread(struct wiimote *wiimote)
 			if (buf[0] != (BT_TRANS_DATA | BT_PARAM_INPUT)) {
 				cwiid_err(wiimote, "Invalid packet type");
 			}
-			ma.count = 0;
-			if (clock_gettime(CLOCK_REALTIME, &ma.timestamp)) {
-				if (print_clock_err) {
-					cwiid_err(wiimote, "clock_gettime error");
-					print_clock_err = 0;
-				}
-			}
-			err = 0;
 
 			/* Main switch */
 			switch (buf[1]) {
@@ -154,9 +158,8 @@ void *router_thread(struct wiimote *wiimote)
 					cwiid_err(wiimote, "State update error");
 				}
 				if (wiimote->flags & CWIID_FLAG_MESG_IFC) {
-					if (write_mesg_array(wiimote, &ma)) {
-						/* prints its own errors */
-					}
+					/* prints its own errors */
+					write_mesg_array(wiimote, &ma);
 				}
 			}
 		}

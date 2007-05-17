@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * process_err adds error_mesg to mesg_array
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created for API overhaul (moved from old event.c)
  */
@@ -22,31 +25,24 @@
 #include <unistd.h>
 #include "cwiid_internal.h"
 
-int process_error(struct wiimote *wiimote, ssize_t len)
+int process_error(struct wiimote *wiimote, ssize_t len, struct mesg_array *ma)
 {
-	struct cwiid_error_mesg error_mesg;
-	int ret = 0;
+	struct cwiid_error_mesg *error_mesg;
 
-	error_mesg.type = CWIID_MESG_ERROR;
+	error_mesg = &ma->array[ma->count++].error_mesg;
+	error_mesg->type = CWIID_MESG_ERROR;
 	if (len == 0) {
-		error_mesg.error = CWIID_ERROR_DISCONNECT;
+		error_mesg->error = CWIID_ERROR_DISCONNECT;
 	}
 	else {
-		error_mesg.error = CWIID_ERROR_COMM;
-	}
-
-	if (write(wiimote->error_pipe[1], &error_mesg, sizeof error_mesg)
-	  != sizeof error_mesg) {
-		cwiid_err(wiimote, "Error pipe write error");
-		ret = -1;
+		error_mesg->error = CWIID_ERROR_COMM;
 	}
 
 	if (cancel_rw(wiimote)) {
 		cwiid_err(wiimote, "RW cancel error");
-		ret = -1;
 	}
 
-	return ret;
+	return 0;
 }
 
 int process_status(struct wiimote *wiimote, const unsigned char *data,
