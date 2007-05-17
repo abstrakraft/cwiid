@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * remove error_pipe init and destruct
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * rewrite for API overhaul
  *
@@ -58,9 +61,9 @@ cwiid_wiimote_t *cwiid_connect(bdaddr_t *bdaddr, int flags)
 {
 	struct wiimote *wiimote = NULL;
 	struct sockaddr_l2 remote_addr;
-	char mesg_pipe_init = 0, status_pipe_init = 0, error_pipe_init = 0,
-	     rw_pipe_init = 0, state_mutex_init = 0, rw_mutex_init = 0,
-	     rpt_mutex_init = 0, router_thread_init = 0, status_thread_init = 0;
+	char mesg_pipe_init = 0, status_pipe_init = 0, rw_pipe_init = 0,
+	     state_mutex_init = 0, rw_mutex_init = 0, rpt_mutex_init = 0,
+	     router_thread_init = 0, status_thread_init = 0;
 	void *pthread_ret;
 
 	/* Allocate wiimote */
@@ -135,11 +138,6 @@ cwiid_wiimote_t *cwiid_connect(bdaddr_t *bdaddr, int flags)
 		goto ERR_HND;
 	}
 	status_pipe_init = 1;
-	if (pipe(wiimote->error_pipe)) {
-		cwiid_err(wiimote, "Pipe creation error (error pipe)");
-		goto ERR_HND;
-	}
-	error_pipe_init = 1;
 	if (pipe(wiimote->rw_pipe)) {
 		cwiid_err(wiimote, "Pipe creation error (rw pipe)");
 		goto ERR_HND;
@@ -247,12 +245,6 @@ ERR_HND:
 				cwiid_err(wiimote, "Pipe close error (status pipe)");
 			}
 		}
-		if (error_pipe_init) {
-			if (close(wiimote->error_pipe[0]) ||
-			  close(wiimote->error_pipe[1])) {
-				cwiid_err(wiimote, "Pipe close error (error pipe)");
-			}
-		}
 		if (rw_pipe_init) {
 			if (close(wiimote->rw_pipe[0]) || close(wiimote->rw_pipe[1])) {
 				cwiid_err(wiimote, "Pipe close error (rw pipe)");
@@ -327,9 +319,6 @@ int cwiid_disconnect(struct wiimote *wiimote)
 	}
 	if (close(wiimote->status_pipe[0]) || close(wiimote->status_pipe[1])) {
 		cwiid_err(wiimote, "Pipe close error (status pipe)");
-	}
-	if (close(wiimote->error_pipe[0]) || close(wiimote->error_pipe[1])) {
-		cwiid_err(wiimote, "Pipe close error (error pipe)");
 	}
 	if (close(wiimote->rw_pipe[0]) || close(wiimote->rw_pipe[1])) {
 		cwiid_err(wiimote, "Pipe close error (rw pipe)");

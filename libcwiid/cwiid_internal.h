@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * remove error_pipe
+ *  * add struct mesg_array to process_error
+ *
  *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added timestamp to mesg_array
  *
@@ -175,7 +179,6 @@ struct wiimote {
 	pthread_t mesg_callback_thread;
 	int mesg_pipe[2];
 	int status_pipe[2];
-	int error_pipe[2];
 	int rw_pipe[2];
 	struct cwiid_state state;
 	enum rw_status rw_status;
@@ -207,7 +210,7 @@ int cancel_rw(struct wiimote *wiimote);
 int cancel_mesg_callback(struct wiimote *wiimote);
 
 /* process.c */
-int process_error(struct wiimote *, ssize_t);
+int process_error(struct wiimote *, ssize_t, struct mesg_array *);
 int process_status(struct wiimote *, const unsigned char *,
                    struct mesg_array *);
 int process_btn(struct wiimote *, const unsigned char *, struct mesg_array *);
