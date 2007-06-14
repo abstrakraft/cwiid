@@ -1,3 +1,6 @@
+2007-06-14 L. Donnie Smith <cwiid@abstrakraft.org>
+	* added sleep after cwiid_find_wiimote call
+
 2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
 	python
 	* removed Wiimote_FromC function

@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added sleep after cwiid_find_wiimote call
+ *
  *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * remove error_pipe init and destruct
  *  * renamed connect and disconnect to open and close
@@ -96,6 +99,7 @@ cwiid_wiimote_t *cwiid_open(bdaddr_t *bdaddr, int flags)
 		if (cwiid_find_wiimote(bdaddr, 5)) {
 			goto ERR_HND;
 		}
+		sleep(1);
 	}
 
 	/* Connect to Wiimote */
