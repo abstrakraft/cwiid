@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiidabstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for wmplugin_exec prototype change (&mesg->mesg)
+ *
  *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * changed cwiid_{connect,disconnect,command} to
  *    cwiid_{open,close,request_status|set_led|set_rumble|set_rpt_mode}
@@ -91,14 +94,14 @@ int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 
 	data.buttons = 0;
 
-	if (wmplugin_set_report_mode(id, CWIID_RPT_IR)) {
+	if (wmplugin_set_rpt_mode(id, CWIID_RPT_IR)) {
 		return -1;
 	}
 
 	return 0;
 }
 
-struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
+struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
 {
 	int i;
 	uint8_t flags;
@@ -107,8 +110,8 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
 
 	ir_mesg = NULL;
 	for (i=0; i < mesg_count; i++) {
-		if (mesg[i]->type == CWIID_MESG_IR) {
-			ir_mesg = &mesg[i]->ir_mesg;
+		if (mesg[i].type == CWIID_MESG_IR) {
+			ir_mesg = &mesg[i].ir_mesg;
 		}
 	}
 

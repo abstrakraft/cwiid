@@ -15,6 +15,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * refactored to isolate plugin logic
+ *
+ *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added python plugin support
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for libcwiid rename
  *
@@ -132,16 +138,21 @@ struct axis_map {
 	uint8_t flags;
 };
 
+enum plugin_type {
+	PLUGIN_C,
+	PLUGIN_PYTHON
+};
+
 struct plugin {
 	char *name;
-	struct wmplugin_info *info;
-	void *handle;
-	wmplugin_init_t *init;
-	wmplugin_exec_t *exec;
+	enum plugin_type type;
 	uint8_t rpt_mode_flags;
+	struct wmplugin_info *info;
+	struct wmplugin_data *data;
 	uint16_t prev_buttons;
 	struct btn_map bmap[WMPLUGIN_MAX_BUTTON_COUNT];
 	struct axis_map amap[WMPLUGIN_MAX_AXIS_COUNT];
+	void *p;
 };
 
 #define CONF_MAX_INCLUDE_DEPTH	10

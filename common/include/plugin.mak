@@ -7,10 +7,10 @@ DEPS    = $(SOURCES:.c=.d)
 
 CFLAGS += -fpic
 
-#TODO:unify the way DESTDIR is handled
-#Currently, defs.mak adds DESTDIR to the plugin INST_DIR,
+#TODO:unify the way ROOTDIR is handled
+#Currently, defs.mak adds ROOTDIR to the plugin INST_DIR,
 #so we don't do it here
-#DEST_INST_DIR = $(DESTDIR)/$(INST_DIR)
+#DEST_INST_DIR = $(ROOTDIR)/$(INST_DIR)
 DEST_INST_DIR = $(INST_DIR)
 
 all: $(LIB_NAME)

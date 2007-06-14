@@ -4,13 +4,15 @@ include @top_builddir@/defs.mak
 
 APP_NAME = wminput
 
-SOURCES = main.c conf.c uinput.c action_enum.c parser.c lexer.c util.c
+SOURCES = main.c conf.c c_plugin.c py_plugin.c uinput.c action_enum.c parser.c \
+	lexer.c util.c
 
 WMINPUT_CONFIG_DIR = $(CWIID_CONFIG_DIR)/wminput
-CFLAGS += -I@top_builddir@/libcwiid \
+CFLAGS += -I@top_builddir@/libcwiid -I/usr/include/python@PYTHON_VERSION@ \
 	-DWMINPUT_CONFIG_DIR=\"$(WMINPUT_CONFIG_DIR)\" \
-	-DCWIID_PLUGINS_DIR=\"$(CWIID_PLUGINS_DIR)\"
-LDLIBS += -lcwiid -ldl
+	-DCWIID_PLUGINS_DIR=\"$(CWIID_PLUGINS_DIR)\" \
+ 	-DCWIID_VERSION=\"${PACKAGE_VERSION}\"
+LDLIBS += -lcwiid -ldl -lpython@PYTHON_VERSION@
 LDFLAGS += -L@top_builddir@/libcwiid -rdynamic
 INST_DIR = @bindir@
 

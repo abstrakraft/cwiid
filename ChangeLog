@@ -1,3 +1,47 @@
+2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
+	python
+	* removed Wiimote_FromC function
+	* added bdaddr argument to Wiimote.init
+	* overloaded Wiimote.init to accept CObject (existing wiimote),
+	  and logic to avoid closing it on dealloc
+
+	wminput
+	* refactored to isolate plugin logic
+	* now imports python plugins without changing directories
+
+2007-06-01 Nick <nickishappy@gmail.com>
+	lswm
+	* reworked command-line options (added standard options, long options)
+
+	wminput
+	* reworked command-line options (added standard options, long options)
+
+2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
+	python
+	* added Wiimote_FromC
+	* exported Wiimote_FromC and ConvertMesgArray as CObjects
+	* added get_acc_cal
+
+	wminput
+	* added pyplugin.c, pyplugin.h
+	* changed wmplugin_exec prototype (&mesg->mesg)
+	* changed param format (pass pointers)
+	* added python plugin support (experimental)
+
+2007-05-30 L. Donnie Smith <cwiid@abstrakraft.org>
+	configure.ac
+	* added python/Makefile and PYTHON_VERSION variable
+
+	build system
+	* added ROOTDIR (massaged DESTDIR)
+
+	python
+	* added directory
+
+2007-05-27 Arthur Peters <amp@singingwizard.org>
+	python
+	* removed set_mesg_callback from methods table
+
 2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
 	libcwiid
 	* removed error_pipe

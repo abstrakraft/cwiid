@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-01 Nick <nickishappy@gmail.com>
+ *  * reworked command-line options (added standard options, long options)
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for libcwiid rename
  *
@@ -31,15 +34,19 @@
 #include <unistd.h>
 #include <bluetooth/bluetooth.h>
 #include <cwiid.h>
+#include <getopt.h>
 
-#define OPTSTRING	"ahlq"
-
-#define USAGE \
-	"%s [OPTIONS]\n" \
-	"  -a  list all bluetooth devices (not just wiimotes)\n" \
-	"  -h  print this help message\n" \
-	"  -l  long format (device details)\n" \
-	"  -q  quiet mode\n"
+void print_usage(void)
+{
+	printf("lswm lists availiable wiimotes\n");
+	printf("Usage: %s [OPTIONS]...\n\n", "lswm");
+	printf("Options:\n");
+	printf("\t-h, --help\t\tPrints this output.\n");
+	printf("\t-v, --version\t\toutput version information and exit.\n");
+	printf("\t-l, --long\t\tlong format (device details).\n");
+	printf("\t-q, --quiet\t\tquiet mode (less verbose).\n");
+	printf("\t-a, --all\t\tlist all bluetooth devices (not just wiimotes).\n");
+}
 
 int main(int argc, char *argv[])
 {
@@ -53,10 +60,27 @@ int main(int argc, char *argv[])
 	char ba_str[18];
 
 	/* Parse options */
-	while ((c = getopt(argc, argv, OPTSTRING)) != -1) {
+	while (1) {
+		int option_index = 0;
+
+		static struct option long_options[] = {
+			{"help", 0, 0, 'h'},
+			{"all", 0, 0, 'a'},
+			{"long", 0, 0, 'l'},
+			{"version", 0, 0, 'v'},
+			{"quiet", 0, 0, 'q'},
+			{0, 0, 0, 0}
+		};
+
+		c = getopt_long(argc, argv, "halvq", long_options, &option_index);
+
+		if (c == -1) {
+			break;
+		}
+
 		switch (c) {
 		case 'h':
-			printf(USAGE, argv[0]);
+			print_usage();
 			return 0;
 			break;
 		case 'a':
@@ -65,18 +89,20 @@ int main(int argc, char *argv[])
 		case 'l':
 			long_format = 1;
 			break;
+		case 'v':
+			printf("CWiid Version %s\n", CWIID_VERSION);
+			return 0;
+			break;
 		case 'q':
 			quiet = 1;
 			break;
 		case '?':
 		default:
-			fprintf(stderr, "Try '%s -h' for more information\n", argv[0]);
+			fprintf(stderr, "Try '%s --help' for more information\n", argv[0]);
 			return -1;
 			break;
 		}
 	}
-
-	/* TODO: check for other stuff on the command-line? */
 
 	/* Handle quiet mode */
 	if (quiet) {
@@ -111,4 +137,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-

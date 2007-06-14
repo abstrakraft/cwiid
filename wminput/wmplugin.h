@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * changed wmplugin_exec prototype (pass mesg instead of &mesg)
+ *  * changed param interface (pass pointers)
+ *
  *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for libcwiid rename
  *
@@ -58,15 +62,10 @@ enum wmplugin_param_type {
 	WMPLUGIN_PARAM_FLOAT
 };
 
-union wmplugin_param_value {
-	int Int;
-	float Float;
-};
-
 struct wmplugin_param_info {
 	char *name;
 	enum wmplugin_param_type type;
-	union wmplugin_param_value value;
+	void *ptr;
 };
 
 struct wmplugin_info {
@@ -90,10 +89,9 @@ struct wmplugin_data {
 
 typedef struct wmplugin_info *wmplugin_info_t(void);
 typedef int wmplugin_init_t(int, cwiid_wiimote_t *);
-typedef struct wmplugin_data *wmplugin_exec_t(int, union cwiid_mesg * []);
+typedef struct wmplugin_data *wmplugin_exec_t(int, union cwiid_mesg []);
 
-int wmplugin_set_report_mode(int id, uint8_t flags);
+int wmplugin_set_rpt_mode(int id, uint8_t rpt_mode);
 void wmplugin_err(int id, char *str, ...);
 
 #endif
-
