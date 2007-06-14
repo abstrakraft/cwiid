@@ -2,7 +2,7 @@
 
 include @top_builddir@/defs.mak
 
-DEST_MAN_DIR = $(DESTDIR)/$(mandir)
+DEST_MAN_DIR = $(ROOTDIR)$(mandir)
 
 all:
 

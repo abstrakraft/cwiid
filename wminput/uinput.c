@@ -290,4 +290,3 @@ void *uinput_listen(struct uinput_listen_data *data)
 		}
 	} while (-1);
 }
-

@@ -15,6 +15,16 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * refactored to isolate plugin logic
+ *
+ *  2007-06-03 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * fixed plugin->data malloc bug
+ *
+ *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added python plugin support
+ *  * changed param interface (pass pointers)
+ *
  *  2007-04-15 <work.eric@gmail.com>
  *  * fixed classic controller configuration bug
  *
@@ -32,14 +42,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dlfcn.h>
-#include <unistd.h>
-
 #include "conf.h"
 #include "util.h"
 #include "y.tab.h"
+#include "c_plugin.h"
+#include "py_plugin.h"
 
 extern FILE *yyin;
 extern int yyparse();
@@ -84,10 +91,14 @@ int conf_unload(struct conf *conf)
 	for (i=0; i < CONF_MAX_PLUGINS; i++) {
 		if (conf->plugins[i].name) {
 			free(conf->plugins[i].name);
-			dlclose(conf->plugins[i].handle);
-		}
-		else {
-			break;
+			switch (conf->plugins[i].type) {
+			case PLUGIN_C:
+				c_plugin_close(&conf->plugins[i]);
+				break;
+			case PLUGIN_PYTHON:
+				py_plugin_close(&conf->plugins[i]);
+				break;
+			}
 		}
 	}
 
@@ -325,16 +336,16 @@ int conf_plugin_param_int(struct conf *conf, const char *name,
 		return -1;
 	}
 
-	switch (plugin->info->param_info[i].type) {
-	case WMPLUGIN_PARAM_INT:
-		plugin->info->param_info[i].value.Int = value;
+	switch (plugin->type) {
+	case PLUGIN_C:
+		if (c_plugin_param_int(plugin, i, value)) {
+			return -1;
+		}
 		break;
-	case WMPLUGIN_PARAM_FLOAT:
-		plugin->info->param_info[i].value.Float = (float) value;
-		break;
-	default:
-		wminput_err("unknown parameter type: %s.%s", name, param);
-		return -1;
+	case PLUGIN_PYTHON:
+		if (py_plugin_param_int(plugin, i, value)) {
+			return -1;
+		}
 		break;
 	}
 
@@ -364,18 +375,16 @@ int conf_plugin_param_float(struct conf *conf, const char *name,
 		return -1;
 	}
 
-	switch (plugin->info->param_info[i].type) {
-	case WMPLUGIN_PARAM_INT:
-		wminput_err("possible loss of precision: %s.%s (cast float to int)",
-		            name, param);
-		plugin->info->param_info[i].value.Int = value;
+	switch (plugin->type) {
+	case PLUGIN_C:
+		if (c_plugin_param_float(plugin, i, value)) {
+			return -1;
+		}
 		break;
-	case WMPLUGIN_PARAM_FLOAT:
-		plugin->info->param_info[i].value.Float = value;
-		break;
-	default:
-		wminput_err("unknown parameter type: %s.%s", name, param);
-		return -1;
+	case PLUGIN_PYTHON:
+		if (py_plugin_param_float(plugin, i, value)) {
+			return -1;
+		}
 		break;
 	}
 
@@ -555,14 +564,11 @@ int lookup_action(const char *str_action)
 	return -1;
 }
 
-#define PLUGIN_PATHNAME_LEN	128
 struct plugin *get_plugin(struct conf *conf, const char *name)
 {
 	int i;
-	char pathname[PLUGIN_PATHNAME_LEN];
+	char plugin_found = 0;
 	struct plugin *plugin;
-	struct stat buf;
-	wmplugin_info_t *info;
 
 	for (i=0; i < CONF_MAX_PLUGINS; i++) {
 		if (!conf->plugins[i].name) {
@@ -577,60 +583,27 @@ struct plugin *get_plugin(struct conf *conf, const char *name)
 		wminput_err("maximum number of plugins exceeded");
 		return NULL;
 	}
-	else {
-		plugin = &conf->plugins[i];
-		plugin->name = (char *)name;
 
-		for (i=0; conf->plugin_search_dirs[i]; i++) {
-			snprintf(pathname, PLUGIN_PATHNAME_LEN, "%s/%s.so",
-			         conf->plugin_search_dirs[i], name);
-			if (!stat(pathname, &buf)) {
-				if (!(plugin->handle = dlopen(pathname, RTLD_NOW))) {
-					wminput_err(dlerror());
-				}
-				break;
-			}
-		}
+	plugin = &conf->plugins[i];
+	plugin->name = (char *)name;
 
-		if (!plugin->handle) {
-			wminput_err("plugin not found: %s", name);
-			free(plugin->name);
-			plugin->name = NULL;
-			return NULL;
+	for (i=0; conf->plugin_search_dirs[i]; i++) {
+		if (!c_plugin_open(plugin, conf->plugin_search_dirs[i])) {
+			plugin_found = 1;
+			break;
 		}
-		else if ((info = dlsym(plugin->handle, "wmplugin_info")) ==
-		         NULL) {
-			wminput_err("Unable to load plugin info function: %s", dlerror());
-			free(plugin->name);
-			plugin->name = NULL;
-			dlclose(plugin->handle);
-			return NULL;
+		if (!py_plugin_open(plugin, conf->plugin_search_dirs[i])) {
+			plugin_found = 1;
+			break;
 		}
-		else if ((plugin->info = (*info)()) == NULL) {
-			wminput_err("Invalid plugin info from %s", plugin->name);
-			free(plugin->name);
-			plugin->name = NULL;
-			dlclose(plugin->handle);
-			return NULL;
-		}
-		else if ((plugin->init = dlsym(plugin->handle, "wmplugin_init")) ==
-		         NULL) {
-			wminput_err("Unable to load plugin init function: %s", dlerror());
-			free(plugin->name);
-			plugin->name = NULL;
-			dlclose(plugin->handle);
-			return NULL;
-		}
-		else if ((plugin->exec = dlsym(plugin->handle, "wmplugin_exec")) ==
-		         NULL) {
-			wminput_err("Unable to load plugin exec function: %s", dlerror());
-			free(plugin->name);
-			plugin->name = NULL;
-			dlclose(plugin->handle);
-			return NULL;
-		}
+	}
+
+	if (!plugin_found) {
+		wminput_err("plugin not found: %s", name);
+		free(plugin->name);
+		plugin->name = NULL;
+		return NULL;
 	}
 
 	return plugin;
 }
-

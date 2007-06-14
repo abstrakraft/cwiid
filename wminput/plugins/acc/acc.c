@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * updated for wmplugin_exec prototype change (&mesg->mesg)
+ *  * updated for param interface change (pass pointers)
+ *
  *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * use cwiid_get_acc_cal to get acc calibration values
  *
@@ -58,6 +62,11 @@ wmplugin_init_t wmplugin_init;
 wmplugin_exec_t wmplugin_exec;
 static void process_acc(struct cwiid_acc_mesg *mesg);
 
+static float Roll_Scale = 1.0;
+static float Pitch_Scale = 1.0;
+static float X_Scale = 1.0;
+static float Y_Scale = 1.0;
+
 struct wmplugin_info *wmplugin_info() {
 	if (!info_init) {
 		info.button_count = 0;
@@ -89,16 +98,16 @@ struct wmplugin_info *wmplugin_info() {
 		info.param_count = 4;
 		info.param_info[0].name = "Roll_Scale";
 		info.param_info[0].type = WMPLUGIN_PARAM_FLOAT;
-		info.param_info[0].value.Float = 1.0;
+		info.param_info[0].ptr = &Roll_Scale;
 		info.param_info[1].name = "Pitch_Scale";
 		info.param_info[1].type = WMPLUGIN_PARAM_FLOAT;
-		info.param_info[1].value.Float = 1.0;
+		info.param_info[1].ptr = &Pitch_Scale;
 		info.param_info[2].name = "X_Scale";
 		info.param_info[2].type = WMPLUGIN_PARAM_FLOAT;
-		info.param_info[2].value.Float = 1.0;
+		info.param_info[2].ptr = &X_Scale;
 		info.param_info[3].name = "Y_Scale";
 		info.param_info[3].type = WMPLUGIN_PARAM_FLOAT;
-		info.param_info[3].value.Float = 1.0;
+		info.param_info[3].ptr = &Y_Scale;
 		info_init = 1;
 	}
 	return &info;
@@ -111,7 +120,7 @@ int wmplugin_init(int id, cwiid_wiimote_t *wiimote)
 	data.buttons = 0;
 	data.axes[0].valid = 1;
 	data.axes[1].valid = 1;
-	if (wmplugin_set_report_mode(id, CWIID_RPT_ACC)) {
+	if (wmplugin_set_rpt_mode(id, CWIID_RPT_ACC)) {
 		return -1;
 	}
 
@@ -123,15 +132,15 @@ int wmplugin_init(int id, cwiid_wiimote_t *wiimote)
 	return 0;
 }
 
-struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg *mesg[])
+struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
 {
 	int i;
 	struct wmplugin_data *ret = NULL;
 
 	for (i=0; i < mesg_count; i++) {
-		switch (mesg[i]->type) {
+		switch (mesg[i].type) {
 		case CWIID_MESG_ACC:
-			process_acc(&mesg[i]->acc_mesg);
+			process_acc(&mesg[i].acc_mesg);
 			ret = &data;
 			break;
 		default:
@@ -169,20 +178,20 @@ static void process_acc(struct cwiid_acc_mesg *mesg)
 
 	pitch = atan(a_y/a_z*cos(roll));
 
-	data.axes[0].value = roll  * 1000 * info.param_info[0].value.Float;
-	data.axes[1].value = pitch * 1000 * info.param_info[1].value.Float;
+	data.axes[0].value = roll  * 1000 * Roll_Scale;
+	data.axes[1].value = pitch * 1000 * Pitch_Scale;
 
 	if ((a > 0.85) && (a < 1.15)) {
 		if ((fabs(roll)*(180/PI) > 10) && (fabs(pitch)*(180/PI) < 80)) {
 			data.axes[2].valid = 1;
-			data.axes[2].value = roll * 5 * info.param_info[2].value.Float;
+			data.axes[2].value = roll * 5 * X_Scale;
 		}
 		else {
 			data.axes[2].valid = 0;
 		}
 		if (fabs(pitch)*(180/PI) > 10) {
 			data.axes[3].valid = 1;
-			data.axes[3].value = pitch * 10 * info.param_info[3].value.Float;
+			data.axes[3].value = pitch * 10 * Y_Scale;
 		}
 		else {
 			data.axes[3].valid = 0;

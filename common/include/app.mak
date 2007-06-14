@@ -5,7 +5,7 @@ DEPS    = $(SOURCES:.c=.d)
 
 INST_DIR ?= /usr/local/bin
 
-DEST_INST_DIR = $(DESTDIR)/$(INST_DIR)
+DEST_INST_DIR = $(ROOTDIR)$(INST_DIR)
 
 all: $(APP_NAME)
 

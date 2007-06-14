@@ -1,0 +1,25 @@
+#Copyright (C) 2007 Justin M. Tulloss
+
+#TODO: Fix /usr/local path issue
+
+include @top_builddir@/defs.mak
+
+ifdef ROOTDIR
+	SET_ROOT_DIR = "--root=$(ROOTDIR)"
+endif
+
+all:
+	python setup.py build_ext $(DEBUGFLAGS) -I@top_builddir@/libcwiid -L@top_builddir@/libcwiid -lcwiid
+
+install:
+	python setup.py install $(SET_ROOT_DIR)
+
+uninstall:
+
+clean:
+	rm -rf build
+
+distclean: clean
+	rm Makefile
+
+.PHONY: all install uninstall clean distclean

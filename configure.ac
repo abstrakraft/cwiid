@@ -1,4 +1,8 @@
 # ChangeLog:
+# 2007-05-30 L. Donnie Smith <cwiid@abstrakraft.org>
+# * added python/Makefile
+# * added PYTHON_VERSION variable
+#
 # 2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
 # * updated for libcwiid rename
 #
@@ -31,6 +35,9 @@ AC_PROG_YACC
 if test "$YACC" != "bison -y"; then
 	AC_MSG_ERROR([bison not found])
 fi
+
+PYTHON_VERSION=[`python -c 'import sys; print sys.version[:3]'`]
+AC_SUBST(PYTHON_VERSION)
 
 AC_CHECK_LIB([pthread], [pthread_create],,
 	AC_MSG_ERROR([pthread library not found]))
@@ -104,5 +111,6 @@ AC_OUTPUT(
 	[wminput/plugins/acc/Makefile]
 	[wminput/plugins/nunchuk_acc/Makefile]
 	[lswm/Makefile]
+	[python/Makefile]
 	)
 

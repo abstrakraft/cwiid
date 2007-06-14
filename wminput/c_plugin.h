@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,23 +16,22 @@
  *
  *  ChangeLog:
  *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * refactored to isolate plugin logic
- *
- *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  */
 
-#include <stdarg.h>
-#include <stdio.h>
+#ifndef C_PLUGIN_H
+#define C_PLUGIN_H
 
-#include "wmplugin.h"
+int c_init(void);
+int c_wiimote(cwiid_wiimote_t *wiimote);
+void c_deinit(void);
+int c_plugin_open(struct plugin *plugin, char *dir);
+void c_plugin_close(struct plugin *plugin);
+int c_plugin_init(struct plugin *plugin, int id);
+int c_plugin_exec(struct plugin *plugin, int mesg_count,
+                   union cwiid_mesg mesg[]);
+int c_plugin_param_int(struct plugin *plugin, int i, int value);
+int c_plugin_param_float(struct plugin *plugin, int i, float value);
 
-void wminput_err(char *str, ...)
-{
-	va_list ap;
+#endif
 
-	va_start(ap, str);
-	vfprintf(stderr, str, ap);
-	fprintf(stderr, "\n");
-	va_end(ap);
-}

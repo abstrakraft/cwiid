@@ -4,7 +4,7 @@ include @top_builddir@/defs.mak
 
 docfiles = Xmodmap wminput.list
 
-DEST_DOC_DIR = $(DESTDIR)/$(docdir)
+DEST_DOC_DIR = $(ROOTDIR)$(docdir)
 
 all:
 
