@@ -1,5 +1,9 @@
 2007-06-14 L. Donnie Smith <cwiid@abstrakraft.org>
+	libcwiid
 	* added sleep after cwiid_find_wiimote call
+
+	python
+	* added --prefix option to install script
 
 2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
 	python
