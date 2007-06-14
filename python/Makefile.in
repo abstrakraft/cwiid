@@ -12,7 +12,7 @@ all:
 	python setup.py build_ext $(DEBUGFLAGS) -I@top_builddir@/libcwiid -L@top_builddir@/libcwiid -lcwiid
 
 install:
-	python setup.py install $(SET_ROOT_DIR)
+	python setup.py install --prefix=${prefix} $(SET_ROOT_DIR)
 
 uninstall:
 
