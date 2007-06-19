@@ -19,6 +19,9 @@
  * Boston, MA  02110-1301  USA
  *
  * ChangeLog:
+ * 2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
+ * * revised error messages and doc strings
+ *
  * 2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
  * * removed Wiimote_FromC function
  * * added bdaddr argument to Wiimote.init
@@ -96,21 +99,23 @@ PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[]);
 static PyMethodDef Wiimote_Methods[] =
 {
 	{"close", (PyCFunction)Wiimote_close, METH_NOARGS,
-	 "close wiimote connection"},
+	 "close()\n\nClose the Wiimote connection"},
 	{"enable", (PyCFunction)Wiimote_enable, METH_VARARGS | METH_KEYWORDS,
-	 "enable flags on wiimote"},
+	 "enable(flags)\n\nenable Wiimote connection flags"},
 	{"disable", (PyCFunction)Wiimote_disable, METH_VARARGS | METH_KEYWORDS,
-	 "disable flags on wiimote"},
+	 "disable(flags)\n\ndisable Wiimote connection flags"},
 	{"get_mesg", (PyCFunction)Wiimote_get_mesg, METH_NOARGS,
-	 "blocking call to get messages"},
+	 "get_mesg() -> message list\n\nretrieve message list from queue"},
 	{"get_acc_cal", (PyCFunction)Wiimote_get_acc_cal,
-	 METH_VARARGS | METH_KEYWORDS, "get accelerometer calibration"},
+	 METH_VARARGS | METH_KEYWORDS,
+	 "get_acc_cal(extension) -> calibration tuple\n\n"
+	 "retrieve calibration information"},
 	{"request_status", (PyCFunction)Wiimote_request_status, METH_NOARGS,
-	 "request status message"},
+	 "request_status()\n\nrequest status message"},
 	{"read", (PyCFunction)Wiimote_read, METH_VARARGS | METH_KEYWORDS,
-	 "read from wiimote"},
+	 "read(flags,offset,len) -> buffer\n\nread data from Wiimote"},
 	{"write", (PyCFunction)Wiimote_write, METH_VARARGS | METH_KEYWORDS,
-	 "write to wiimote"},
+	 "write(flags,offset,buffer)\n\nwrite data to Wiimote"},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -147,7 +152,7 @@ PyTypeObject Wiimote_Type = {
 	0,						/* tp_setattro */
 	0,						/* tp_as_buffer */
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
-	"cwiid c-python interface",	/* tp_doc */
+	"CWiid Wiimote connection object",	/* tp_doc */
 	0,						/* tp_traverse */
 	0,						/* tp_clear */
 	0,						/* tp_richcompare */
@@ -193,19 +198,6 @@ static void Wiimote_dealloc(Wiimote *self)
 	self->ob_type->tp_free((PyObject *)self);
 }
 
-static int cwiid_start(Wiimote *self, int flags)
-{
-	cwiid_wiimote_t *wiimote;
-
-	/* Set up wiimote */
-
-	/* keep pyobject with wiimote */
-	cwiid_set_data(wiimote,self);
-	/* keep wiimote with pyobject */
-	self->wiimote = wiimote;
-	return 0;
-}
-
 static int Wiimote_init(Wiimote* self, PyObject* args, PyObject *kwds)
 {
 	static char *kwlist[] = {"bdaddr", "flags", NULL};
@@ -233,7 +225,7 @@ static int Wiimote_init(Wiimote* self, PyObject* args, PyObject *kwds)
 
 		if (str_bdaddr) {
 			if (str2ba(str_bdaddr, &bdaddr)) {
-				PyErr_SetString(PyExc_IOError, "bad bdaddr");
+				PyErr_SetString(PyExc_ValueError, "bad bdaddr");
 				return -1;
 			}
 		}
@@ -242,7 +234,8 @@ static int Wiimote_init(Wiimote* self, PyObject* args, PyObject *kwds)
 		}
 
 		if (!(wiimote = cwiid_open(&bdaddr, flags))) {
-			PyErr_SetString(PyExc_IOError, "Could not open wiimote");
+			PyErr_SetString(PyExc_RuntimeError,
+			                "Error opening wiimote connection");
 			return -1;
 		}
 		else {
@@ -258,7 +251,8 @@ static int Wiimote_init(Wiimote* self, PyObject* args, PyObject *kwds)
 static PyObject *Wiimote_close(Wiimote *self)
 {
 	if (cwiid_close(self->wiimote)) {
-		PyErr_SetString(PyExc_IOError, "Wiimote close error");
+		PyErr_SetString(PyExc_RuntimeError,
+		                "Error closing wiimote connection");
 		self->wiimote = NULL;
 		return NULL;
 	}
@@ -278,7 +272,7 @@ static PyObject *Wiimote_enable(Wiimote *self, PyObject *args, PyObject *kwds)
 	}
 
 	if (cwiid_enable(self->wiimote, flags)) {
-		PyErr_SetString(PyExc_IOError, "cwiid_enable error");
+		PyErr_SetString(PyExc_RuntimeError, "Error enabling wiimote flags");
 		return NULL;
 	}
 
@@ -296,7 +290,7 @@ static PyObject *Wiimote_disable(Wiimote *self, PyObject *args, PyObject *kwds)
 	}
 
 	if (cwiid_disable(self->wiimote, flags)) {
-		PyErr_SetString(PyExc_IOError, "cwiid_disable error");
+		PyErr_SetString(PyExc_RuntimeError, "Error disabling wiimote flags");
 		return NULL;
 	}
 
@@ -316,13 +310,15 @@ static int
 
 	if ((OldCallback == Py_None) && (NewCallback != Py_None)) {
 		if (cwiid_set_mesg_callback(self->wiimote, CallbackBridge)) {
-			PyErr_SetString(PyExc_IOError, "set callback error");
+			PyErr_SetString(PyExc_AttributeError,
+			                "Error setting wiimote callback");
 			return -1;
 		}
 	}
 	else if ((OldCallback != Py_None) && (NewCallback == Py_None)) {
 		if (cwiid_set_mesg_callback(self->wiimote, NULL)) {
-			PyErr_SetString(PyExc_IOError, "set callback error");
+			PyErr_SetString(PyExc_AttributeError,
+			                "Error clearing wiimote callback");
 			return -1;
 		}
 	}
@@ -346,7 +342,8 @@ static PyObject *Wiimote_get_mesg(Wiimote *self)
 			Py_RETURN_NONE;
 		}
 		else {
-			PyErr_SetString(PyExc_IOError, "get_mesg error");
+			PyErr_SetString(PyExc_RuntimeError,
+			                "Error getting wiimote message list");
 			return NULL;
 		}
 	}
@@ -540,7 +537,8 @@ static PyObject *Wiimote_get_acc_cal(Wiimote *self, PyObject *args,
 	}
 
 	if (cwiid_get_acc_cal(self->wiimote, ext_type, &acc_cal)) {
-		PyErr_SetString(PyExc_IOError, "Wiimote get acc cal error");
+		PyErr_SetString(PyExc_RuntimeError,
+		                "Error getting wiimote acc calibration");
 		return NULL;
 	}
 
@@ -557,7 +555,7 @@ static PyObject *Wiimote_get_acc_cal(Wiimote *self, PyObject *args,
 static PyObject *Wiimote_request_status(Wiimote *self)
 {
 	if (cwiid_request_status(self->wiimote)) {
-		PyErr_SetString(PyExc_IOError, "Wiimote request status error");
+		PyErr_SetString(PyExc_RuntimeError, "Error requesting wiimote status");
 		return NULL;
 	}
 
@@ -573,7 +571,8 @@ static int Wiimote_set_led(Wiimote *self, PyObject *PyLed, void *closure)
 	}
 
 	if (cwiid_set_led(self->wiimote, (uint8_t)led)) {
-		PyErr_SetString(PyExc_IOError, "Wiimote set led error");
+		PyErr_SetString(PyExc_AttributeError,
+		                "Error setting wiimote led state");
 		return -1;
 	}
 
@@ -590,7 +589,8 @@ static int
 	}
 
 	if (cwiid_set_rumble(self->wiimote, (uint8_t)rumble)) {
-		PyErr_SetString(PyExc_IOError, "Wiimote set rumble error");
+		PyErr_SetString(PyExc_AttributeError,
+		                "Error setting wiimote rumble state");
 		return -1;
 	}
 
@@ -607,7 +607,8 @@ static int
 	}
 
 	if (cwiid_set_rpt_mode(self->wiimote, (uint8_t)rpt_mode)) {
-		PyErr_SetString(PyExc_IOError, "Wiimote set rpt_mode error");
+		PyErr_SetString(PyExc_AttributeError,
+		                "Error setting wiimote report mode");
 		return -1;
 	}
 
@@ -652,7 +653,7 @@ static PyObject *Wiimote_read(Wiimote *self, PyObject *args, PyObject *kwds)
 		return NULL;
 	}
 	if (cwiid_read(self->wiimote,flags,offset,len,buf)) {
-		PyErr_SetString(PyExc_IOError, "Wiimote read error");
+		PyErr_SetString(PyExc_RuntimeError, "Error reading wiimote data");
 		Py_DECREF(pyRetBuf);
 		return NULL;
 	}
@@ -674,7 +675,7 @@ static PyObject *Wiimote_write(Wiimote *self, PyObject *args, PyObject *kwds)
 	}
 
 	if (cwiid_write(self->wiimote, flags, offset, len, buf)) {
-		PyErr_SetString(PyExc_IOError, "Wiimote write error");
+		PyErr_SetString(PyExc_RuntimeError, "Error writing wiimote data");
 		return NULL;
 	}
 

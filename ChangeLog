@@ -1,3 +1,10 @@
+2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
+	wminput
+	* revised error messages
+
+	python
+	* revised error messages and doc strings
+
 2007-06-14 L. Donnie Smith <cwiid@abstrakraft.org>
 	libcwiid
 	* added sleep after cwiid_find_wiimote call

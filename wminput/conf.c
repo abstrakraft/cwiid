@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * revised error messages
+ *
  *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * refactored to isolate plugin logic
  *
@@ -70,7 +73,7 @@ int conf_load(struct conf *conf, const char *conf_name,
 
 	if (yyparse()) {
 		if (fclose(yyin)) {
-			wminput_err("error closing configuration file");
+			wminput_err("Error closing configuration file");
 		}
 		conf_unload(cur_conf);
 		return -1;
@@ -487,7 +490,7 @@ FILE *conf_push_config(struct conf *conf, const char *filename, YYLTYPE *yyloc)
 	const char *stackname;
 
 	if (conf->stack_index+1 >= CONF_MAX_INCLUDE_DEPTH) {
-		wminput_err("maximum include depth exceeded: %s", filename);
+		wminput_err("Maximum include depth exceeded: %s", filename);
 		return NULL;
 	}
 
@@ -511,14 +514,14 @@ FILE *conf_push_config(struct conf *conf, const char *filename, YYLTYPE *yyloc)
 	}
 
 	if (!file) {
-		wminput_err("file not found: %s", filename);
+		wminput_err("File not found: %s", filename);
 		return NULL;
 	}
 
 	conf->stack_index++;
 	if ((conf->config_filename_stack[conf->stack_index] =
 	  malloc(strlen(stackname) + 1)) == NULL) {
-		wminput_err("out of memory");
+		wminput_err("Error allocating pathname");
 		conf->stack_index--;
 		return NULL;
 	}
@@ -580,7 +583,7 @@ struct plugin *get_plugin(struct conf *conf, const char *name)
 	}
 
 	if (i == CONF_MAX_PLUGINS) {
-		wminput_err("maximum number of plugins exceeded");
+		wminput_err("Maximum number of plugins exceeded");
 		return NULL;
 	}
 
@@ -599,7 +602,7 @@ struct plugin *get_plugin(struct conf *conf, const char *name)
 	}
 
 	if (!plugin_found) {
-		wminput_err("plugin not found: %s", name);
+		wminput_err("Plugin not found: %s", name);
 		free(plugin->name);
 		plugin->name = NULL;
 		return NULL;
