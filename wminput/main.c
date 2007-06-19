@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * revised error messages
+ *
  *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * refactored to isolate plugin logic
  *
@@ -164,7 +167,7 @@ int main(int argc, char *argv[])
 	/* Load Config */
 	/* Setup search directory arrays */
 	if ((tmp = getenv("HOME")) == NULL) {
-		wminput_err("unable to find home directory");
+		wminput_err("Unable to find home directory");
 		config_search_dirs[0] = WMINPUT_CONFIG_DIR;
 		plugin_search_dirs[0] = CWIID_PLUGINS_DIR;
 		config_search_dirs[1] = plugin_search_dirs[1] = NULL;
@@ -293,17 +296,17 @@ int main(int argc, char *argv[])
 	printf("Exiting.\n");
 
 	if (pthread_cancel(uinput_listen_thread)) {
-		wminput_err("error canceling uinput listen thread");
+		wminput_err("Error canceling uinput listen thread");
 		ret = -1;
 	}
 	else if (pthread_join(uinput_listen_thread, NULL)) {
-		wminput_err("error joing uinput listen thread");
+		wminput_err("Error joining uinput listen thread");
 		ret = -1;
 	}
 
 	/* disconnect */
 	if (cwiid_close(wiimote)) {
-		wminput_err("error on disconnect");
+		wminput_err("Error on wiimote disconnect");
 		ret = -1;
 	}
 
@@ -328,7 +331,7 @@ int wminput_set_report_mode()
 	}
 
 	if (cwiid_set_rpt_mode(wiimote, rpt_mode_flags)) {
-		wminput_err("error setting report mode");
+		wminput_err("Error setting report mode");
 		return -1;
 	}
 
@@ -364,7 +367,7 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			break;
 		case CWIID_MESG_ERROR:
 			if (kill(getpid(),SIGINT)) {
-				wminput_err("error sending SIGINT");
+				wminput_err("Error sending SIGINT");
 			}
 			break;
 		default:

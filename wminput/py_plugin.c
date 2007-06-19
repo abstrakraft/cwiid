@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * revised error messages
+ *
  *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * relocated all python plugin logic here
  *  * now imports plugins without changing directories
@@ -74,7 +77,7 @@ static struct {
 static PyMethodDef Module_Methods[] = 
 {
 	{"set_rpt_mode", (PyCFunction)set_rpt_mode, METH_VARARGS | METH_KEYWORDS,
-	 "set plugin report mode"},
+	 "set_rpt_mode(id, rpt_mode)\n\nset the plugin report mode"},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -110,7 +113,7 @@ int py_init(void)
 
 	/* note: PyWmPluginModule is a borrowed reference - do not decref */
 	if (!(PyWmPluginModule = Py_InitModule3("wmplugin", Module_Methods,
-	                                       "plugin interface for wminput"))) {
+	                                        "wminput plugin interface"))) {
 		PyErr_Print();
 		goto ERR_HND;
 	}
@@ -123,8 +126,6 @@ int py_init(void)
 			goto ERR_HND;
 		}
 	}
-
-	PyRun_SimpleString("import sys; sys.path.append('.')");
 
 	return 0;
 
@@ -226,7 +227,7 @@ int py_plugin_open(struct plugin *plugin, char *dir)
 	Py_DECREF(PyStr);
 
 	if (!(plugin->p = malloc(sizeof(struct py_plugin)))) {
-		wminput_err("malloc error");
+		wminput_err("Error allocating py_plugin");
 		return -1;
 	}
 
@@ -237,11 +238,11 @@ int py_plugin_open(struct plugin *plugin, char *dir)
 	((struct py_plugin *) plugin->p)->exec = NULL;
 
 	if (!(plugin->info = malloc(sizeof *plugin->info))) {
-		wminput_err("malloc error");
+		wminput_err("Error allocating plugin info");
 		goto ERR_HND;
 	}
 	if (!(plugin->data = malloc(sizeof *plugin->data))) {
-		wminput_err("malloc error");
+		wminput_err("Error allocating plugin data");
 		goto ERR_HND;
 	}
 	if (!(((struct py_plugin *)plugin->p)->init =
@@ -272,7 +273,7 @@ int py_plugin_open(struct plugin *plugin, char *dir)
 		goto ERR_HND;
 	}
 	if (py_plugin_info(plugin, info)) {
-		wminput_err("python_info error");
+		wminput_err("Error on python_info");
 		Py_DECREF((PyObject *)info);
 		goto ERR_HND;
 	}
@@ -333,7 +334,7 @@ static int py_plugin_info(struct plugin *plugin, PyObject *info)
 
 	if (!(PySequence_Check(PyButtonInfo) && PySequence_Check(PyAxisInfo) &&
 	      PySequence_Check(PyParamInfo))) {
-		wminput_err("info not sequences");
+		wminput_err("Type error in wminput_info: info not sequences");
 		goto ERR_HND;
 	}
 
@@ -462,13 +463,13 @@ int py_plugin_exec(struct plugin *plugin, int mesg_count,
 	}
 
 	if (!(PySequence_Check(PyButtonData) && PySequence_Check(PyAxisData))) {
-		wminput_err("exec not sequences");
+		wminput_err("Type error on wminput_exec: exec not sequences");
 		Py_DECREF(PyData);
 		return -1;
 	}
 
 	if (PySequence_Size(PyButtonData) != plugin->info->button_count) {
-		wminput_err("exec bad button sequence");
+		wminput_err("Type error on wminput_exec: bad button sequence");
 		Py_DECREF(PyData);
 		return -1;
 	}
@@ -484,7 +485,7 @@ int py_plugin_exec(struct plugin *plugin, int mesg_count,
 			plugin->data->buttons |= 1<<i;
 		}
 		else if (PyObj != Py_False) {
-			wminput_err("exec bad button value");
+			wminput_err("Type error on wminput_exec: bad button value");
 			Py_DECREF(PyObj);
 			Py_DECREF(PyData);
 			return -1;
@@ -494,7 +495,7 @@ int py_plugin_exec(struct plugin *plugin, int mesg_count,
 	}
 
 	if (PySequence_Size(PyAxisData) != plugin->info->axis_count) {
-		wminput_err("exec bad axis sequence");
+		wminput_err("Error on wminput_exec: bad axis sequence");
 		Py_DECREF(PyData);
 		return -1;
 	}
@@ -509,7 +510,7 @@ int py_plugin_exec(struct plugin *plugin, int mesg_count,
 			plugin->data->axes[i].valid = 0;
 		}
 		else if (!PyInt_Check(PyObj)) {
-			wminput_err("exec bad axis value");
+			wminput_err("Type error on wminput_exec: bad axis value");
 			Py_DECREF(PyObj);
 			Py_DECREF(PyData);
 			return -1;
