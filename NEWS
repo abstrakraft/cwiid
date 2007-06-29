@@ -1,3 +1,10 @@
+0.6.00
+	- renamed libwiimote to libcwiid to avoid naming conflict with other projects
+	- rewrite of libcwiid architecture
+	- Python libcwiid interface
+	- Python wminput plugins
+	- rewrite of ir_ptr plugin
+
 0.5.03
 	- Bugfixes, lswm utility, disconnect messages, wminput infinite wait
 
