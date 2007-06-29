@@ -7,6 +7,7 @@
 
 	wminput
 	* rewrote ir_ptr plugin
+	* supress error for nonexistent python plugins
 
 2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
 	wminput

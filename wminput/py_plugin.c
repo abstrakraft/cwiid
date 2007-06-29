@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-28 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * supress error for nonexistent python plugins
+ *
  *  2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * revised error messages
  *
@@ -200,6 +203,7 @@ int py_plugin_open(struct plugin *plugin, char *dir)
 {
 	PyObject *handle, *info;
 	PyObject *PyStr;
+	PyObject *PyErrType, *PyErr, *PyTraceback;
 
 	if (!(PyStr = PyString_FromString(dir))) {
 		PyErr_Print();
@@ -212,8 +216,19 @@ int py_plugin_open(struct plugin *plugin, char *dir)
 	}
 
 	if (!(handle = PyImport_ImportModule(plugin->name))) {
-		/* TODO: print only syntax errors, not "module not found errors" */
-		PyErr_Print();
+		/* ignore "module not found" errors in top level module */
+		PyErr_Fetch(&PyErrType, &PyErr, &PyTraceback);
+		PyErr_NormalizeException(&PyErrType, &PyErr, &PyTraceback);
+		if (PyErr_GivenExceptionMatches(PyErr, PyExc_ImportError) &&
+		  !PyTraceback) {
+			Py_XDECREF(PyErrType);
+			Py_XDECREF(PyErr);
+		}
+		else {
+			PyErr_Restore(PyErrType, PyErr, PyTraceback);
+			PyErr_Print();
+		}
+
 		if (PySequence_DelItem(PyPath, 0)) {
 			PyErr_Print();
 		}
