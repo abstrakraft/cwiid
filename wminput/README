@@ -90,3 +90,4 @@ Plugins are by default installed in /usr/local/lib/cwiid/plugins.  Plugin search
 
 For developers, the plugin API is specified in cwiid/wminput/wmplugin.h.  The examples cover most of the functionality, except buttons, which are triggered by asserting the i^th bit of the buttons element of struct wmplugin_data, where i is the index of the button.
 
+Plugins may now be implemented in Python, as well as C.  A Python version of the acc plugin may be found in cwiid/wminput/plugins/acc.

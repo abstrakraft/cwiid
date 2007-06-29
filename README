@@ -23,14 +23,15 @@ DESCRIPTION
 ------------------------------------------------------------------------------------------------
 The CWiid package contains the following parts:
 1.libcwiid - wiimote API.
-2.wmgui - GTK gui to the wiimote.
-3.wminput - an event/joystick/mouse driver for the wiimote.
-4.lswm - list wiimote devices (in the spirit of ls{,pci,usb}, etc.
-4.wmdemo - a minimal demonstration of the libwiimote API. (not installed)
+2.cwiid module - python interface to libcwiid
+3.wmgui - GTK gui to the wiimote.
+4.wminput - an event/joystick/mouse driver for the wiimote.
+5.lswm - list wiimote devices (in the spirit of ls{,pci,usb}, etc.
+6.wmdemo - a minimal demonstration of the libwiimote API. (not installed)
 
 REQUIREMENTS
 ------------------------------------------------------------------------------------------------
-awk, bison, flex, bluez-libs, gtk+-2 dev libs, uinput kernel support, kernel sources
+awk, bison, flex, bluez-libs, gtk+-2 dev libs, python 2.4 or greater, uinput kernel support, kernel sources
 
 INSTALLATION
 ------------------------------------------------------------------------------------------------
@@ -40,11 +41,11 @@ sudo make install
 
 To install global configuration files to the more familiar /etc rather than /usr/etc or /usr/local/etc, execute configure with --sysconfdir=/etc.
 
-While CWiid is still in the early development stages, installation directories and filenames are changed more often than in a mature, stable package.  In order to prevent the collection of obselete directories and files, it is recommended that you run 'make uninstall && make uninstall_config' from your current CWiid source directory before installing a new one.  Files are currently installed to the following directories: /usr/local/{bin,etc,lib,lib/cwiid}.  Recently, but no longer, used directories include /usr/share/CWiid - this directory may be deleted.
+While CWiid is still in the early development stages, installation directories and filenames are changed more often than in a mature, stable package.  In order to prevent the collection of obselete directories and files, it is recommended that you run 'make uninstall && make uninstall_config' from your current CWiid source directory before installing a new one.  Files are currently installed to the following directories: /usr/local/{bin,etc,lib,lib/cwiid,lib/python2.X/site-packages,share/doc,share/man}.  Recently, but no longer, used directories include /usr/share/CWiid - this directory may be deleted.
 
 Many distributions do not have /usr/local/lib in the library search path, and on many of these same distributions, the library installation directory (as determined by autoconf) is /usr/local/lib, creating a problem when you try to run programs depending on libraries installed there. There are two clean ways to fix this:
 1.Add a --prefix=/usr argument to ./configure
-2.Add /usr/local/lib to /etc/ld.so.conf, then run ldconfig. 
+2.Add /usr/local/lib to /etc/ld.so.conf, then run ldconfig.
 
 I prefer the second method since it keeps local software in the local directory where it should be, and it fixes the problem for every package using /usr/local/lib, not just CWiid.  Until someone offers a convincing argument for the omission of /usr/local/lib from /etc/ld.so.conf, I consider this to be a distribution bug, and method #2 above is the fix.
 
