@@ -1,3 +1,10 @@
+2007-06-27 L. Donnie Smith <cwiid@abstrakraft.org>
+	wminput
+	* rewrote ir_ptr plugin
+
+	libcwiid
+	* changed version
+
 2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
 	wminput
 	* revised error messages

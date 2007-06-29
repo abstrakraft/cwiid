@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-06-28 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * Converted to single source
+ *  * Added deadspace at edges
+ *
  *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * updated for wmplugin_exec prototype change (&mesg->mesg)
  *
@@ -44,42 +48,37 @@
 
 #include "wmplugin.h"
 
+#define DEBOUNCE_THRESHOLD	50
+#define NEW_AMOUNT	0.3
+#define OLD_AMOUNT	(1.0 - NEW_AMOUNT)
+#define X_EDGE	50
+#define Y_EDGE	50
+
 cwiid_wiimote_t *wiimote;
 
-struct cursor {
-	unsigned char valid;
-	uint16_t pos[2];
-};
-int a_debounce, b_debounce;
-
-/* static objects are initialized to 0 by default */
-static int a_index = -1, b_index = -1;
-static struct cwiid_ir_src a, b, prev_a, prev_b;
-
-static unsigned char info_init = 0;
 static struct wmplugin_info info;
 static struct wmplugin_data data;
-
-static struct cursor c, prev_c;
 
 wmplugin_info_t wmplugin_info;
 wmplugin_init_t wmplugin_init;
 wmplugin_exec_t wmplugin_exec;
 
 struct wmplugin_info *wmplugin_info() {
+	static unsigned char info_init = 0;
+
 	if (!info_init) {
 		info.button_count = 0;
 		info.axis_count = 2;
 		info.axis_info[0].name = "X";
 		info.axis_info[0].type = WMPLUGIN_ABS;
-		info.axis_info[0].max  = 1024;
-		info.axis_info[0].min  = 0;
+		info.axis_info[0].max  = CWIID_IR_X_MAX - X_EDGE;
+		info.axis_info[0].min  = X_EDGE;
 		info.axis_info[0].fuzz = 0;
 		info.axis_info[0].flat = 0;
 		info.axis_info[1].name = "Y";
 		info.axis_info[1].type = WMPLUGIN_ABS;
-		info.axis_info[1].max  = 768;
-		info.axis_info[1].min  = 0;
+		info.axis_info[1].max  = CWIID_IR_Y_MAX - Y_EDGE;
+		info.axis_info[1].min  = Y_EDGE;
 		info.axis_info[1].fuzz = 0;
 		info.axis_info[1].flat = 0;
 		info.param_count = 0;
@@ -103,9 +102,12 @@ int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 
 struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
 {
+	static int src_index = -1;
+	static int debounce = 0;
+	static uint8_t old_flag;
+
 	int i;
-	uint8_t flags;
-	static uint8_t old_flags;
+	uint8_t flag;
 	struct cwiid_ir_mesg *ir_mesg;
 
 	ir_mesg = NULL;
@@ -119,151 +121,78 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
 		return NULL;
 	}
 
-	/* update history */
-	prev_a = a;
-	prev_b = b;
-	prev_c = c;
-
-	/* invalidate a & b indices if sources are no longer present */
-	if ((a_index != -1) && (!ir_mesg->src[a_index].valid)) {
-		a_index = -1;
+	/* invalidate src index if source is no longer present */
+	if ((src_index != -1) && !ir_mesg->src[src_index].valid) {
+		if (debounce > DEBOUNCE_THRESHOLD) {
+			src_index = -1;
+		}
+		else {
+			debounce++;
+		}
 	}
-	if ((b_index != -1) && (!ir_mesg->src[b_index].valid)) {
-		b_index = -1;
+	else {
+		debounce = 0;
 	}
 
-	/* of not set, pick largest available source for a & b */
-	if (a_index == -1) {
+	/* of not set, pick largest available source */
+	if (src_index == -1) {
 		for (i=0; i < CWIID_IR_SRC_COUNT; i++) {
-			if ((ir_mesg->src[i].valid) && (i != b_index)) {
-				if ((a_index == -1) ||
-				  (ir_mesg->src[i].size > ir_mesg->src[a_index].size)) {
-					a_index = i;
+			if (ir_mesg->src[i].valid) {
+				if ((src_index == -1) ||
+				  (ir_mesg->src[i].size > ir_mesg->src[src_index].size)) {
+					src_index = i;
 				}
 			}
 		}
-	}
-	/* if there is no current src_b, pick the largest valid one */
-	if (b_index == -1) {
-		for (i=0; i < CWIID_IR_SRC_COUNT; i++) {
-			if ((ir_mesg->src[i].valid) && (i != a_index)) {
-				if ((b_index == -1) ||
-				  (ir_mesg->src[i].size > ir_mesg->src[b_index].size)) {
-					b_index = i;
-				}
-			}
-		}
-	}
-
-#define DEBOUNCE_THRESHOLD 50
-
-	/* set a & b, mirror the x coordinates */
-	if (a_index == -1) {
-		a_debounce++;
-		if( a_debounce > DEBOUNCE_THRESHOLD ) {
-			a.valid = 0;
-		}
-		else {
-			a = prev_a;
-		}
-	}
-	else {
-		a = ir_mesg->src[a_index];
-		a.pos[CWIID_X] = CWIID_IR_X_MAX - a.pos[CWIID_X];
-		a_debounce = 0;
-	}
-	if (b_index == -1) {
-		b_debounce++;
-		if( b_debounce > DEBOUNCE_THRESHOLD ) {
-			b.valid = 0;
-		}
-		else {
-			b = prev_b;
-		}
-	}
-	else {
-		b = ir_mesg->src[b_index];
-		b.pos[CWIID_X] = CWIID_IR_X_MAX - b.pos[CWIID_X];
-		b_debounce = 0;
-	}
-
-	/* if both sources are valid, calculate the center */
-	if (a.valid && b.valid) {
-		c.valid = 1;
-		for (i=0; i < 2; i++) {
-			c.pos[i] = (a.pos[i] + b.pos[i])/2;
-		}
-	}
-	/* if either source is valid, use best guess */
-	else if (a.valid) {
-		/* if a isn't new, and we have a previous center,
-		 * assume source-center relationship holds */
-		if (prev_a.valid && prev_c.valid) {
-			c.valid = 1;
-			for (i=0; i < 2; i++) {
-				c.pos[i] = a.pos[i] + (prev_c.pos[i] - prev_a.pos[i]);
-			}
-		}
-		/* if a is new or we don't have a previous center,
-		 * use a as the center */
-		else {
-			c.valid = 1;
-			for (i=0; i < 2; i++) {
-				c.pos[i] = a.pos[i];
-			}
-		}
-	}
-	else if (b.valid) {
-		/* if b isn't new, and we have a previous center,
-		 * assume source-center relationship holds */
-		if (prev_b.valid && prev_c.valid) {
-			c.valid = 1;
-			for (i=0; i < 2; i++) {
-				c.pos[i] = b.pos[i] + (prev_c.pos[i] - prev_b.pos[i]);
-			}
-		}
-		/* if b is new or we don't have a previous center,
-		 * use b as the center */
-		else {
-			c.valid = 1;
-			for (i=0; i < 2; i++) {
-				c.pos[i] = b.pos[i];
-			}
-		}
-	}
-	/* no sources, no guesses */
-	else {
-		c.valid = 0;
 	}
 
 	/* LEDs */
-	flags = 0;
-	if ((a_index == 1) || (b_index == 1)) {
-		flags |= CWIID_LED1_ON;
+	switch (src_index) {
+	case 0:
+		flag = CWIID_LED1_ON;
+		break;
+	case 1:
+		flag = CWIID_LED2_ON;
+		break;
+	case 2:
+		flag = CWIID_LED3_ON;
+		break;
+	case 3:
+		flag = CWIID_LED4_ON;
+		break;
+	default:
+		flag = 0;
+		break;
 	}
-	else if ((a_index == 2) || (b_index == 2)) {
-		flags |= CWIID_LED2_ON;
+	if (flag != old_flag) {
+		cwiid_set_led(wiimote, flag);
+		old_flag = flag;
 	}
-	else if ((a_index == 3) || (b_index == 3)) {
-		flags |= CWIID_LED3_ON;
-	}
-	else if ((a_index == 4) || (b_index == 4)) {
-		flags |= CWIID_LED4_ON;
-	}
-	if (flags != old_flags) {
-		cwiid_set_led(wiimote, flags);
-	}
-	old_flags = flags;
 
-	data.axes[0].valid = data.axes[1].valid = c.valid;
+	if ((src_index == -1) || !ir_mesg->src[src_index].valid) {
+		data.axes[0].valid = data.axes[1].valid = 0;
+	}
+	else {
+		data.axes[0].valid = data.axes[1].valid = 1;
+		data.axes[0].value = NEW_AMOUNT * (CWIID_IR_X_MAX -
+		                         ir_mesg->src[src_index].pos[CWIID_X])
+		                   + OLD_AMOUNT * data.axes[0].value;
+		data.axes[1].value = NEW_AMOUNT * ir_mesg->src[src_index].pos[CWIID_Y]
+		                   + OLD_AMOUNT * data.axes[1].value;
 
-#define NEW_AMOUNT 0.6
-#define OLD_AMOUNT (1.0-NEW_AMOUNT)
-
-	data.axes[0].value = c.pos[CWIID_X]*NEW_AMOUNT +
-	                     data.axes[0].value*OLD_AMOUNT;
-	data.axes[1].value = c.pos[CWIID_Y]*NEW_AMOUNT +
-	                     data.axes[1].value*OLD_AMOUNT;
+		if (data.axes[0].value > CWIID_IR_X_MAX - X_EDGE) {
+			data.axes[0].value = CWIID_IR_X_MAX - X_EDGE;
+		}
+		else if (data.axes[0].value < X_EDGE) {
+			data.axes[0].value = X_EDGE;
+		}
+		if (data.axes[1].value > CWIID_IR_Y_MAX - Y_EDGE) {
+			data.axes[1].value = CWIID_IR_Y_MAX - Y_EDGE;
+		}
+		else if (data.axes[1].value < Y_EDGE) {
+			data.axes[1].value = Y_EDGE;
+		}
+	}
 
 	return &data;
 }
