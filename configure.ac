@@ -20,7 +20,7 @@
 # * Initial ChangeLog
 # * Check for stdint.h
 
-AC_INIT(CWiid,0.5.02,cwiid@abstrakraft.org)
+AC_INIT(CWiid,0.6.00_rc2,cwiid@abstrakraft.org)
 
 AC_PROG_CC
 AC_PROG_AWK
