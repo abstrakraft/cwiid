@@ -61,7 +61,6 @@ See wminput/README for more information on wminput configuration and execution.
 FUTURE IDEAS/IMPROVEMENTS
 ------------------------------------------------------------------------------------------------
 The following list is neither complete nor ordered:
-lswm (list wiimotes)
 wmcp (copy data between files and wiimotes)
 Move wiimote communications into a separate daemon (wiimoted) with which applications communicate via sockets (or some other means)
 wmgui logging

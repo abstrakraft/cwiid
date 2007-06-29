@@ -3,8 +3,8 @@
 include @top_builddir@/defs.mak
 
 LIB_NAME = cwiid
-MAJOR_VER = 0
-MINOR_VER = 1
+MAJOR_VER = 1
+MINOR_VER = 0
 SOURCES = bluetooth.c command.c connect.c interface.c process.c state.c \
           thread.c util.c
 LDLIBS += -lbluetooth -lpthread -lrt
