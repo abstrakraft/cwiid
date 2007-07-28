@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added config.h include
+ *  * use PACKAGE_VERSION from config.h instead of CWIID_VERSION
+ *
  *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * changed cwiid_{connect,disconnect,command} to
  *    cwiid_{open,close,request_status|set_led|set_rumble|set_rpt_mode}
@@ -43,7 +47,12 @@
  *  * type audit (stdint, const, char booleans)
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #define APP_NAME		"CWiid wmgui"
+#define APP_VERSION		PACKAGE_VERSION
 #define APP_COPYRIGHT	"Copyright (C) 2007 L. Donnie Smith " \
                         "<cwiid@abstrakraft.org>"
 #define APP_COMMENTS	"Wiimote GUI"
@@ -696,7 +705,7 @@ void menuAbout_activate(void)
 {
 	gtk_show_about_dialog(GTK_WINDOW(winMain),
 	                      "name", APP_NAME,
-	                      "version", CWIID_VERSION,
+	                      "version", APP_VERSION,
 	                      "copyright", APP_COPYRIGHT,
 	                      "comments", APP_COMMENTS,
 	                      NULL);

@@ -1,4 +1,8 @@
 # ChangeLog:
+# 2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
+# * added config.h header
+# * added with-python argument and associated logic
+#
 # 2007-05-30 L. Donnie Smith <cwiid@abstrakraft.org>
 # * added python/Makefile
 # * added PYTHON_VERSION variable
@@ -21,6 +25,7 @@
 # * Check for stdint.h
 
 AC_INIT(CWiid,0.6.00_rc2,cwiid@abstrakraft.org)
+AC_CONFIG_HEADER(common/include/config.h)
 
 AC_PROG_CC
 AC_PROG_AWK
@@ -36,8 +41,36 @@ if test "$YACC" != "bison -y"; then
 	AC_MSG_ERROR([bison not found])
 fi
 
-PYTHON_VERSION=[`python -c 'import sys; print sys.version[:3]'`]
-AC_SUBST(PYTHON_VERSION)
+AC_ARG_WITH(
+	[python],
+	[AS_HELP_STRING([--without-python],[compile without python support])],
+	[case $withval in 
+		yes)
+			REQUIRE_PYTHON=1
+			PYTHON_NAME=python
+		;;
+		no)
+			REQUIRE_PYTHON=
+			PYTHON_NAME=
+		;;
+		*)
+			REQUIRE_PYTHON=1
+			PYTHON_NAME=$withval
+		;;
+	esac],
+	[REQUIRE_PYTHON=1; PYTHON_NAME=python])
+if test $REQUIRE_PYTHON; then
+	AC_CHECK_PROGS([PYTHON],$PYTHON_NAME)
+	if test $REQUIRE_PYTHON -a ! $PYTHON; then
+		AC_MSG_ERROR([$PYTHON_NAME not found])
+	fi
+fi
+AC_SUBST(PYTHON)
+if test $PYTHON; then
+	PYTHON_VERSION=[`$PYTHON -c 'import sys; print sys.version[:3]'`]
+	AC_SUBST(PYTHON_VERSION)
+	AC_DEFINE([HAVE_PYTHON],1,[Define to 1 if python support is enabled])
+fi
 
 AC_CHECK_LIB([pthread], [pthread_create],,
 	AC_MSG_ERROR([pthread library not found]))

@@ -15,6 +15,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added config.h include
+ *  * use PACKAGE_VERSION from config.h instead of CWIID_VERSION
+ *  * added HAVE_PYTHON tests around all python code
+ *
  *  2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * revised error messages
  *
@@ -49,6 +54,10 @@
  *  * type audit (stdint, const, char booleans)
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,7 +74,10 @@
 #include "util.h"
 #include "wmplugin.h"
 #include "c_plugin.h"
+
+#ifdef HAVE_PYTHON
 #include "py_plugin.h"
+#endif
 
 struct conf conf;
 
@@ -144,7 +156,7 @@ int main(int argc, char *argv[])
 			config_filename = optarg;
 			break;
 		case 'v':
-			printf("CWiid Version %s\n", CWIID_VERSION);
+			printf("CWiid Version %s\n", PACKAGE_VERSION);
 			return 0;
 			break;
 		case '?':
@@ -160,9 +172,12 @@ int main(int argc, char *argv[])
 	if (c_init()) {
 		return -1;
 	}
+
+#ifdef HAVE_PYTHON
 	if (py_init()) {
 		return -1;
 	}
+#endif
 
 	/* Load Config */
 	/* Setup search directory arrays */
@@ -237,10 +252,12 @@ int main(int argc, char *argv[])
 		conf_unload(&conf);
 		return -1;
 	}
+#ifdef HAVE_PYTHON
 	if (py_wiimote(wiimote)) {
 		conf_unload(&conf);
 		return -1;
 	}
+#endif
 
 	/* init plugins */
 	for (i=0; (i < CONF_MAX_PLUGINS) && conf.plugins[i].name; i++) {
@@ -253,6 +270,7 @@ int main(int argc, char *argv[])
 				return -1;
 			}
 			break;
+#ifdef HAVE_PYTHON
 		case PLUGIN_PYTHON:
 			if (py_plugin_init(&conf.plugins[i], i)) {
 				wminput_err("error %s init", conf.plugins[i].name);
@@ -261,6 +279,7 @@ int main(int argc, char *argv[])
 				return -1;
 			}
 			break;
+#endif
 		}
 	}
 
@@ -314,7 +333,9 @@ int main(int argc, char *argv[])
 		ret = -1;
 	}
 
+#ifdef HAVE_PYTHON
 	py_deinit();
+#endif
 
 	return ret;
 }
@@ -639,11 +660,13 @@ void process_plugin(struct plugin *plugin, int mesg_count,
 				return;
 			}
 			break;
+#ifdef HAVE_PYTHON
 		case PLUGIN_PYTHON:
 			if (py_plugin_exec(plugin, plugin_mesg_count, plugin_mesg)) {
 				return;
 			}
 			break;
+#endif
 		}
 
 		/* Plugin Button/Key Events */
