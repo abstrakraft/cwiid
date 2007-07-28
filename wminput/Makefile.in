@@ -4,19 +4,29 @@ include @top_builddir@/defs.mak
 
 APP_NAME = wminput
 
-SOURCES = main.c conf.c c_plugin.c py_plugin.c uinput.c action_enum.c parser.c \
-	lexer.c util.c
+SOURCES = main.c conf.c c_plugin.c uinput.c action_enum.c util.c
+#kludge to make sure YACC/LEX sources are listed last, otherwise we get errors
+#when building dependencies
+LAST_SOURCES = parser.c lexer.c
 
 WMINPUT_CONFIG_DIR = $(CWIID_CONFIG_DIR)/wminput
-CFLAGS += -I@top_builddir@/libcwiid -I/usr/include/python@PYTHON_VERSION@ \
+CFLAGS += -I@top_builddir@/libcwiid \
 	-DWMINPUT_CONFIG_DIR=\"$(WMINPUT_CONFIG_DIR)\" \
-	-DCWIID_PLUGINS_DIR=\"$(CWIID_PLUGINS_DIR)\" \
- 	-DCWIID_VERSION=\"${PACKAGE_VERSION}\"
-LDLIBS += -lcwiid -ldl -lpython@PYTHON_VERSION@
+	-DCWIID_PLUGINS_DIR=\"$(CWIID_PLUGINS_DIR)\"
+
+LDLIBS += -lcwiid -ldl
 LDFLAGS += -L@top_builddir@/libcwiid -rdynamic
 INST_DIR = @bindir@
 
 YFLAGS += -d
+
+ifdef PYTHON
+	SOURCES += py_plugin.c
+	CFLAGS += -I/usr/include/python@PYTHON_VERSION@
+	LDLIBS += -lpython@PYTHON_VERSION@
+endif
+
+SOURCES += $(LAST_SOURCES)
 
 include $(COMMON)/include/app.mak
 

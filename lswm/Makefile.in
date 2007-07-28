@@ -6,7 +6,7 @@ APP_NAME = lswm
 
 SOURCES = lswm.c
 
-CFLAGS += -I@top_builddir@/libcwiid -DCWIID_VERSION=\"${PACKAGE_VERSION}\"
+CFLAGS += -I@top_builddir@/libcwiid
 LDFLAGS += -L@top_builddir@/libcwiid
 LDLIBS += -lcwiid
 INST_DIR = @bindir@

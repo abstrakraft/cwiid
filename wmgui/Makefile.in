@@ -6,8 +6,7 @@ APP_NAME = wmgui
 
 SOURCES = main.c interface.c support.c
 
-CFLAGS += @GTK_CFLAGS@ -I@top_builddir@/libcwiid \
-	-DCWIID_VERSION=\"${PACKAGE_VERSION}\"
+CFLAGS += @GTK_CFLAGS@ -I@top_builddir@/libcwiid
 LDFLAGS += -L@top_builddir@/libcwiid
 LDLIBS += @GTK_LIBS@ -lm -lcwiid
 INST_DIR = @bindir@

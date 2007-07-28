@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added config.h include
+ *  * added HAVE_PYTHON tests around all python code
+ *
  *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * refactored to isolate plugin logic
  *
@@ -37,6 +41,10 @@
 
 #ifndef CONF_H
 #define CONF_H
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdint.h>
 #include <stdio.h>
@@ -118,7 +126,9 @@
 #endif
 #define UINPUT_VENDOR	0x0001
 #define UINPUT_PRODUCT	0x0001
+#ifndef UINPUT_VERSION
 #define UINPUT_VERSION	0x0001
+#endif
 
 struct lookup_enum {
 	const char *name;
@@ -140,7 +150,9 @@ struct axis_map {
 
 enum plugin_type {
 	PLUGIN_C,
+#ifdef HAVE_PYTHON
 	PLUGIN_PYTHON
+#endif
 };
 
 struct plugin {

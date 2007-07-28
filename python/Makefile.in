@@ -7,10 +7,10 @@ ifdef ROOTDIR
 endif
 
 all:
-	python setup.py build_ext $(DEBUGFLAGS) -I@top_builddir@/libcwiid -L@top_builddir@/libcwiid -lcwiid
+	$(PYTHON) setup.py build_ext $(DEBUGFLAGS) -I@top_builddir@/libcwiid -L@top_builddir@/libcwiid -lcwiid
 
 install:
-	python setup.py install --prefix=${prefix} $(SET_ROOT_DIR)
+	$(PYTHON) setup.py install --prefix=${prefix} $(SET_ROOT_DIR)
 
 uninstall:
 	rm -f $(ROOTDIR)${prefix}/lib/python@PYTHON_VERSION@/site-packages/cwiid.so

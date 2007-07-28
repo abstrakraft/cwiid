@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added config.h include
+ *  * use PACKAGE_VERSION from config.h instead of CWIID_VERSION
+ *
  *  2007-06-01 Nick <nickishappy@gmail.com>
  *  * reworked command-line options (added standard options, long options)
  *
@@ -27,6 +31,10 @@
  *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * created file
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdint.h>
 #include <stdio.h>
@@ -90,7 +98,7 @@ int main(int argc, char *argv[])
 			long_format = 1;
 			break;
 		case 'v':
-			printf("CWiid Version %s\n", CWIID_VERSION);
+			printf("CWiid Version %s\n", PACKAGE_VERSION);
 			return 0;
 			break;
 		case 'q':

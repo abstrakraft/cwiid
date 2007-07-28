@@ -1,3 +1,18 @@
+2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
+	configure.ac
+	* added config.h header
+	* added with-python argument and associated logic
+
+	lswm
+	* added config.h include for sources requiring defs
+
+	wmgui
+	* added config.h include for sources requiring defs
+
+	wminput
+	* added config.h include for sources requiring defs
+	* added HAVE_PYTHON tests around all python code
+
 2007-06-28 L. Donnie Smith <cwiid@abstrakraft.org>
 	libcwiid
 	* changed version

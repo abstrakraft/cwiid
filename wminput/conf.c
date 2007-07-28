@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added config.h include
+ *  * added HAVE_PYTHON tests around all python code
+ *
  *  2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * revised error messages
  *
@@ -40,6 +44,10 @@
  *  * type audit (stdint, const, char booleans)
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,7 +57,9 @@
 #include "util.h"
 #include "y.tab.h"
 #include "c_plugin.h"
+#ifdef HAVE_PYTHON
 #include "py_plugin.h"
+#endif
 
 extern FILE *yyin;
 extern int yyparse();
@@ -98,9 +108,11 @@ int conf_unload(struct conf *conf)
 			case PLUGIN_C:
 				c_plugin_close(&conf->plugins[i]);
 				break;
+#ifdef HAVE_PYTHON
 			case PLUGIN_PYTHON:
 				py_plugin_close(&conf->plugins[i]);
 				break;
+#endif
 			}
 		}
 	}
@@ -345,11 +357,13 @@ int conf_plugin_param_int(struct conf *conf, const char *name,
 			return -1;
 		}
 		break;
+#ifdef HAVE_PYTHON
 	case PLUGIN_PYTHON:
 		if (py_plugin_param_int(plugin, i, value)) {
 			return -1;
 		}
 		break;
+#endif
 	}
 
 	return 0;
@@ -384,11 +398,13 @@ int conf_plugin_param_float(struct conf *conf, const char *name,
 			return -1;
 		}
 		break;
+#ifdef HAVE_PYTHON
 	case PLUGIN_PYTHON:
 		if (py_plugin_param_float(plugin, i, value)) {
 			return -1;
 		}
 		break;
+#endif
 	}
 
 	return 0;
@@ -595,10 +611,12 @@ struct plugin *get_plugin(struct conf *conf, const char *name)
 			plugin_found = 1;
 			break;
 		}
+#ifdef HAVE_PYTHON
 		if (!py_plugin_open(plugin, conf->plugin_search_dirs[i])) {
 			plugin_found = 1;
 			break;
 		}
+#endif
 	}
 
 	if (!plugin_found) {
