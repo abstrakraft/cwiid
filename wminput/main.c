@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-07-29 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * fixed wait forever logic
+ *
  *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added config.h include
  *  * use PACKAGE_VERSION from config.h instead of CWIID_VERSION
@@ -231,16 +234,23 @@ int main(int argc, char *argv[])
 	/* Wiimote Connect */
 	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
 	if (wait_forever) {
-		if (cwiid_find_wiimote(&bdaddr, -1)) {
-			wminput_err("error finding wiimote");
+		if (!bacmp(&bdaddr, BDADDR_ANY)) {
+			if (cwiid_find_wiimote(&bdaddr, -1)) {
+				wminput_err("error finding wiimote");
+				conf_unload(&conf);
+				return -1;
+			}
+		}
+		/* TODO: avoid continuously calling cwiid_open */
+		/* TODO: kill error messages on failed cwiid_open calls */
+		while (!(wiimote = cwiid_open(&bdaddr, CWIID_FLAG_MESG_IFC)));
+	}
+	else {
+		if ((wiimote = cwiid_open(&bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
+			wminput_err("unable to connect");
 			conf_unload(&conf);
 			return -1;
 		}
-	}
-	if ((wiimote = cwiid_open(&bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
-		wminput_err("unable to connect");
-		conf_unload(&conf);
-		return -1;
 	}
 	if (cwiid_set_mesg_callback(wiimote, &cwiid_callback)) {
 		wminput_err("error setting callback");
@@ -309,6 +319,7 @@ int main(int argc, char *argv[])
 	sigemptyset(&sigset);
 	sigaddset(&sigset, SIGTERM);
 	sigaddset(&sigset, SIGINT);
+	sigaddset(&sigset, SIGUSR1);
 	sigprocmask(SIG_BLOCK, &sigset, NULL);
 	sigwait(&sigset, &signum);
 
@@ -387,8 +398,8 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			process_classic_mesg((struct cwiid_classic_mesg *) &mesg[i]);
 			break;
 		case CWIID_MESG_ERROR:
-			if (kill(getpid(),SIGINT)) {
-				wminput_err("Error sending SIGINT");
+			if (kill(getpid(),SIGUSR1)) {
+				wminput_err("Error sending SIGUSR1");
 			}
 			break;
 		default:
