@@ -230,7 +230,6 @@ int main(int argc, char *argv[])
 		bdaddr = *BDADDR_ANY;
 	}
 
-	/* TODO: fix wait_forever logic - currently assumes bdaddr is unspecified */
 	/* Wiimote Connect */
 	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
 	if (wait_forever) {
