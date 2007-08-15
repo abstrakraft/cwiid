@@ -24,7 +24,7 @@
 # * Initial ChangeLog
 # * Check for stdint.h
 
-AC_INIT(CWiid,0.6.00_rc2,cwiid@abstrakraft.org)
+AC_INIT(CWiid,0.6.00_rc3,cwiid@abstrakraft.org)
 AC_CONFIG_HEADER(common/include/config.h)
 
 AC_PROG_CC
