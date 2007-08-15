@@ -1,4 +1,7 @@
 2007-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
+	libcwiid
+	* make cwiid_err_default public
+
 	wminput
 	* added {c,py}_wiimote_deinit functions
 	* added daemon, quiet, and reconnect options

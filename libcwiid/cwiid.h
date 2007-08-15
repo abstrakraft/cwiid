@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2008-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * make cwiid_err_default public
+ *
  *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * changed cwiid_connect, cwiid_disconnect to cwiid_open, cwiid_close
  *  * added cwiid_request_status, cwiid_set_let, cwiid_set_rumble,
@@ -300,6 +303,7 @@ extern "C" {
 
 /* Error reporting (library wide) */
 int cwiid_set_err(cwiid_err_t *err);
+void cwiid_err_default(struct wiimote *wiimote, const char *str, va_list ap);
 
 /* Connection */
 #define cwiid_connect cwiid_open
