@@ -1,3 +1,8 @@
+2007-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
+	wminput
+	* added {c,py}_wiimote_deinit functions
+	* added daemon, quiet, and reconnect options
+
 2007-07-29 L. Donnie Smith <cwiid@abstrakraft.org>
 	wminput
 	* fixed wait forever logic
