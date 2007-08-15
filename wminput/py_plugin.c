@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added py_wiimote_deinit
+ *
  *  2007-06-28 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * supress error for nonexistent python plugins
  *
@@ -89,7 +92,7 @@ int py_init(void)
 	PyObject *PyObj, *PyWmPluginModule;
 	int i;
 
-	Py_Initialize();
+	Py_InitializeEx(0);
 
 	if (!(PyCWiidModule = PyImport_ImportModule("cwiid"))) {
 		PyErr_Print();
@@ -190,9 +193,13 @@ int py_wiimote(cwiid_wiimote_t *wiimote)
 	return 0;
 }
 
-void py_deinit(void)
+void py_wiimote_deinit()
 {
 	Py_DECREF(PyWiimote);
+}
+
+void py_deinit(void)
+{
 	Py_DECREF(PyCWiidModule);
 	Py_DECREF(PyPath);
 	Py_DECREF(PySysModule);

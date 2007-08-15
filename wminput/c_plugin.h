@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added c_wiimote_deinit
+ *
  *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * Initial ChangeLog
  */
@@ -24,6 +27,7 @@
 
 int c_init(void);
 int c_wiimote(cwiid_wiimote_t *wiimote);
+void c_wiimote_deinit(void);
 void c_deinit(void);
 int c_plugin_open(struct plugin *plugin, char *dir);
 void c_plugin_close(struct plugin *plugin);

@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added daemon, quiet, and reconnect options
+ *
  *  2007-07-29 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * fixed wait forever logic
  *
@@ -108,12 +111,15 @@ void print_usage(void)
 	printf("\t-h, --help\t\tPrints this output.\n");
 	printf("\t-v, --version\t\toutput version information and exit.\n");
 	printf("\t-c, --config [file]\tChoose config file to use.\n");
+	printf("\t-d, --daemon\t\tImplies -q, -r, and -w.\n");
+	printf("\t-q, --quiet\t\tReduce output to errors\n");
+	printf("\t-r, --reconnect [wait]\t\tAutomatically try reconnect after wiimote disconnect.\n");
 	printf("\t-w, --wait\t\tWait indefinitely for wiimote to connect.\n");
 }
 
 int main(int argc, char *argv[])
 {
-	char wait_forever = 0;
+	char wait_forever = 0, quiet = 0, reconnect = 0, reconnect_wait = 0;
 	char *config_search_dirs[3], *plugin_search_dirs[3];
 	char *config_filename = DEFAULT_CONFIG_FILE;
 	char home_config_dir[HOME_DIR_LEN];
@@ -121,7 +127,7 @@ int main(int argc, char *argv[])
 	char *tmp;
 	int c, i;
 	char *str_addr;
-	bdaddr_t bdaddr;
+	bdaddr_t bdaddr, current_bdaddr;
 	sigset_t sigset;
 	int signum, ret=0;
 	struct uinput_listen_data uinput_listen_data;
@@ -135,13 +141,16 @@ int main(int argc, char *argv[])
 
 		static struct option long_options[] = {
 			{"help", 0, 0, 'h'},
-			{"wait", 0, 0, 'w'},
-			{"config", 1, 0, 'c'},
 			{"version", 0, 0, 'v'},
+			{"config", 1, 0, 'c'},
+			{"daemon", 0, 0, 'd'},
+			{"quiet", 0, 0, 'q'},
+			{"reconnect", 2, 0, 'r'},
+			{"wait", 0, 0, 'w'},
 			{0, 0, 0, 0}
 		};
 
-		c = getopt_long (argc, argv, "hwc:v", long_options, &option_index);
+		c = getopt_long (argc, argv, "hvc:dqr::w", long_options, &option_index);
 
 		if (c == -1) {
 			break;
@@ -152,15 +161,33 @@ int main(int argc, char *argv[])
 			print_usage();
 			return 0;
 			break;
-		case 'w':
-			wait_forever = 1;
+		case 'v':
+			printf("CWiid Version %s\n", PACKAGE_VERSION);
+			return 0;
 			break;
 		case 'c':
 			config_filename = optarg;
 			break;
-		case 'v':
-			printf("CWiid Version %s\n", PACKAGE_VERSION);
-			return 0;
+		case 'd':
+			wait_forever = 1;
+			quiet = 1;
+			reconnect = 1;
+			break;
+		case 'q':
+			quiet = 1;
+			break;
+		case 'r':
+			reconnect = 1;
+			if (optarg) {
+				reconnect_wait = strtol(optarg, &tmp, 10);
+				if (*tmp != '\0') {
+					wminput_err("bad reconnect wait time");
+					return -1;
+				}
+			}
+			break;
+		case 'w':
+			wait_forever = 1;
 			break;
 		case '?':
 			printf("Try `wminput --help` for more information\n");
@@ -230,122 +257,147 @@ int main(int argc, char *argv[])
 		bdaddr = *BDADDR_ANY;
 	}
 
-	/* Wiimote Connect */
-	printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
-	if (wait_forever) {
-		if (!bacmp(&bdaddr, BDADDR_ANY)) {
-			if (cwiid_find_wiimote(&bdaddr, -1)) {
-				wminput_err("error finding wiimote");
-				conf_unload(&conf);
-				return -1;
-			}
-		}
-		/* TODO: avoid continuously calling cwiid_open */
-		/* TODO: kill error messages on failed cwiid_open calls */
-		while (!(wiimote = cwiid_open(&bdaddr, CWIID_FLAG_MESG_IFC)));
-	}
-	else {
-		if ((wiimote = cwiid_open(&bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
-			wminput_err("unable to connect");
-			conf_unload(&conf);
-			return -1;
-		}
-	}
-	if (cwiid_set_mesg_callback(wiimote, &cwiid_callback)) {
-		wminput_err("error setting callback");
-		conf_unload(&conf);
-		return -1;
-	}
-
-	if (c_wiimote(wiimote)) {
-		conf_unload(&conf);
-		return -1;
-	}
-#ifdef HAVE_PYTHON
-	if (py_wiimote(wiimote)) {
-		conf_unload(&conf);
-		return -1;
-	}
-#endif
-
-	/* init plugins */
-	for (i=0; (i < CONF_MAX_PLUGINS) && conf.plugins[i].name; i++) {
-		switch (conf.plugins[i].type) {
-		case PLUGIN_C:
-			if (c_plugin_init(&conf.plugins[i], i)) {
-				wminput_err("error on %s init", conf.plugins[i].name);
-				conf_unload(&conf);
-				cwiid_close(wiimote);
-				return -1;
-			}
-			break;
-#ifdef HAVE_PYTHON
-		case PLUGIN_PYTHON:
-			if (py_plugin_init(&conf.plugins[i], i)) {
-				wminput_err("error %s init", conf.plugins[i].name);
-				conf_unload(&conf);
-				cwiid_close(wiimote);
-				return -1;
-			}
-			break;
-#endif
-		}
-	}
-
-	if (wminput_set_report_mode()) {
-		conf_unload(&conf);
-		cwiid_close(wiimote);
-		return -1;
-	}
-
-	uinput_listen_data.wiimote = wiimote;
-	uinput_listen_data.conf = &conf;
-	if (pthread_create(&uinput_listen_thread, NULL,
-	                   (void *(*)(void *))uinput_listen,
-	                   &uinput_listen_data)) {
-		wminput_err("error starting uinput listen thread");
-		conf_unload(&conf);
-		cwiid_close(wiimote);
-		return -1;
-	}
-
-
-	printf("Ready.\n");
-
-	init = 0;
-
-	/* wait */
 	sigemptyset(&sigset);
 	sigaddset(&sigset, SIGTERM);
 	sigaddset(&sigset, SIGINT);
 	sigaddset(&sigset, SIGUSR1);
-	sigprocmask(SIG_BLOCK, &sigset, NULL);
-	sigwait(&sigset, &signum);
 
-	printf("Exiting.\n");
+	do {
+		bacpy(&current_bdaddr, &bdaddr);
 
-	if (pthread_cancel(uinput_listen_thread)) {
-		wminput_err("Error canceling uinput listen thread");
-		ret = -1;
-	}
-	else if (pthread_join(uinput_listen_thread, NULL)) {
-		wminput_err("Error joining uinput listen thread");
-		ret = -1;
-	}
+		/* Wiimote Connect */
+		if (!quiet) {
+			printf("Put Wiimote in discoverable mode now (press 1+2)...\n");
+		}
+		if (wait_forever) {
+			if (!bacmp(&current_bdaddr, BDADDR_ANY)) {
+				if (cwiid_find_wiimote(&current_bdaddr, -1)) {
+					wminput_err("error finding wiimote");
+					conf_unload(&conf);
+					return -1;
+				}
+			}
+			/* TODO: avoid continuously calling cwiid_open */
+			/* TODO: kill error messages on failed cwiid_open calls */
+			while (!(wiimote = cwiid_open(&current_bdaddr, CWIID_FLAG_MESG_IFC)));
+		}
+		else {
+			if ((wiimote = cwiid_open(&current_bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
+				wminput_err("unable to connect");
+				conf_unload(&conf);
+				return -1;
+			}
+		}
+		if (cwiid_set_mesg_callback(wiimote, &cwiid_callback)) {
+			wminput_err("error setting callback");
+			conf_unload(&conf);
+			return -1;
+		}
 
-	/* disconnect */
-	if (cwiid_close(wiimote)) {
-		wminput_err("Error on wiimote disconnect");
-		ret = -1;
-	}
+		if (c_wiimote(wiimote)) {
+			conf_unload(&conf);
+			return -1;
+		}
+#ifdef HAVE_PYTHON
+		if (py_wiimote(wiimote)) {
+			conf_unload(&conf);
+			return -1;
+		}
+#endif
+
+		/* init plugins */
+		for (i=0; (i < CONF_MAX_PLUGINS) && conf.plugins[i].name; i++) {
+			switch (conf.plugins[i].type) {
+			case PLUGIN_C:
+				if (c_plugin_init(&conf.plugins[i], i)) {
+					wminput_err("error on %s init", conf.plugins[i].name);
+					conf_unload(&conf);
+					cwiid_close(wiimote);
+					return -1;
+				}
+				break;
+#ifdef HAVE_PYTHON
+			case PLUGIN_PYTHON:
+				if (py_plugin_init(&conf.plugins[i], i)) {
+					wminput_err("error %s init", conf.plugins[i].name);
+					conf_unload(&conf);
+					cwiid_close(wiimote);
+					return -1;
+				}
+				break;
+#endif
+			}
+		}
+
+		if (wminput_set_report_mode()) {
+			conf_unload(&conf);
+			cwiid_close(wiimote);
+			return -1;
+		}
+
+		uinput_listen_data.wiimote = wiimote;
+		uinput_listen_data.conf = &conf;
+		if (pthread_create(&uinput_listen_thread, NULL,
+		                   (void *(*)(void *))uinput_listen,
+		                   &uinput_listen_data)) {
+			wminput_err("error starting uinput listen thread");
+			conf_unload(&conf);
+			cwiid_close(wiimote);
+			return -1;
+		}
+
+		if (!quiet) {
+			printf("Ready.\n");
+		}
+
+		init = 0;
+
+		/* wait */
+		sigprocmask(SIG_BLOCK, &sigset, NULL);
+		sigwait(&sigset, &signum);
+		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+
+		if ((signum == SIGTERM) || (signum == SIGINT)) {
+			reconnect = 0;
+		}
+
+		if (pthread_cancel(uinput_listen_thread)) {
+			wminput_err("Error canceling uinput listen thread");
+			ret = -1;
+		}
+		else if (pthread_join(uinput_listen_thread, NULL)) {
+			wminput_err("Error joining uinput listen thread");
+			ret = -1;
+		}
+
+		c_wiimote_deinit();
+#ifdef HAVE_PYTHON
+		py_wiimote_deinit();
+#endif
+
+		/* disconnect */
+		if (cwiid_close(wiimote)) {
+			wminput_err("Error on wiimote disconnect");
+			ret = -1;
+		}
+
+		if (reconnect && reconnect_wait) {
+			sleep(reconnect_wait);
+		}
+	} while (reconnect);
 
 	if (conf_unload(&conf)) {
 		ret = -1;
 	}
 
+	c_deinit();
 #ifdef HAVE_PYTHON
 	py_deinit();
 #endif
+
+	if (!quiet) {
+		printf("Exiting.\n");
+	}
 
 	return ret;
 }
