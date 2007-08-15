@@ -64,6 +64,7 @@
 #include "config.h"
 #endif
 
+#include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -113,8 +114,17 @@ void print_usage(void)
 	printf("\t-c, --config [file]\tChoose config file to use.\n");
 	printf("\t-d, --daemon\t\tImplies -q, -r, and -w.\n");
 	printf("\t-q, --quiet\t\tReduce output to errors\n");
-	printf("\t-r, --reconnect [wait]\t\tAutomatically try reconnect after wiimote disconnect.\n");
+	printf("\t-r, --reconnect [wait]\tAutomatically try reconnect after wiimote disconnect.\n");
 	printf("\t-w, --wait\t\tWait indefinitely for wiimote to connect.\n");
+}
+
+void cwiid_err_connect(struct wiimote *wiimote, const char *str, va_list ap)
+{
+	/* TODO: temporary kludge to stifle error messages from cwiid_open */
+	if (errno != EHOSTDOWN) {
+		vfprintf(stderr, str, ap);
+		fprintf(stderr, "\n");
+	}
 }
 
 int main(int argc, char *argv[])
@@ -278,8 +288,9 @@ int main(int argc, char *argv[])
 				}
 			}
 			/* TODO: avoid continuously calling cwiid_open */
-			/* TODO: kill error messages on failed cwiid_open calls */
+			cwiid_set_err(cwiid_err_connect);
 			while (!(wiimote = cwiid_open(&current_bdaddr, CWIID_FLAG_MESG_IFC)));
+			cwiid_set_err(cwiid_err_default);
 		}
 		else {
 			if ((wiimote = cwiid_open(&current_bdaddr, CWIID_FLAG_MESG_IFC)) == NULL) {
