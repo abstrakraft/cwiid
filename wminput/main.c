@@ -110,7 +110,7 @@ void print_usage(void)
 	printf("Usage: %s [OPTIONS]...\n\n", "wminput");
 	printf("Options:\n");
 	printf("\t-h, --help\t\tPrints this output.\n");
-	printf("\t-v, --version\t\toutput version information and exit.\n");
+	printf("\t-v, --version\t\tOutput version information and exit.\n");
 	printf("\t-c, --config [file]\tChoose config file to use.\n");
 	printf("\t-d, --daemon\t\tImplies -q, -r, and -w.\n");
 	printf("\t-q, --quiet\t\tReduce output to errors\n");
