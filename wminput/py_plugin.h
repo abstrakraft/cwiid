@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2007-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * added py_wiimote_deinit
+ *
  *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * refactored to isolate plugin logic
  *
@@ -27,6 +30,7 @@
 
 int py_init(void);
 int py_wiimote(cwiid_wiimote_t *wiimote);
+void py_wiimote_deinit(void);
 void py_deinit(void);
 int py_plugin_open(struct plugin *plugin, char *dir);
 void py_plugin_close(struct plugin *plugin);

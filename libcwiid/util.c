@@ -15,6 +15,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2008-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * make cwiid_err_default public
+ *  * clean up cwiid_err
+ *
  *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * rewrite for API overhaul
  *
@@ -54,7 +58,7 @@
 #include <unistd.h>
 #include "cwiid_internal.h"
 
-static cwiid_err_t cwiid_err_default;
+cwiid_err_t cwiid_err_default;
 
 static cwiid_err_t *cwiid_err_func = &cwiid_err_default;
 
@@ -67,8 +71,7 @@ int cwiid_set_err(cwiid_err_t *err)
 	return 0;
 }
 
-static void cwiid_err_default(struct wiimote *wiimote, const char *str,
-                              va_list ap)
+void cwiid_err_default(struct wiimote *wiimote, const char *str, va_list ap)
 {
 	vfprintf(stderr, str, ap);
 	fprintf(stderr, "\n");
@@ -80,12 +83,7 @@ void cwiid_err(struct wiimote *wiimote, const char *str, ...)
 
 	if (cwiid_err_func) {
 		va_start(ap, str);
-		if (wiimote) {
-			(*cwiid_err_func)(wiimote, str, ap);
-		}
-		else {
-			(*cwiid_err_func)(NULL, str, ap);
-		}
+		(*cwiid_err_func)(wiimote, str, ap);
 		va_end(ap);
 	}
 }
