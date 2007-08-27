@@ -61,11 +61,23 @@ wminput tracking plugins are, by default, installed to /usr/lib/CWiid/plugins.  
 .B \-h
 Show summary of options.
 .TP
-.B \-w
-On startup, wait (without timing) out until a wiimote is found.
+.B \-v, --version
+Output version information and exit.
 .TP
-.B \-c config
-Specify the configuration file to load. 
+.B \-c, --config [file]
+Choose config file to use.
+.TP
+.B \-d, --daemon
+Implies -q, -r, and -w.
+.TP
+.B \-q, --quiet
+Reduce output to errors
+.TP
+.B \-r, --reconnect [wait]
+Automatically try reconnect after wiimote disconnect.
+.TP
+.B \-w, --wait
+Wait indefinitely for wiimote to connect.
 .TP
 .B bdaddr
 Specify the wiimote bluetooth address. The bluetooth device address (bdaddr) of the wiimote can be specified on the command-line, or through the WIIMOTE_BDADDR environment variable, in the that order of precedence.  If neither is given, the first wiimote found by hci_inquiry will be used.

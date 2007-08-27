@@ -1,3 +1,7 @@
+2007-08-26 L. Donnie Smith <cwiid@abstrakraft.org>
+	docs
+	* updated wminput man page
+
 2007-08-23 L. Donnie Smith <cwiid@abstrakraft.org>
 	python
 	* fixed libdir install bug
