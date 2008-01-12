@@ -136,6 +136,7 @@ AC_OUTPUT(
 	[doc/Makefile]
 	[man/Makefile]
 	[libcwiid/Makefile]
+	[libcwiid/cwiid.pc]
 	[wmdemo/Makefile]
 	[wmgui/Makefile]
 	[wminput/Makefile]
