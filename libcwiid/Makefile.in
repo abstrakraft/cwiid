@@ -10,6 +10,7 @@ SOURCES = bluetooth.c command.c connect.c interface.c process.c state.c \
 LDLIBS += -lbluetooth -lpthread -lrt
 LIB_INST_DIR = @libdir@
 INC_INST_DIR = @includedir@
+DEST_PKG_CONFIG_INST_DIR = $(ROOTDIR)@libdir@/pkgconfig
 
 include $(COMMON)/include/lib.mak
 
@@ -21,12 +22,22 @@ $(SO_NAME):
 $(LINK_NAME):
 	ln -sf $(SO_NAME) $(LINK_NAME)
 
+install: install_pkgconfig
+
+uninstall: uninstall_pkgconfig
+
+install_pkgconfig:
+	install -D -m 644 cwiid.pc $(DEST_PKG_CONFIG_INST_DIR)/cwiid.pc
+
+uninstall_pkgconfig:
+	rm -f $(DEST_PKG_CONFIG_INST_DIR)/cwiid.pc
+
 clean: remove_links
 
 remove_links:
 	rm -f $(SO_NAME) $(LINK_NAME)
 
 distclean: clean
-	rm Makefile
+	rm Makefile cwiid.pc
 
 .PHONY: distclean clean make_links remove_links
