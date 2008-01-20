@@ -19,6 +19,9 @@
  * Boston, MA  02110-1301  USA
  *
  * ChangeLog:
+ * 2008-01-19 L. Donnie Smith <cwiid@abstrakraft.org>
+ * * print callback error tracebacks
+ *
  * 2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
  * * revised error messages and doc strings
  *
@@ -682,9 +685,8 @@ static PyObject *Wiimote_write(Wiimote *self, PyObject *args, PyObject *kwds)
 	Py_RETURN_NONE;
 }
 
-static void
-	CallbackBridge(cwiid_wiimote_t *wiimote, int mesg_count,
-	               union cwiid_mesg mesg[], struct timespec *t)
+static void CallbackBridge(cwiid_wiimote_t *wiimote, int mesg_count,
+	                       union cwiid_mesg mesg[], struct timespec *t)
 {
 	PyObject *ArgTuple;
 	PyObject *PySelf;
@@ -696,7 +698,10 @@ static void
 
 	/* Put id and the list of messages as the arguments to the callback */
 	PySelf = (PyObject *) cwiid_get_data(wiimote);
-	PyObject_CallFunction(((Wiimote *)PySelf)->callback, "(O)", ArgTuple);
+	if (!PyObject_CallFunction(((Wiimote *)PySelf)->callback, "(O)",
+	                           ArgTuple)) {
+		PyErr_Print();
+	}
 
 	Py_XDECREF(ArgTuple);
 	PyGILState_Release(gstate);
