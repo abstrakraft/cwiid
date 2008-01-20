@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
 
 	printf("Note: To demonstrate the new API interfaces, wmdemo no longer "
 	       "enables messages by default.\n"
-		   "Output can be gathered through the new state-based interface (s), "
-	       "or by enabling the messages interface (c).\n");
+	       "Output can be gathered through the new state-based interface (s), "
+	       "or by enabling the messages interface (m).\n");
 
 	/* Menu */
 	printf("%s", MENU);
