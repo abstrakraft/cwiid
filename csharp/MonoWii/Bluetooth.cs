@@ -23,7 +23,7 @@
  * 
  *  2007-11-11 Marek Wyborski 
  *  * .Net/Mono Bindings for cwiid 0.6.00
- *  * Most of the bindings have been tested 
+ *  * Most of the bindings have been tested
  */
 
 
