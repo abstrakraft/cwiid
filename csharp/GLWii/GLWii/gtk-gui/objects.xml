@@ -1,0 +1,6 @@
+<objects>
+  <object type="GLWii.WiimoteGL" palette-category="widget" allow-children="false" base-type="Gtk.Bin">
+    <itemgroups />
+    <signals />
+  </object>
+</objects>

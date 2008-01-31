@@ -1,0 +1,24 @@
+<Combine name="GTKWii" fileversion="2.0">
+  <Configurations active="Debug">
+    <Configuration name="Debug" ctype="CombineConfiguration">
+      <Entry build="True" name="GTKWii" configuration="Debug" />
+      <Entry build="True" name="MonoWii" configuration="Debug" />
+      <Entry build="True" name="Packages" configuration="" />
+    </Configuration>
+    <Configuration name="Release" ctype="CombineConfiguration">
+      <Entry build="True" name="GTKWii" configuration="Release" />
+      <Entry build="True" name="MonoWii" configuration="Release" />
+      <Entry build="True" name="Packages" configuration="" />
+    </Configuration>
+  </Configurations>
+  <StartMode startupentry="GTKWii" single="True">
+    <Execute type="None" entry="GTKWii" />
+    <Execute type="None" entry="MonoWii" />
+    <Execute type="None" entry="Packages" />
+  </StartMode>
+  <Entries>
+    <Entry filename="./GTKWii/GTKWii.mdp" />
+    <Entry filename="../MonoWii/MonoWii.mdp" />
+    <Entry filename="./Packages.mdse" />
+  </Entries>
+</Combine>

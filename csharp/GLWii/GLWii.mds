@@ -1,0 +1,24 @@
+<Combine name="GLWii" fileversion="2.0">
+  <Configurations active="Debug">
+    <Configuration name="Debug" ctype="CombineConfiguration">
+      <Entry build="True" name="GLWii" configuration="Debug" />
+      <Entry build="True" name="Packages" configuration="" />
+      <Entry build="True" name="MonoWii" configuration="Debug" />
+    </Configuration>
+    <Configuration name="Release" ctype="CombineConfiguration">
+      <Entry build="True" name="GLWii" configuration="Release" />
+      <Entry build="True" name="Packages" configuration="" />
+      <Entry build="True" name="MonoWii" configuration="Release" />
+    </Configuration>
+  </Configurations>
+  <StartMode startupentry="GLWii" single="True">
+    <Execute type="None" entry="GLWii" />
+    <Execute type="None" entry="Packages" />
+    <Execute type="None" entry="MonoWii" />
+  </StartMode>
+  <Entries>
+    <Entry filename="./GLWii/GLWii.mdp" />
+    <Entry filename="./Packages.mdse" />
+    <Entry filename="../MonoWii/MonoWii.mdp" />
+  </Entries>
+</Combine>

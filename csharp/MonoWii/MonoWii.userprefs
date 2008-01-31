@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<UserCombinePreferences filename="/home/jestin/Projects/MonoWii/MonoWii.mds">
+  <Files />
+  <Views>
+    <ViewMemento Id="MonoDevelop.Ide.Gui.Pads.ProjectPad">
+      <TreeView>
+        <Node expanded="True" selected="True" />
+      </TreeView>
+    </ViewMemento>
+    <ViewMemento Id="MonoDevelop.Ide.Gui.Pads.ClassPad">
+      <TreeView>
+        <Node expanded="True" />
+      </TreeView>
+    </ViewMemento>
+  </Views>
+  <Properties>
+    <Properties>
+      <Property key="ActiveConfiguration" value="Release" />
+      <Property key="ActiveWindow" value="" />
+    </Properties>
+  </Properties>
+</UserCombinePreferences>
