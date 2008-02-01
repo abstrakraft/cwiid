@@ -16,9 +16,14 @@ namespace MonoWii
 	public delegate void ButtonHandler(cwiid.CWIID_BTN_FLAGS _Buttons);
 	
 	/// <summary>
-	/// This is the delegate that gets called when an accelerometer event occurs
+	/// This delegate sends raw accelerometer data
 	/// </summary>
-	public delegate void AccelHandler(double dX, double dY, double dZ);
+	public delegate void RawAccelHandler(cwiid.cwiid_acc_mesg _Acc);
+	
+	/// <summary>
+	/// This delegate sends buffered accelerometer data
+	/// </summary>
+	public delegate void BufferedAccelHandler(double dX, double dY, double dZ);
 	
 	/// <summary>
 	/// This is the delegate that gets called when an infrared event occurs
@@ -78,11 +83,6 @@ namespace MonoWii
 		private System.UInt32 m_nMinNunchukStickInterval = 100000000;
 		
 		/// <summary>
-		/// Whether we are using accelerometer buffereing
-		/// </summary>
-		private bool m_bAccelBufferOn = false;
-		
-		/// <summary>
 		/// The size of the accelerometer buffer
 		/// </summary>
 		private int m_nAccelBufferSize = 6;
@@ -98,9 +98,14 @@ namespace MonoWii
 		public event ButtonHandler ButtonEvent = null;
 		
 		/// <summary>
-		/// An event that hits when an accelerometer event is recieved
+		/// An event that hits when an accelerometer event is recieved, and sends raw data
 		/// </summary>
-		public event AccelHandler AccelEvent = null;
+		public event RawAccelHandler RawAccelEvent = null;
+		
+		/// <summary>
+		/// An event that hits when an accelerometer event is recieved, and sends buffered data
+		/// </summary>
+		public event BufferedAccelHandler BufferedAccelEvent = null;
 		
 		/// <summary>
 		/// An event that hits when an infrared event is recieved
@@ -488,20 +493,20 @@ namespace MonoWii
 						break;
 					case cwiid.cwiid_mesg_type.CWIID_MESG_ACC:
 						
-						m_LastACCTimeStamp.tv_sec = timestamp.tv_sec;
-						m_LastACCTimeStamp.tv_nsec = timestamp.tv_nsec;
-					
-						if(m_bAccelBufferOn)
+						if(bUpdateACC)
 						{
-							m_AccelBuffer.Insert(0, message.acc_mesg);
+							m_LastACCTimeStamp.tv_sec = timestamp.tv_sec;
+							m_LastACCTimeStamp.tv_nsec = timestamp.tv_nsec;
 							
-							while(m_AccelBuffer.Count > m_nAccelBufferSize)
+							if(BufferedAccelEvent != null)
 							{
-								m_AccelBuffer.RemoveAt(m_nAccelBufferSize);
-							}
+								m_AccelBuffer.Insert(0, message.acc_mesg);
 							
-							if(AccelEvent != null && bUpdateACC)
-							{
+								while(m_AccelBuffer.Count > m_nAccelBufferSize)
+								{
+									m_AccelBuffer.RemoveAt(m_nAccelBufferSize);
+								}
+								
 								double dX = 0.0;
 								double dY = 0.0;
 								double dZ = 0.0;
@@ -519,16 +524,12 @@ namespace MonoWii
 								dY /= (double) m_AccelBuffer.Count;
 								dZ /= (double) m_AccelBuffer.Count;
 								
-								AccelEvent(dX, dY, dZ);
+								BufferedAccelEvent(dX, dY, dZ);
 							}
-						}
-						else
-						{
-							if(AccelEvent != null && bUpdateACC)
+							
+							if(RawAccelEvent != null)
 							{
-								AccelEvent((double)message.acc_mesg.accX,
-								           (double)message.acc_mesg.accY,
-								           (double)message.acc_mesg.accZ);
+								RawAccelEvent(message.acc_mesg);
 							}
 						}
 						break;
@@ -657,15 +658,6 @@ namespace MonoWii
 		{
 			get { return m_Address; }
 			set { m_Address = value; }
-		}
-		
-		/// <summary>
-		/// Whether we are using accelerometer buffereing
-		/// </summary>
-		public bool AccelerometerBuffereing
-		{
-			get { return m_bAccelBufferOn; }
-			set { m_bAccelBufferOn = value; }
 		}
 		
 		/// <summary>

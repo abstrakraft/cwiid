@@ -23,14 +23,11 @@ public partial class MainWindow: Gtk.Window
 		
 		MyWiimote = new Wiimote();
 		MyWiimote.ButtonEvent += new ButtonHandler(OnWiimoteButtonPressed);
-		MyWiimote.AccelEvent += new AccelHandler(OnWiimoteAccelChanged);
+		MyWiimote.RawAccelEvent += new RawAccelHandler(OnWiimoteAccelChanged);
 		MyWiimote.IREvent += new IRHandler(OnWiimoteIRChanged);
 		MyWiimote.NunchukButtonEvent += new NunchukButtonHandler(OnNunchukButtonPressed);
 		MyWiimote.NunchukAccelEvent += new NunchukAccelHandler(OnNunchukAccelChanged);
 		MyWiimote.NunchukStickEvent += new NunchukStickHandler(OnNunchukStick);
-		
-		MyWiimote.AccelerometerBuffereing = true;
-		MyWiimote.AccelerometerBufferSize = 6;
 	}
 	
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
@@ -60,17 +57,17 @@ public partial class MainWindow: Gtk.Window
           });
 	}
 	
-	private void OnWiimoteAccelChanged(double dX, double dY, double dZ)
+	private void OnWiimoteAccelChanged(cwiid.cwiid_acc_mesg _Acc)
 	{
 		Gtk.Application.Invoke (delegate {
-			XAccelBar.Fraction = dX / (double) cwiid.CWIID_ACC_MAX;
-			XAccelBar.Text = dX.ToString("#0.00");
+			XAccelBar.Fraction = _Acc.accX / (double) cwiid.CWIID_ACC_MAX;
+			XAccelBar.Text = _Acc.accX.ToString();
 			
-			YAccelBar.Fraction = (double) dY / (double) cwiid.CWIID_ACC_MAX;
-			YAccelBar.Text = dY.ToString("#0.00");
+			YAccelBar.Fraction = (double) _Acc.accY / (double) cwiid.CWIID_ACC_MAX;
+			YAccelBar.Text = _Acc.accY.ToString();
 			
-			ZAccelBar.Fraction = (double) dZ / (double) cwiid.CWIID_ACC_MAX;
-			ZAccelBar.Text = dZ.ToString("#0.00");
+			ZAccelBar.Fraction = (double) _Acc.accZ / (double) cwiid.CWIID_ACC_MAX;
+			ZAccelBar.Text = _Acc.accZ.ToString();
           });
 	}
 	

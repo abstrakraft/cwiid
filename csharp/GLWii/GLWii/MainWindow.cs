@@ -26,11 +26,10 @@ public partial class MainWindow: Gtk.Window
 	{
 		Build ();
 		
-		MyWiimote.AccelEvent += new AccelHandler(OnAccelEvent);
+		MyWiimote.BufferedAccelEvent += new BufferedAccelHandler(OnAccelEvent);
 		MyWiimote.ButtonEvent += new ButtonHandler(OnButtonEvent);
 		MyWiimote.MinACCInterval = MyWiimote.MinACCInterval * 3 / 4;
 		
-		MyWiimote.AccelerometerBuffereing = true;
 		MyWiimote.AccelerometerBufferSize = 10;
 		MyWiimote.MinACCInterval = 0;
 	}
