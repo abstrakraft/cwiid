@@ -210,6 +210,7 @@ public partial class MainWindow: Gtk.Window
 		gc.Stroke();
 		
 		((IDisposable) gc.Target).Dispose ();
+		((IDisposable) gc).Dispose ();
 	}
 	
 	private void OnNunchukButtonPressed(cwiid.CWIID_NUNCHUK_BTN_FLAGS _Buttons)
@@ -291,5 +292,6 @@ public partial class MainWindow: Gtk.Window
 		gc.Stroke();
 		
 		((IDisposable) gc.Target).Dispose ();
+		((IDisposable) gc).Dispose ();
 	}
 }
