@@ -32,6 +32,7 @@ namespace GLWii
 		private bool m_bOpenGLInitialized = false;
 		private bool m_bDrawBlade = false;
 		private bool m_bDrawTexture = true;
+		private bool m_bCalibrateMode = false;
 		
 		public WiimoteGL()
 		{
@@ -185,16 +186,7 @@ namespace GLWii
 		
 		public void SetCalibrateMode(bool _bOn)
 		{
-			if (glArea.MakeCurrent() == 0)
-                return;
-			if(_bOn)
-			{
-				Gl.glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-			}
-			else
-			{
-				Gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-			}
+			m_bCalibrateMode = _bOn;
 		}
 		
 		// One-time configuration of opengl states happens here
@@ -261,6 +253,15 @@ namespace GLWii
 		
 		private void DrawWiimote()
 		{
+			if(m_bCalibrateMode)
+			{
+				Gl.glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+			}
+			else
+			{
+				Gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			}
+			
 			if(m_bDrawTexture)
 			{
 				Gl.glEnable(Gl.GL_TEXTURE_2D);
