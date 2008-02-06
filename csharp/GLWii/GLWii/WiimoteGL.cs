@@ -147,6 +147,11 @@ namespace GLWii
 			{
 				DrawBlade();
 			}
+			
+			Gl.glMatrixMode(Gl.GL_MODELVIEW);
+			Gl.glLoadIdentity();
+			
+			DrawRoom();
 
             // bring back buffer to front, put front buffer in back
             glArea.SwapBuffers();
@@ -174,6 +179,7 @@ namespace GLWii
 				if (glArea.MakeCurrent() == 0)
 	                return;
 				
+				Gl.glMatrixMode(Gl.GL_MODELVIEW);
 				Gl.glLoadIdentity();
 				
 				// we want pitch to be measured from vertically, the way we originally draw the wiimote
@@ -229,6 +235,16 @@ namespace GLWii
 			Gl.glEnable(Gl.GL_LIGHT0);
 			Gl.glEnable(Gl.GL_NORMALIZE);
 			Gl.glEnable(Gl.GL_GENERATE_MIPMAP);
+			
+			// fog stuff
+			float[] fogColor = new float[4] { 0.0f, 0.0f, 0.0f, 1.0f };
+			Gl.glEnable(Gl.GL_FOG);
+			Gl.glFogi(Gl.GL_FOG_MODE, Gl.GL_EXP);
+			Gl.glFogfv(Gl.GL_FOG_COLOR, fogColor);
+			Gl.glFogf(Gl.GL_FOG_DENSITY, 0.10f);
+			Gl.glHint(Gl.GL_FOG_HINT, Gl.GL_DONT_CARE);
+			Gl.glFogf(Gl.GL_FOG_START, 1.0f);
+			Gl.glFogf(Gl.GL_FOG_END, 5.0f);
 			
 			Gl.glHint(Gl.GL_PERSPECTIVE_CORRECTION_HINT, Gl.GL_NICEST);
         }
@@ -373,6 +389,77 @@ namespace GLWii
 			Gl.glDisable(Gl.GL_BLEND);
 
 			Gl.glEnable(Gl.GL_LIGHTING);
+		}
+		
+		public void DrawRoom()
+		{
+			// Right Wall
+			for(int y = -5; y < 6; y++)
+			{
+				Gl.glBegin(Gl.GL_LINES);
+					Gl.glVertex3f(5.0f, (float)y, -30.0f);
+					Gl.glVertex3f(5.0f, (float)y, 10.0f);
+				Gl.glEnd();
+			}
+			
+			for(int z = -30; z < 11; z++)
+			{
+				Gl.glBegin(Gl.GL_LINES);
+					Gl.glVertex3f(5.0f, 5.0f, (float)z);
+					Gl.glVertex3f(5.0f, -5.0f, (float)z);
+				Gl.glEnd();
+			}
+			
+			// Left Wall
+			for(int y = -5; y < 6; y++)
+			{
+				Gl.glBegin(Gl.GL_LINES);
+					Gl.glVertex3f(-5.0f, (float)y, -30.0f);
+					Gl.glVertex3f(-5.0f, (float)y, 10.0f);
+				Gl.glEnd();
+			}
+			
+			for(int z = -30; z < 11; z++)
+			{
+				Gl.glBegin(Gl.GL_LINES);
+					Gl.glVertex3f(-5.0f, 5.0f, (float)z);
+					Gl.glVertex3f(-5.0f, -5.0f, (float)z);
+				Gl.glEnd();
+			}
+			
+			// Ceiling
+			for(int x = -5; x < 6; x++)
+			{
+				Gl.glBegin(Gl.GL_LINES);
+					Gl.glVertex3f((float)x, 5.0f, -30.0f);
+					Gl.glVertex3f((float)x, 5.0f, 10.0f);
+				Gl.glEnd();
+			}
+			
+			for(int z = -30; z < 11; z++)
+			{
+				Gl.glBegin(Gl.GL_LINES);
+					Gl.glVertex3f(5.0f, 5.0f, (float)z);
+					Gl.glVertex3f(-5.0f, 5.0f, (float)z);
+				Gl.glEnd();
+			}
+			
+			// Floor
+			for(int x = -5; x < 6; x++)
+			{
+				Gl.glBegin(Gl.GL_LINES);
+					Gl.glVertex3f((float)x, -5.0f, -30.0f);
+					Gl.glVertex3f((float)x, -5.0f, 10.0f);
+				Gl.glEnd();
+			}
+			
+			for(int z = -30; z < 11; z++)
+			{
+				Gl.glBegin(Gl.GL_LINES);
+					Gl.glVertex3f(5.0f, -5.0f, (float)z);
+					Gl.glVertex3f(-5.0f, -5.0f, (float)z);
+				Gl.glEnd();
+			}
 		}
 		
 		public void ToggleBlade()
