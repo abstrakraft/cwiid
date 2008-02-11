@@ -69,6 +69,9 @@ namespace HeadTracking
 			Gl.glTexParameteri(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_MAG_FILTER, Gl.GL_NEAREST);
 			Gl.glTexParameteri(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_MIN_FILTER, Gl.GL_NEAREST);
 			Gl.glTexImage2D(Gl.GL_TEXTURE_2D, 0, Gl.GL_RGBA, m_TargetBitmap.Width, m_TargetBitmap.Height, 0, Gl.GL_RGBA, Gl.GL_UNSIGNED_BYTE, m_TargetImage);
+			
+			// Blending
+			Gl.glBlendFunc(Gl.GL_ONE, Gl.GL_ONE_MINUS_SRC_ALPHA);
 
 			// Lighting stuff
 			float[] mat_specular = new float[4] { 1.0f, 1.0f, 1.0f, 1.0f};
@@ -262,6 +265,7 @@ namespace HeadTracking
 			Gl.glEnd();
 			
 			Gl.glEnable(Gl.GL_TEXTURE_2D);
+			Gl.glEnable(Gl.GL_BLEND);
 			
 			Gl.glBegin(Gl.GL_POLYGON);
 				Gl.glNormal3f(0.0f, 0.0f, 1.0f);
@@ -272,6 +276,7 @@ namespace HeadTracking
 			Gl.glEnd();
 			
 			Gl.glDisable(Gl.GL_TEXTURE_2D);
+			Gl.glDisable(Gl.GL_BLEND);
 			
 			// Target 2
 			Gl.glBegin(Gl.GL_LINES);
@@ -280,6 +285,7 @@ namespace HeadTracking
 			Gl.glEnd();
 			
 			Gl.glEnable(Gl.GL_TEXTURE_2D);
+			Gl.glEnable(Gl.GL_BLEND);
 			
 			Gl.glBegin(Gl.GL_POLYGON);
 				Gl.glNormal3f(0.0f, 0.0f, 1.0f);
@@ -290,6 +296,7 @@ namespace HeadTracking
 			Gl.glEnd();
 			
 			Gl.glDisable(Gl.GL_TEXTURE_2D);
+			Gl.glDisable(Gl.GL_BLEND);
 			
 			// Target 3
 			Gl.glBegin(Gl.GL_LINES);
@@ -298,6 +305,7 @@ namespace HeadTracking
 			Gl.glEnd();
 			
 			Gl.glEnable(Gl.GL_TEXTURE_2D);
+			Gl.glEnable(Gl.GL_BLEND);
 			
 			Gl.glBegin(Gl.GL_POLYGON);
 				Gl.glNormal3f(0.0f, 0.0f, 1.0f);
@@ -308,6 +316,7 @@ namespace HeadTracking
 			Gl.glEnd();
 			
 			Gl.glDisable(Gl.GL_TEXTURE_2D);
+			Gl.glDisable(Gl.GL_BLEND);
 			
 			// Target 4
 			Gl.glBegin(Gl.GL_LINES);
@@ -316,6 +325,7 @@ namespace HeadTracking
 			Gl.glEnd();
 			
 			Gl.glEnable(Gl.GL_TEXTURE_2D);
+			Gl.glEnable(Gl.GL_BLEND);
 			
 			Gl.glBegin(Gl.GL_POLYGON);
 				Gl.glNormal3f(0.0f, 0.0f, 1.0f);
@@ -326,24 +336,27 @@ namespace HeadTracking
 			Gl.glEnd();
 			
 			Gl.glDisable(Gl.GL_TEXTURE_2D);
+			Gl.glDisable(Gl.GL_BLEND);
 			
 			// Target 5
 			Gl.glBegin(Gl.GL_LINES);
-				Gl.glVertex3f(0.0f, 0.0f, -30.0f);
-				Gl.glVertex3f(0.0f, 0.0f, 2.0f);
+				Gl.glVertex3f(0.5f, 0.5f, -30.0f);
+				Gl.glVertex3f(0.5f, 0.5f, 2.0f);
 			Gl.glEnd();
 			
 			Gl.glEnable(Gl.GL_TEXTURE_2D);
+			Gl.glEnable(Gl.GL_BLEND);
 			
 			Gl.glBegin(Gl.GL_POLYGON);
 				Gl.glNormal3f(0.0f, 0.0f, 1.0f);
-				Gl.glTexCoord2f(1.0f, 1.0f); Gl.glVertex3f(-0.5f, -0.5f, 2.0f);
-				Gl.glTexCoord2f(0.0f, 1.0f); Gl.glVertex3f(0.5f, -0.5f, 2.0f);
-				Gl.glTexCoord2f(0.0f, 0.0f); Gl.glVertex3f(0.5f, 0.5f, 2.0f);
-				Gl.glTexCoord2f(1.0f, 0.0f); Gl.glVertex3f(-0.5f, 0.5f, 2.0f);
+				Gl.glTexCoord2f(1.0f, 1.0f); Gl.glVertex3f(0.0f, 0.0f, 2.0f);
+				Gl.glTexCoord2f(0.0f, 1.0f); Gl.glVertex3f(1.0f, 0.0f, 2.0f);
+				Gl.glTexCoord2f(0.0f, 0.0f); Gl.glVertex3f(1.0f, 1.0f, 2.0f);
+				Gl.glTexCoord2f(1.0f, 0.0f); Gl.glVertex3f(0.0f, 1.0f, 2.0f);
 			Gl.glEnd();
 			
 			Gl.glDisable(Gl.GL_TEXTURE_2D);
+			Gl.glDisable(Gl.GL_BLEND);
 		}
 		
 		private void LoadTexture()
@@ -403,9 +416,9 @@ namespace HeadTracking
 			Gl.glMatrixMode(Gl.GL_MODELVIEW);
 			Gl.glLoadIdentity();
 			
-			float dLeft = -(((cwiid.CWIID_IR_X_MAX / 2) - dAverageX) * 2.0f) / (cwiid.CWIID_IR_X_MAX / 2);
-			float dUp = (((cwiid.CWIID_IR_Y_MAX / 2) - dAverageY) * 2.0f) / (cwiid.CWIID_IR_Y_MAX / 2);
-			float dForward = ((dDistance - 400.0f) * 2.0f) / 400.0f;
+			float dLeft = -(((cwiid.CWIID_IR_X_MAX / 2) - dAverageX) * 0.75f) / (cwiid.CWIID_IR_X_MAX / 2);
+			float dUp = (((cwiid.CWIID_IR_Y_MAX / 2) - dAverageY) * 0.75f) / (cwiid.CWIID_IR_Y_MAX / 2);
+			float dForward = ((dDistance - 400.0f) * 4.0f) / 400.0f;
 			
 			Gl.glTranslatef(dLeft, dUp, dForward);
 		}

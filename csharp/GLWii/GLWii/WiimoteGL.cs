@@ -136,9 +136,6 @@ namespace GLWii
             //Console.WriteLine("Exposed");
             // Clear the scene
             Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
-
-            // Replace current matrix with the identity matrix
-            //Gl.glLoadIdentity();
 			
 			// Draw the wiimote
 			DrawWiimote();
@@ -241,7 +238,7 @@ namespace GLWii
 			Gl.glEnable(Gl.GL_FOG);
 			Gl.glFogi(Gl.GL_FOG_MODE, Gl.GL_EXP);
 			Gl.glFogfv(Gl.GL_FOG_COLOR, fogColor);
-			Gl.glFogf(Gl.GL_FOG_DENSITY, 0.10f);
+			Gl.glFogf(Gl.GL_FOG_DENSITY, 0.05f);
 			Gl.glHint(Gl.GL_FOG_HINT, Gl.GL_DONT_CARE);
 			Gl.glFogf(Gl.GL_FOG_START, 1.0f);
 			Gl.glFogf(Gl.GL_FOG_END, 5.0f);
