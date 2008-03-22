@@ -44,6 +44,16 @@ namespace MonoWii
 	/// This is the delegate that gets called when nunchuk stick event occurs
 	/// </summary>
 	public delegate void NunchukStickHandler(byte _StickX, byte _StickY);
+	
+	/// <summary>
+	/// This is the delegate that gets called when a classic controller button event occurs
+	/// </summary>
+	public delegate void ClassicButtonHandler(cwiid.CWIID_CLASSIC_BTN_FLAGS _Buttons);
+	
+	/// <summary>
+	/// This is the delegate that gets called when classic controller stick event occurs
+	/// </summary>
+	public delegate void ClassicStickHandler(byte _LStickX, byte _LStickY, byte _RStickX, byte _RStickY);
 #endregion
 	
 	public class Wiimote
@@ -81,6 +91,11 @@ namespace MonoWii
 		/// The minimum time lapse between calls to NunchukStickEvent
 		/// </summary>
 		private System.UInt32 m_nMinNunchukStickInterval = 100000000;
+		
+		/// <summary>
+		/// The minimum time lapse between calls to ClassicStickEvent
+		/// </summary>
+		private System.UInt32 m_nMinClassicStickInterval = 1000000000;
 		
 		/// <summary>
 		/// The size of the accelerometer buffer
@@ -128,6 +143,16 @@ namespace MonoWii
 		public event NunchukStickHandler NunchukStickEvent = null;
 		
 		/// <summary>
+		/// An event that hits when a classic controller button event is recieved
+		/// </summary>
+		public event ClassicButtonHandler ClassicButtonEvent = null;
+		
+		// <summary>
+		/// An event that hits when a classic controller stick event is recieved
+		/// </summary>
+		public event ClassicStickHandler ClassicStickEvent = null;
+		
+		/// <summary>
 		/// The handle to the wiimote
 		/// </summary>
 		IntPtr m_hWiimote;
@@ -171,6 +196,16 @@ namespace MonoWii
 		/// This is the last received nunchuk button
 		/// </summary>
 		private cwiid.CWIID_NUNCHUK_BTN_FLAGS m_LastNunchukButtons = 0x00;
+		
+		/// <summary>
+		/// The timestamp of the last classic controller stick event sent out
+		/// </summary>
+		private cwiid.timespec m_LastClassicStickTimeStamp;
+		
+		/// <summary>
+		/// This is the last received classic button
+		/// </summary>
+		private cwiid.CWIID_CLASSIC_BTN_FLAGS m_LastClassicButtons = 0x00;
 		
 		/// <summary>
 		/// The error callback
@@ -391,6 +426,7 @@ namespace MonoWii
 			bool bUpdateACC = true;
 			bool bUpdateNunchukACC = true;
 			bool bUpdateNunchukStick = true;
+			bool bUpdateClassicStick = true;
 			
 			// decide to update IR
 			if(timestamp.tv_sec == m_LastIRTimeStamp.tv_sec)
@@ -453,6 +489,22 @@ namespace MonoWii
 				if((System.UInt32.MaxValue - m_LastNunchukStickTimeStamp.tv_nsec) + timestamp.tv_nsec < MinNunchukStickInterval)
 				{
 					bUpdateNunchukStick = false;
+				}
+			}
+			
+			// decide to update classic stick
+			if(timestamp.tv_sec == m_LastClassicStickTimeStamp.tv_sec)
+			{
+				if(timestamp.tv_nsec - m_LastClassicStickTimeStamp.tv_nsec < MinClassicStickInterval)
+				{
+					bUpdateNunchukStick = false;
+				}
+			}
+			else
+			{
+				if((System.UInt32.MaxValue - m_LastClassicStickTimeStamp.tv_nsec) + timestamp.tv_nsec < MinClassicStickInterval)
+				{
+					bUpdateClassicStick = false;
 				}
 			}
 			
@@ -566,10 +618,26 @@ namespace MonoWii
 						}
 						break;
 					case cwiid.cwiid_mesg_type.CWIID_MESG_CLASSIC:
-						System.Console.Write("Classic Report: btns={0} l_stick=({1},{2}) r_stick=({3},{4}) " +
-						              "l={5} r={5}\n", message.classic_mesg.buttons.ToString(), message.classic_mesg.l_stick[0].ToString(),
-					                             message.classic_mesg.l_stick[1].ToString(), message.classic_mesg.r_stick[0].ToString(), message.classic_mesg.r_stick[1].ToString(),
-					                              message.classic_mesg.l.ToString(), message.classic_mesg.r.ToString());
+						if(ClassicButtonEvent != null)
+						{
+							if(message.classic_mesg.buttons != m_LastClassicButtons)
+							{
+								ClassicButtonEvent(message.classic_mesg.buttons);
+								m_LastClassicButtons = message.classic_mesg.buttons;
+							}
+						}
+						
+						if(ClassicStickEvent != null && bUpdateClassicStick)
+						{
+							m_LastClassicStickTimeStamp.tv_sec = timestamp.tv_sec;
+							m_LastClassicStickTimeStamp.tv_nsec = timestamp.tv_nsec;
+							ClassicStickEvent(message.classic_mesg.l_stick[0], message.classic_mesg.l_stick[1],
+							                  message.classic_mesg.r_stick[0], message.classic_mesg.r_stick[1]);
+						}
+//						System.Console.Write("Classic Report: btns={0} l_stick=({1},{2}) r_stick=({3},{4}) " +
+//						              "l={5} r={5}\n", message.classic_mesg.buttons.ToString(), message.classic_mesg.l_stick[0].ToString(),
+//					                             message.classic_mesg.l_stick[1].ToString(), message.classic_mesg.r_stick[0].ToString(), message.classic_mesg.r_stick[1].ToString(),
+//					                              message.classic_mesg.l.ToString(), message.classic_mesg.r.ToString());
 						break;
 					case cwiid.cwiid_mesg_type.CWIID_MESG_ERROR:
 						if (cwiid.cwiid_close(wiimote) > 0)
@@ -606,6 +674,30 @@ namespace MonoWii
 		}
 #endregion
 		
+#region Static Functions
+		
+#endregion
+		/// <summary>
+		/// Returns an array of available wiimote addresses
+		/// </summary>
+		public static ArrayList GetActiveRemotes(int _nTimeout)
+		{
+			ArrayList Addresses = new ArrayList();
+			
+			/*unsafe
+			{
+				cwiid.cwiid_bdinfo *Info;
+				IntPtr pInfo = (IntPtr) &Info;
+				int nCount = cwiid.cwiid_get_bdinfo_array(-1, 4, -1, pInfo,0);
+				
+				for(int nIndex = 0; nIndex < nCount; nIndex++)
+				{
+					Addresses.Add(pInfo[nIndex].bdaddr);
+				}
+			}*/
+			
+			return Addresses;
+		}
 #region Properties
 		/// <summary>
 		/// Whether the wiimote is connected
@@ -649,6 +741,15 @@ namespace MonoWii
 		{
 			get { return m_nMinNunchukStickInterval; }
 			set { m_nMinNunchukStickInterval = value; }
+		}
+		
+		/// <summary>
+		/// The minimum time lapse between calls to ClassicStickEvent
+		/// </summary>
+		public System.UInt32 MinClassicStickInterval
+		{
+			get { return m_nMinClassicStickInterval; }
+			set { m_nMinClassicStickInterval = value; }
 		}
 		
 		/// <summary>
