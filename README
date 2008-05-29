@@ -31,7 +31,7 @@ The CWiid package contains the following parts:
 
 REQUIREMENTS
 ------------------------------------------------------------------------------------------------
-awk, bison, flex, bluez-libs, gtk+-2 dev libs, python 2.4 or greater, uinput kernel support, kernel sources
+awk, bison, flex, bluez-libs, gtk+-2 dev libs, python 2.4 or greater, python dev for python module, uinput kernel support, kernel sources
 
 INSTALLATION
 ------------------------------------------------------------------------------------------------
