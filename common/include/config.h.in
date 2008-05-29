@@ -1,4 +1,4 @@
-/* config.h.in.  Generated from configure.ac by autoheader.  */
+/* common/include/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to 1 if you have the <bluetooth/hci.h> header file. */
 #undef HAVE_BLUETOOTH_HCI_H
