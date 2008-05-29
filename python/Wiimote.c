@@ -236,7 +236,10 @@ static int Wiimote_init(Wiimote* self, PyObject* args, PyObject *kwds)
 			bdaddr = *BDADDR_ANY;
 		}
 
-		if (!(wiimote = cwiid_open(&bdaddr, flags))) {
+		Py_BEGIN_ALLOW_THREADS
+		wiimote = cwiid_open(&bdaddr, flags);
+		Py_END_ALLOW_THREADS
+		if (!wiimote) {
 			PyErr_SetString(PyExc_RuntimeError,
 			                "Error opening wiimote connection");
 			return -1;
