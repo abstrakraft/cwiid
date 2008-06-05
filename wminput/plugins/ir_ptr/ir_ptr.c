@@ -147,6 +147,10 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
 	}
 
 	/* LEDs */
+	/* Commented out so it doesn't overide led plugin.
+	 * It shouldn't matter, since only one IR source
+	 * is used now anyways. If the pointer is moving,
+	 * it sees a source.
 	switch (src_index) {
 	case 0:
 		flag = CWIID_LED1_ON;
@@ -164,10 +168,12 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
 		flag = 0;
 		break;
 	}
+
 	if (flag != old_flag) {
 		cwiid_set_led(wiimote, flag);
 		old_flag = flag;
 	}
+	*/
 
 	if ((src_index == -1) || !ir_mesg->src[src_index].valid) {
 		data.axes[0].valid = data.axes[1].valid = 0;
