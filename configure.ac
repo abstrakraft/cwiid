@@ -145,6 +145,7 @@ AC_OUTPUT(
 	[wminput/plugins/acc/Makefile]
 	[wminput/plugins/nunchuk_acc/Makefile]
 	[wminput/plugins/led/Makefile]
+ 	[wminput/plugins/nunchuk_stick2btn/Makefile]
 	[lswm/Makefile]
 	[python/Makefile]
 	)
