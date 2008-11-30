@@ -122,8 +122,8 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 		}
 
 		/* timeout (10000) in milliseconds */
-		if (hci_remote_name(sock, &dev_list[i].bdaddr, BT_NAME_LEN,
-		                    (*bdinfo)[bdinfo_count].name, 10000)) {
+		if (hci_read_remote_name(sock, &dev_list[i].bdaddr, BT_NAME_LEN,
+		                         (*bdinfo)[bdinfo_count].name, 10000)) {
 			cwiid_err(NULL, "Bluetooth name read error");
 			err = 1;
 			goto CODA;
