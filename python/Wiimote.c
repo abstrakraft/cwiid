@@ -691,7 +691,7 @@ static PyObject *Wiimote_write(Wiimote *self, PyObject *args, PyObject *kwds)
 static void CallbackBridge(cwiid_wiimote_t *wiimote, int mesg_count,
 	                       union cwiid_mesg mesg[], struct timespec *t)
 {
-	PyObject *ArgTuple;
+	PyObject *ArgTuple, *Time;
 	PyObject *PySelf;
 	PyGILState_STATE gstate;
 
@@ -701,8 +701,9 @@ static void CallbackBridge(cwiid_wiimote_t *wiimote, int mesg_count,
 
 	/* Put id and the list of messages as the arguments to the callback */
 	PySelf = (PyObject *) cwiid_get_data(wiimote);
-	if (!PyObject_CallFunction(((Wiimote *)PySelf)->callback, "(O)",
-	                           ArgTuple)) {
+	if (!PyObject_CallFunction(((Wiimote *)PySelf)->callback, "(O, d)",
+	                           ArgTuple,
+	                           t->tv_sec + ((double) t->tv_nsec) * 1e-9)) {
 		PyErr_Print();
 	}
 
