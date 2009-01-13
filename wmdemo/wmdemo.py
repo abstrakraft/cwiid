@@ -143,7 +143,8 @@ def print_state(state):
 		   state['classic']['l_stick'], state['classic']['r_stick'],
 		   state['classic']['l'], state['classic']['r'])
 
-def callback(mesg_list):
+def callback(mesg_list, time):
+	print 'time: %f' % time
 	for mesg in mesg_list:
 		if mesg[0] == cwiid.MESG_STATUS:
 			print 'Status Report: battery=%d extension=' % \
@@ -167,7 +168,7 @@ def callback(mesg_list):
 		elif mesg[0] == cwiid.MESG_IR:
 			valid_src = False
 			print 'IR Report: ',
-			for src in state['ir_src']:
+			for src in mesg[1]:
 				if src:
 					valid_src = True
 					print src['pos'],
