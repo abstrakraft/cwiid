@@ -15,6 +15,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *  ChangeLog:
+ *  2009-06-13 L. Donnie Smith <cwiid@abstrakraft.org>
+ *  * add cwiid_open_timeout function, call it with default from cwiid_open
+ *
  *  2007-06-14 L. Donnie Smith <cwiid@abstrakraft.org>
  *  * added sleep after cwiid_find_wiimote call
  *
@@ -61,7 +64,13 @@
 pthread_mutex_t global_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int wiimote_id = 0;
 
+/* TODO: Turn this onto a macro on next major so version */
 cwiid_wiimote_t *cwiid_open(bdaddr_t *bdaddr, int flags)
+{
+	return cwiid_open_timeout(bdaddr, flags, 5);
+}
+
+cwiid_wiimote_t *cwiid_open_timeout(bdaddr_t *bdaddr, int flags, int timeout)
 {
 	struct wiimote *wiimote = NULL;
 	struct sockaddr_l2 remote_addr;
@@ -96,7 +105,7 @@ cwiid_wiimote_t *cwiid_open(bdaddr_t *bdaddr, int flags)
 
 	/* If BDADDR_ANY is given, find available wiimote */
 	if (bacmp(bdaddr, BDADDR_ANY) == 0) {
-		if (cwiid_find_wiimote(bdaddr, 5)) {
+		if (cwiid_find_wiimote(bdaddr, timeout)) {
 			goto ERR_HND;
 		}
 		sleep(1);
