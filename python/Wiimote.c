@@ -328,7 +328,7 @@ static int
 
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
-		return NULL;
+		return -1;
 	}
 
 	if (!PyCallable_Check(NewCallback)) {
@@ -616,7 +616,7 @@ static int Wiimote_set_led(Wiimote *self, PyObject *PyLed, void *closure)
 
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
-		return NULL;
+		return -1;
 	}
 
 	if (((led = PyInt_AsLong(PyLed)) == -1) && PyErr_Occurred()) {
@@ -639,7 +639,7 @@ static int
 
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
-		return NULL;
+		return -1;
 	}
 
 	if (((rumble = PyInt_AsLong(PyRumble)) == -1) && PyErr_Occurred()) {
@@ -662,7 +662,7 @@ static int
 
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
-		return NULL;
+		return -1;
 	}
 
 	if (((rpt_mode = PyInt_AsLong(PyRptMode)) == -1) && PyErr_Occurred()) {
