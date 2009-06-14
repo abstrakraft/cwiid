@@ -26,6 +26,7 @@ def main():
 
 	#Connect to address given on command-line, if present
 	print 'Put Wiimote in discoverable mode now (press 1+2)...'
+	global wiimote
 	if len(sys.argv) > 1:
 		wiimote = cwiid.Wiimote(sys.argv[1])
 	else:
@@ -91,7 +92,7 @@ def main():
 
 def print_state(state):
 	print 'Report Mode:',
-	for r in ['STATUS', 'BTN', 'ACC', 'IR', 'NUNCHUK', 'CLASSIC']:
+	for r in ['STATUS', 'BTN', 'ACC', 'IR', 'NUNCHUK', 'CLASSIC', 'BALANCE']:
 		if state['rpt_mode'] & eval('cwiid.RPT_' + r):
 			print r,
 	print
@@ -142,6 +143,10 @@ def print_state(state):
 		  (state['classic']['buttons'],
 		   state['classic']['l_stick'], state['classic']['r_stick'],
 		   state['classic']['l'], state['classic']['r'])
+	elif state['ext_type'] == cwiid.EXT_BALANCE:
+		print 'Balance: right_top=%d right_bottom=%d left_top=%d left_bottom=%d' % \
+		  (state['balance']['right_top'], state['balance']['right_bottom'],
+		   state['balance']['left_top'], state['balance']['left_bottom'])
 
 def callback(mesg_list, time):
 	print 'time: %f' % time
@@ -155,6 +160,8 @@ def callback(mesg_list, time):
 				print 'Nunchuk'
 			elif mesg[1]['ext_type'] == cwiid.EXT_CLASSIC:
 				print 'Classic Controller'
+			elif mesg[1]['ext_type'] == cwiid.EXT_BALANCE:
+				print 'Balance Board'
 			else:
 				print 'Unknown Extension'
 
@@ -191,6 +198,8 @@ def callback(mesg_list, time):
 			   state['classic']['l_stick'], state['classic']['r_stick'],
 			   state['classic']['l'], state['classic']['r'])
 		elif mesg[0] ==  cwiid.MESG_ERROR:
+			print "Error message received"
+			global wiimote
 			wiimote.close()
 			exit(-1)
 		else:

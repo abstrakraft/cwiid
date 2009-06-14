@@ -179,3 +179,28 @@ int cwiid_get_acc_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
 
 	return 0;
 }
+
+int cwiid_get_balance_cal(struct wiimote *wiimote,
+                          struct balance_cal *balance_cal)
+{
+	unsigned char buf[24];
+
+	if (cwiid_read(wiimote, CWIID_RW_REG, 0xa40024, 24, buf)) {
+		cwiid_err(wiimote, "Read error (balancecal)");
+		return -1;
+	}
+	balance_cal->right_top[0]    = ((uint16_t)buf[0]<<8 | (uint16_t)buf[1]);
+	balance_cal->right_bottom[0] = ((uint16_t)buf[2]<<8 | (uint16_t)buf[3]);
+	balance_cal->left_top[0]     = ((uint16_t)buf[4]<<8 | (uint16_t)buf[5]);
+	balance_cal->left_bottom[0]  = ((uint16_t)buf[6]<<8 | (uint16_t)buf[7]);
+	balance_cal->right_top[1]    = ((uint16_t)buf[8]<<8 | (uint16_t)buf[9]);
+	balance_cal->right_bottom[1] = ((uint16_t)buf[10]<<8 | (uint16_t)buf[11]);
+	balance_cal->left_top[1]     = ((uint16_t)buf[12]<<8 | (uint16_t)buf[13]);
+	balance_cal->left_bottom[1]  = ((uint16_t)buf[14]<<8 | (uint16_t)buf[15]);
+	balance_cal->right_top[2]    = ((uint16_t)buf[16]<<8 | (uint16_t)buf[17]);
+	balance_cal->right_bottom[2] = ((uint16_t)buf[18]<<8 | (uint16_t)buf[19]);
+	balance_cal->left_top[2]     = ((uint16_t)buf[20]<<8 | (uint16_t)buf[21]);
+	balance_cal->left_bottom[2]  = ((uint16_t)buf[22]<<8 | (uint16_t)buf[23]);
+
+	return 0;
+}

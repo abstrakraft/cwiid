@@ -216,6 +216,9 @@ void *status_thread(struct wiimote *wiimote)
 					case EXT_CLASSIC:
 						status_mesg->ext_type = CWIID_EXT_CLASSIC;
 						break;
+					case EXT_BALANCE:
+						status_mesg->ext_type = CWIID_EXT_BALANCE;
+						break;
 					default:
 						status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 						break;

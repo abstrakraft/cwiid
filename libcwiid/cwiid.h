@@ -75,7 +75,8 @@
 #define CWIID_RPT_IR		0x08
 #define CWIID_RPT_NUNCHUK	0x10
 #define CWIID_RPT_CLASSIC	0x20
-#define CWIID_RPT_EXT		(CWIID_RPT_NUNCHUK | CWIID_RPT_CLASSIC)
+#define CWIID_RPT_BALANCE	0x40
+#define CWIID_RPT_EXT		(CWIID_RPT_NUNCHUK | CWIID_RPT_CLASSIC | CWIID_RPT_BALANCE)
 
 /* LED flags */
 #define CWIID_LED1_ON	0x01
@@ -165,6 +166,7 @@ enum cwiid_mesg_type {
 	CWIID_MESG_IR,
 	CWIID_MESG_NUNCHUK,
 	CWIID_MESG_CLASSIC,
+	CWIID_MESG_BALANCE,
 	CWIID_MESG_ERROR,
 	CWIID_MESG_UNKNOWN
 };
@@ -173,6 +175,7 @@ enum cwiid_ext_type {
 	CWIID_EXT_NONE,
 	CWIID_EXT_NUNCHUK,
 	CWIID_EXT_CLASSIC,
+	CWIID_EXT_BALANCE,
 	CWIID_EXT_UNKNOWN
 };
 
@@ -185,6 +188,13 @@ enum cwiid_error {
 struct acc_cal {
 	uint8_t zero[3];
 	uint8_t one[3];
+};
+
+struct balance_cal {
+	uint16_t right_top[3];
+	uint16_t right_bottom[3];
+	uint16_t left_top[3];
+	uint16_t left_bottom[3];
 };
 
 /* Message Structs */
@@ -231,6 +241,14 @@ struct cwiid_classic_mesg {
 	uint16_t buttons;
 };
 
+struct cwiid_balance_mesg {
+	enum cwiid_mesg_type type;
+	uint16_t right_top;
+	uint16_t right_bottom;
+	uint16_t left_top;
+	uint16_t left_bottom;
+};
+
 struct cwiid_error_mesg {
 	enum cwiid_mesg_type type;
 	enum cwiid_error error;
@@ -244,6 +262,7 @@ union cwiid_mesg {
 	struct cwiid_ir_mesg ir_mesg;
 	struct cwiid_nunchuk_mesg nunchuk_mesg;
 	struct cwiid_classic_mesg classic_mesg;
+	struct cwiid_balance_mesg balance_mesg;
 	struct cwiid_error_mesg error_mesg;
 };
 
@@ -262,9 +281,17 @@ struct classic_state {
 	uint16_t buttons;
 };
 
+struct balance_state {
+	uint16_t right_top;
+	uint16_t right_bottom;
+	uint16_t left_top;
+	uint16_t left_bottom;
+};
+
 union ext_state {
 	struct nunchuk_state nunchuk;
 	struct classic_state classic;
+	struct balance_state balance;
 };
 
 struct cwiid_state {
@@ -326,6 +353,8 @@ int cwiid_get_mesg(cwiid_wiimote_t *wiimote, int *mesg_count,
 int cwiid_get_state(cwiid_wiimote_t *wiimote, struct cwiid_state *state);
 int cwiid_get_acc_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
                       struct acc_cal *acc_cal);
+int cwiid_get_balance_cal(struct wiimote *wiimote,
+                          struct balance_cal *balance_cal);
 
 /* Operations */
 int cwiid_command(cwiid_wiimote_t *wiimote, enum cwiid_command command,

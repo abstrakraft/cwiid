@@ -73,6 +73,7 @@
 
 /* Wiimote specific magic numbers */
 #define WIIMOTE_NAME "Nintendo RVL-CNT-01"
+#define WIIBALANCE_NAME "Nintendo RVL-WBC-01"
 #define WIIMOTE_CLASS_0 0x04
 #define WIIMOTE_CLASS_1 0x25
 #define WIIMOTE_CLASS_2 0x00
@@ -114,9 +115,10 @@
 
 /* Extension Values */
 #define EXT_NONE	0x2E
-#define EXT_PARTIAL 0xFF
-#define EXT_NUNCHUK 0x00
-#define EXT_CLASSIC 0x01
+#define EXT_PARTIAL	0xFF
+#define EXT_NUNCHUK	0x00
+#define EXT_CLASSIC	0x01
+#define EXT_BALANCE	0x2A
 
 /* IR Enable blocks */
 #define MARCAN_IR_BLOCK_1	"\x00\x00\x00\x00\x00\x00\x90\x00\xC0"

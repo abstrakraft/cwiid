@@ -182,6 +182,7 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 {
 	struct cwiid_nunchuk_mesg *nunchuk_mesg;
 	struct cwiid_classic_mesg *classic_mesg;
+	struct cwiid_balance_mesg *balance_mesg;
 	int i;
 
 	switch (wiimote->state.ext_type) {
@@ -222,6 +223,20 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 			classic_mesg->r = data[3] & 0x1F;
 			classic_mesg->buttons = ~((uint16_t)data[4]<<8 |
 			                          (uint16_t)data[5]);
+		}
+		break;
+	case CWIID_EXT_BALANCE:
+		if (wiimote->state.rpt_mode & CWIID_RPT_BALANCE) {
+			balance_mesg = &ma->array[ma->count++].balance_mesg;
+			balance_mesg->type = CWIID_MESG_BALANCE;
+			balance_mesg->right_top = ((uint16_t)data[0]<<8 |
+			                           (uint16_t)data[1]);
+			balance_mesg->right_bottom = ((uint16_t)data[2]<<8 |
+			                              (uint16_t)data[3]);
+			balance_mesg->left_top = ((uint16_t)data[4]<<8 |
+			                          (uint16_t)data[5]);
+			balance_mesg->left_bottom = ((uint16_t)data[6]<<8 |
+			                             (uint16_t)data[7]);
 		}
 		break;
 	}
