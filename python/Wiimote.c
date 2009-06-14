@@ -254,8 +254,15 @@ static int Wiimote_init(Wiimote* self, PyObject* args, PyObject *kwds)
 	return 0;
 }
 
+#define SET_CLOSED_ERROR	PyErr_SetString(PyExc_ValueError, "Wiimote is closed")
+
 static PyObject *Wiimote_close(Wiimote *self)
 {
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
 	if (cwiid_close(self->wiimote)) {
 		PyErr_SetString(PyExc_RuntimeError,
 		                "Error closing wiimote connection");
@@ -271,6 +278,11 @@ static PyObject *Wiimote_enable(Wiimote *self, PyObject *args, PyObject *kwds)
 {
 	static char *kwlist[] = {"flags", NULL};
 	int flags;
+
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
 
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "i:cwiid.Wiimote.enable",
 	                                 kwlist, &flags)) {
@@ -290,6 +302,11 @@ static PyObject *Wiimote_disable(Wiimote *self, PyObject *args, PyObject *kwds)
 	static char *kwlist[] = {"flags", NULL};
 	int flags;
 
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "i:cwiid.Wiimote.disable",
 	                                 kwlist, &flags)) {
 		return NULL;
@@ -308,6 +325,11 @@ static int
 	                          void *closure)
 {
 	PyObject *OldCallback;
+
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
 
 	if (!PyCallable_Check(NewCallback)) {
 		PyErr_SetString(PyExc_TypeError, "callback must be callable!");
@@ -343,6 +365,11 @@ static PyObject *Wiimote_get_mesg(Wiimote *self)
 	struct timespec t;
 	PyObject *PyMesg;
 
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
 	if (cwiid_get_mesg(self->wiimote, &mesg_count, &mesg, &t)) {
 		if (errno == EAGAIN) {
 			Py_RETURN_NONE;
@@ -365,6 +392,11 @@ static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 {
 	struct cwiid_state state;
 	PyObject *PyState;
+
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
 
 	if (cwiid_get_state(self->wiimote, &state)) {
 		PyErr_SetString(PyExc_IOError, "get state error");
@@ -536,6 +568,11 @@ static PyObject *Wiimote_get_acc_cal(Wiimote *self, PyObject *args,
 	struct acc_cal acc_cal;
 	PyObject *PyAccCal;
 
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
 	if (!PyArg_ParseTupleAndKeywords(args, kwds,
 	                                 "i:cwiid.Wiimote.get_acc_cal", kwlist,
 	                                 &ext_type)) {
@@ -560,6 +597,11 @@ static PyObject *Wiimote_get_acc_cal(Wiimote *self, PyObject *args,
 
 static PyObject *Wiimote_request_status(Wiimote *self)
 {
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
 	if (cwiid_request_status(self->wiimote)) {
 		PyErr_SetString(PyExc_RuntimeError, "Error requesting wiimote status");
 		return NULL;
@@ -571,6 +613,11 @@ static PyObject *Wiimote_request_status(Wiimote *self)
 static int Wiimote_set_led(Wiimote *self, PyObject *PyLed, void *closure)
 {
 	long led;
+
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
 
 	if (((led = PyInt_AsLong(PyLed)) == -1) && PyErr_Occurred()) {
 		return -1;
@@ -590,6 +637,11 @@ static int
 {
 	long rumble;
 
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
 	if (((rumble = PyInt_AsLong(PyRumble)) == -1) && PyErr_Occurred()) {
 		return -1;
 	}
@@ -607,6 +659,11 @@ static int
 	Wiimote_set_rpt_mode(Wiimote *self, PyObject *PyRptMode, void *closure)
 {
 	long rpt_mode;
+
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
 
 	if (((rpt_mode = PyInt_AsLong(PyRptMode)) == -1) && PyErr_Occurred()) {
 		return -1;
@@ -646,6 +703,11 @@ static PyObject *Wiimote_read(Wiimote *self, PyObject *args, PyObject *kwds)
 	void *buf;
 	PyObject *pyRetBuf;
 
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "BII:cwiid.Wiimote.read",
 	                                 kwlist, &flags, &offset, &len)) {
 		return NULL;
@@ -675,6 +737,11 @@ static PyObject *Wiimote_write(Wiimote *self, PyObject *args, PyObject *kwds)
 	void *buf;
 	int len;
 
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "BIt#:cwiid.Wiimote.write",
 	                                 kwlist, &flags, &offset, &buf, &len)) {
 		return NULL;
@@ -691,7 +758,7 @@ static PyObject *Wiimote_write(Wiimote *self, PyObject *args, PyObject *kwds)
 static void CallbackBridge(cwiid_wiimote_t *wiimote, int mesg_count,
 	                       union cwiid_mesg mesg[], struct timespec *t)
 {
-	PyObject *ArgTuple, *Time;
+	PyObject *ArgTuple;
 	PyObject *PySelf;
 	PyGILState_STATE gstate;
 
@@ -719,10 +786,10 @@ static void CallbackBridge(cwiid_wiimote_t *wiimote, int mesg_count,
  *
  * Python callback takes arg (mesgs). The mesgs is a list of
  * mesg tuples which contain the mesg type and a dict of the arguments.
- * 
+ *
  * Ex:
  * mesgs =>[(cwiid.STATUS_MESG,{"battery":battery,"ext_type":ext_type}),
- *          (cwiid.BTN_MESG,buttons), 
+ *          (cwiid.BTN_MESG,buttons),
  *          (cwiid.ACC_MESG,(x,y,z)),
  *          (cwiid.IR_MESG,[{"pos":(x,y),"size":size}, ...]),
  *          (cwiid.NUNCHUK_MESG,{"stick":(x,y),"acc":(x,y,z),
