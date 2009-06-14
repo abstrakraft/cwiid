@@ -75,6 +75,12 @@ int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 			wiimote->state.ext.classic.r = mesg->classic_mesg.r;
 			wiimote->state.ext.classic.buttons = mesg->classic_mesg.buttons;
 			break;
+		case CWIID_MESG_BALANCE:
+			wiimote->state.ext.balance.right_top = mesg->balance_mesg.right_top;
+			wiimote->state.ext.balance.right_bottom = mesg->balance_mesg.right_bottom;
+			wiimote->state.ext.balance.left_top = mesg->balance_mesg.left_top;
+			wiimote->state.ext.balance.left_bottom = mesg->balance_mesg.left_bottom;
+			break;
 		case CWIID_MESG_ERROR:
 			wiimote->state.error = mesg->error_mesg.error;
 			break;
@@ -166,6 +172,10 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 			rpt_type = RPT_EXT21;
 		}	
 	}
+	else if ((rpt_mode & CWIID_RPT_EXT) &&
+	  wiimote->state.ext_type == CWIID_EXT_BALANCE) {
+		rpt_type = RPT_BTN_EXT8;
+	}
 	else {
 		if (rpt_mode & CWIID_RPT_IR) {
 			rpt_type = RPT_BTN_ACC_IR12;
@@ -221,6 +231,10 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 	}
 	else if ((wiimote->state.ext_type == CWIID_EXT_CLASSIC) &&
 	  (CWIID_RPT_CLASSIC & ~rpt_mode & wiimote->state.rpt_mode)) {
+		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
+	}
+	else if ((wiimote->state.ext_type == CWIID_EXT_BALANCE) &&
+	  (CWIID_RPT_BALANCE & ~rpt_mode & wiimote->state.rpt_mode)) {
 		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
 	}
 

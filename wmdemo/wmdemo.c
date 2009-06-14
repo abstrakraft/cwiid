@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'e':
 			/* CWIID_RPT_EXT is actually
-			 * CWIID_RPT_NUNCHUK | CWIID_RPT_CLASSIC */
+			 * CWIID_RPT_NUNCHUK | CWIID_RPT_CLASSIC | CWIID_RPT_BALANCE */
 			toggle_bit(rpt_mode, CWIID_RPT_EXT);
 			set_rpt_mode(wiimote, rpt_mode);
 			break;
@@ -215,6 +215,7 @@ void print_state(struct cwiid_state *state)
 	if (state->rpt_mode & CWIID_RPT_IR) printf(" IR");
 	if (state->rpt_mode & CWIID_RPT_NUNCHUK) printf(" NUNCHUK");
 	if (state->rpt_mode & CWIID_RPT_CLASSIC) printf(" CLASSIC");
+	if (state->rpt_mode & CWIID_RPT_BALANCE) printf(" BALANCE");
 	printf("\n");
 	
 	printf("Active LEDs:");
@@ -272,6 +273,14 @@ void print_state(struct cwiid_state *state)
 		       state->ext.classic.r_stick[CWIID_Y],
 		       state->ext.classic.l, state->ext.classic.r);
 		break;
+	case CWIID_EXT_BALANCE:
+		printf("Balance: right_top=%d right_bottom=%d "
+		       "left_top=%d left_bottom=%d\n",
+		       state->ext.balance.right_top,
+		       state->ext.balance.right_bottom,
+		       state->ext.balance.left_top,
+		       state->ext.balance.left_bottom);
+		break;
 	}
 }
 
@@ -290,6 +299,7 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 {
 	int i, j;
 	int valid_source;
+	struct balance_cal balance_cal;
 
 	for (i=0; i < mesg_count; i++)
 	{
@@ -306,6 +316,28 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 				break;
 			case CWIID_EXT_CLASSIC:
 				printf("Classic Controller");
+				break;
+			case CWIID_EXT_BALANCE:
+				if(cwiid_get_balance_cal(wiimote, &balance_cal)) {
+					printf("Balance board: Failed to fetch calibration data");
+				}
+				else {
+					printf("Balance board: right_top=(%d,%d,%d), "
+						   "right_bottom=(%d,%d,%d), left_top=(%d,%d,%d), "
+						   "left_bottom=(%d,%d,%d)",
+						   balance_cal.right_top[0],
+						   balance_cal.right_top[1],
+						   balance_cal.right_top[2],
+						   balance_cal.right_bottom[0],
+						   balance_cal.right_bottom[1],
+						   balance_cal.right_bottom[2],
+						   balance_cal.left_top[0],
+						   balance_cal.left_top[1],
+						   balance_cal.left_top[2],
+						   balance_cal.left_bottom[0],
+						   balance_cal.left_bottom[1],
+						   balance_cal.left_bottom[2]);
+				}
 				break;
 			default:
 				printf("Unknown Extension");
@@ -354,6 +386,14 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			       mesg[i].classic_mesg.r_stick[CWIID_X],
 			       mesg[i].classic_mesg.r_stick[CWIID_Y],
 			       mesg[i].classic_mesg.l, mesg[i].classic_mesg.r);
+			break;
+		case CWIID_MESG_BALANCE:
+			printf("Balance Report: right_top=%d right_bottom=%d "
+			       "left_top=%d left_bottom=%d\n",
+			       mesg[i].balance_mesg.right_top,
+			       mesg[i].balance_mesg.right_bottom,
+			       mesg[i].balance_mesg.left_top,
+			       mesg[i].balance_mesg.left_bottom);
 			break;
 		case CWIID_MESG_ERROR:
 			if (cwiid_close(wiimote)) {

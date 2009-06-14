@@ -131,7 +131,8 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 
 		/* Filter by name */
 		if (!(flags & BT_NO_WIIMOTE_FILTER) &&
-		  strncmp((*bdinfo)[bdinfo_count].name, WIIMOTE_NAME, BT_NAME_LEN)) {
+		  strncmp((*bdinfo)[bdinfo_count].name, WIIMOTE_NAME, BT_NAME_LEN) &&
+		  strncmp((*bdinfo)[bdinfo_count].name, WIIBALANCE_NAME, BT_NAME_LEN)) {
 			continue;
 		}
 

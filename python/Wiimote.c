@@ -84,6 +84,7 @@ static PyObject *Wiimote_get_mesg(Wiimote *self);
 static PyObject *Wiimote_get_state(Wiimote *self, void *closure);
 static PyObject *Wiimote_get_acc_cal(Wiimote *self, PyObject *args,
                                      PyObject *kwds);
+static PyObject *Wiimote_get_balance_cal(Wiimote *self);
 
 static PyObject *Wiimote_request_status(Wiimote *self);
 static int Wiimote_set_led(Wiimote *self, PyObject *PyLed, void *closure);
@@ -112,7 +113,10 @@ static PyMethodDef Wiimote_Methods[] =
 	{"get_acc_cal", (PyCFunction)Wiimote_get_acc_cal,
 	 METH_VARARGS | METH_KEYWORDS,
 	 "get_acc_cal(extension) -> calibration tuple\n\n"
-	 "retrieve calibration information"},
+	 "retrieve accelerometer calibration information"},
+	{"get_balance_cal", (PyCFunction)Wiimote_get_balance_cal, METH_NOARGS,
+	 "get_balance_cal() -> calibration tuple\n\n"
+	 "retrieve Balance Board calibration information"},
 	{"request_status", (PyCFunction)Wiimote_request_status, METH_NOARGS,
 	 "request_status()\n\nrequest status message"},
 	{"read", (PyCFunction)Wiimote_read, METH_VARARGS | METH_KEYWORDS,
@@ -553,6 +557,32 @@ static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 			Py_DECREF(PyExt);
 		}
 		break;
+	case CWIID_EXT_BALANCE:
+		if (state.rpt_mode & CWIID_RPT_BALANCE) {
+			PyExt = Py_BuildValue("{s:I,s:I,s:I,s:I}",
+			                      "right_top",
+			                        state.ext.balance.right_top,
+			                      "right_bottom",
+			                        state.ext.balance.right_bottom,
+			                      "left_top",
+			                        state.ext.balance.left_top,
+			                      "left_bottom",
+			                        state.ext.balance.left_bottom);
+
+			if (!PyExt) {
+				Py_DECREF(PyState);
+				return NULL;
+			}
+
+			if (PyDict_SetItemString(PyState, "balance", PyExt)) {
+				Py_DECREF(PyState);
+				Py_DECREF(PyExt);
+				return NULL;
+			}
+
+			Py_DECREF(PyExt);
+		}
+		break;
 	default:
 		break;
 	}
@@ -593,6 +623,36 @@ static PyObject *Wiimote_get_acc_cal(Wiimote *self, PyObject *args,
 	}
 
 	return PyAccCal;
+}
+
+static PyObject *Wiimote_get_balance_cal(Wiimote *self)
+{
+	struct balance_cal balance_cal;
+	PyObject *PyBalCal;
+
+	if (cwiid_get_balance_cal(self->wiimote, &balance_cal)) {
+		PyErr_SetString(PyExc_RuntimeError,
+		                "Error getting balance board calibration");
+		return NULL;
+	}
+
+	if (!(PyBalCal = Py_BuildValue("([i,i,i],[i,i,i],[i,i,i],[i,i,i])",
+	                               balance_cal.right_top[0],
+	                               balance_cal.right_top[1],
+	                               balance_cal.right_top[2],
+	                               balance_cal.right_bottom[0],
+	                               balance_cal.right_bottom[1],
+	                               balance_cal.right_bottom[2],
+	                               balance_cal.left_top[0],
+	                               balance_cal.left_top[1],
+	                               balance_cal.left_top[2],
+	                               balance_cal.left_bottom[0],
+	                               balance_cal.left_bottom[1],
+	                               balance_cal.left_bottom[2]))) {
+		return NULL;
+	}
+
+	return PyBalCal;
 }
 
 static PyObject *Wiimote_request_status(Wiimote *self)
@@ -796,6 +856,10 @@ static void CallbackBridge(cwiid_wiimote_t *wiimote, int mesg_count,
  *                               "buttons":buttons},
  *          (cwiid.CLASSIC_MESG,{"l_stick":(x,y),"r_stick":(x,y),"l":l,"r":r,
  *                               "buttons":buttons},
+ *          (cwiid.BALANCE_MESG,{"right_top":right_top,
+ *                               "right_bottom":right_bottom,
+ *                               "left_top":left_top,
+ *                               "left_bottom":left_bottom},
  *          (cwiid.ERROR_MESG,error)]
  */
 PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[])
@@ -901,6 +965,17 @@ PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[])
 			             "l", mesg[i].classic_mesg.l,
 			             "r", mesg[i].classic_mesg.r,
 			             "buttons", mesg[i].classic_mesg.buttons);
+			break;
+		case CWIID_MESG_BALANCE:
+			mesgVal = Py_BuildValue("{s:I,s:I,s:I,s:I}",
+			             "right_top",
+			               mesg[i].balance_mesg.right_top,
+			             "right_bottom",
+			               mesg[i].balance_mesg.right_bottom,
+			             "left_top",
+			               mesg[i].balance_mesg.left_top,
+			             "left_bottom",
+			               mesg[i].balance_mesg.left_bottom);
 			break;
 		case CWIID_MESG_ERROR:
 			mesgVal = Py_BuildValue("i", mesg[i].error_mesg.error);
