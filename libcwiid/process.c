@@ -195,12 +195,12 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 		if (wiimote->state.rpt_mode & CWIID_RPT_NUNCHUK) {
 			nunchuk_mesg = &ma->array[ma->count++].nunchuk_mesg;
 			nunchuk_mesg->type = CWIID_MESG_NUNCHUK;
-			nunchuk_mesg->stick[CWIID_X] = DECODE(data[0]);
-			nunchuk_mesg->stick[CWIID_Y] = DECODE(data[1]);
-			nunchuk_mesg->acc[CWIID_X] = DECODE(data[2]);
-			nunchuk_mesg->acc[CWIID_Y] = DECODE(data[3]);
-			nunchuk_mesg->acc[CWIID_Z] = DECODE(data[4]);
-			nunchuk_mesg->buttons = ~DECODE(data[5]) & NUNCHUK_BTN_MASK;
+			nunchuk_mesg->stick[CWIID_X] = data[0];
+			nunchuk_mesg->stick[CWIID_Y] = data[1];
+			nunchuk_mesg->acc[CWIID_X] = data[2];
+			nunchuk_mesg->acc[CWIID_Y] = data[3];
+			nunchuk_mesg->acc[CWIID_Z] = data[4];
+			nunchuk_mesg->buttons = ~data[5] & NUNCHUK_BTN_MASK;
 		}
 		break;
 	case CWIID_EXT_CLASSIC:
@@ -209,7 +209,7 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 			classic_mesg->type = CWIID_MESG_CLASSIC;
 
 			for (i=0; i < 6; i++) {
-				data[i] = DECODE(data[i]);
+				data[i] = data[i];
 			}
 
 			classic_mesg->l_stick[CWIID_X] = data[0] & 0x3F;

@@ -119,7 +119,6 @@
 /* Data Read/Write flags */
 #define CWIID_RW_EEPROM	0x00
 #define CWIID_RW_REG	0x04
-#define CWIID_RW_DECODE	0x01
 
 /* Maximum Data Read Length */
 #define CWIID_MAX_READ_LEN	0xFFFF
