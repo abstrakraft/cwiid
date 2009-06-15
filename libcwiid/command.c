@@ -129,7 +129,6 @@ int cwiid_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 	struct rw_mesg mesg;
 	unsigned char *cursor;
 	int ret = 0;
-	int i;
 
 	/* Compose read request packet */
 	buf[0]=flags & (CWIID_RW_EEPROM | CWIID_RW_REG);
@@ -194,13 +193,6 @@ CODA:
 	/* Unlock rw_mutex */
 	if (pthread_mutex_unlock(&wiimote->rw_mutex)) {
 		cwiid_err(wiimote, "Mutex unlock error (rw_mutex) - deadlock warning");
-	}
-
-	/* Decode (only for register reads) */
-	if ((ret == 0) && (flags & CWIID_RW_DECODE) && (flags & CWIID_RW_REG)) {
-		for (i=0; i < len; i++) {
-			((unsigned char *)data)[i] = DECODE(((unsigned char *)data)[i]);
-		}
 	}
 
 	return ret;

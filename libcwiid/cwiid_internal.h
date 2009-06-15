@@ -126,9 +126,6 @@
 #define CLIFF_IR_BLOCK_1	"\x02\x00\x00\x71\x01\x00\xAA\x00\x64"
 #define CLIFF_IR_BLOCK_2	"\x63\x03"
 
-/* Extension Decode */
-#define DECODE(a)	(((a ^ 0x17)+0x17)&0xFF)
-
 /* Write Sequences */
 enum write_seq_type {
 	WRITE_SEQ_RPT,

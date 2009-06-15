@@ -157,7 +157,7 @@ int cwiid_get_acc_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
 		err_str = "";
 		break;
 	case CWIID_EXT_NUNCHUK:
-		flags = CWIID_RW_REG | CWIID_RW_DECODE;
+		flags = CWIID_RW_REG;
 		offset = 0xA40020;
 		err_str = "nunchuk ";
 		break;

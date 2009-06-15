@@ -172,7 +172,7 @@ void *status_thread(struct wiimote *wiimote)
 {
 	struct mesg_array ma;
 	struct cwiid_status_mesg *status_mesg;
-	unsigned char buf;
+	unsigned char buf[2];
 
 	ma.count = 1;
 	status_mesg = &ma.array[0].status_mesg;
@@ -192,20 +192,24 @@ void *status_thread(struct wiimote *wiimote)
 
 		if (status_mesg->ext_type == CWIID_EXT_UNKNOWN) {
 			if (wiimote->state.ext_type == CWIID_EXT_NONE) {
-				buf = 0x00;
+				buf[0] = 0x55;
+				buf[1] = 0x00;
 				/* Initialize extension register space */
-				if (cwiid_write(wiimote, CWIID_RW_REG, 0xA40040, 1, &buf)) {
+				if (cwiid_write(wiimote, CWIID_RW_REG, 0xA400F0, 1, &buf[0])) {
 					cwiid_err(wiimote, "Extension initialization error");
 					status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 				}
+				else if (cwiid_write(wiimote, CWIID_RW_REG, 0xA400FB, 1, &buf[1])) {
+						cwiid_err(wiimote, "Extension initialization error");
+						status_mesg->ext_type = CWIID_EXT_UNKNOWN;
+				}
 				/* Read extension ID */
-				else if (cwiid_read(wiimote, CWIID_RW_REG | CWIID_RW_DECODE,
-				                    0xA400FE, 1, &buf)) {
+				else if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 1, &buf[0])) {
 					cwiid_err(wiimote, "Read error (extension error)");
 					status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 				}
 				else {
-					switch (buf) {
+					switch (buf[0]) {
 					case EXT_NONE:
 					case EXT_PARTIAL:
 						status_mesg->ext_type = CWIID_EXT_NONE;
