@@ -116,6 +116,9 @@
 #define CWIID_CLASSIC_BTN_DOWN	0x4000
 #define CWIID_CLASSIC_BTN_RIGHT	0x8000
 
+/* Send Report flags */
+#define CWIID_SEND_RPT_NO_RUMBLE    0x01
+
 /* Data Read/Write flags */
 #define CWIID_RW_EEPROM	0x00
 #define CWIID_RW_REG	0x04
@@ -359,6 +362,8 @@ int cwiid_get_balance_cal(struct wiimote *wiimote,
 /* Operations */
 int cwiid_command(cwiid_wiimote_t *wiimote, enum cwiid_command command,
                   int flags);
+int cwiid_send_rpt(cwiid_wiimote_t *wiimote, uint8_t flags, uint8_t report,
+                   size_t len, const void *data);
 int cwiid_request_status(cwiid_wiimote_t *wiimote);
 int cwiid_set_led(cwiid_wiimote_t *wiimote, uint8_t led);
 int cwiid_set_rumble(cwiid_wiimote_t *wiimote, uint8_t rumble);

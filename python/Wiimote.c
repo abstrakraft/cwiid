@@ -93,6 +93,7 @@ static int
 static int
 	Wiimote_set_rpt_mode(Wiimote *self, PyObject *PyRptMode, void *closure);
 
+static PyObject *Wiimote_send_rpt(Wiimote *self, PyObject *args, PyObject *kwds);
 static PyObject *Wiimote_read(Wiimote *self, PyObject *args, PyObject *kwds);
 static PyObject *Wiimote_write(Wiimote *self, PyObject *args, PyObject *kwds);
 
@@ -121,6 +122,8 @@ static PyMethodDef Wiimote_Methods[] =
 	 "request_status()\n\nrequest status message"},
 	{"read", (PyCFunction)Wiimote_read, METH_VARARGS | METH_KEYWORDS,
 	 "read(flags,offset,len) -> buffer\n\nread data from Wiimote"},
+	{"send_rpt", (PyCFunction)Wiimote_send_rpt, METH_VARARGS | METH_KEYWORDS,
+	 "send_rpt(flags,report,buffer)\n\nsend a report to Wiimote"},
 	{"write", (PyCFunction)Wiimote_write, METH_VARARGS | METH_KEYWORDS,
 	 "write(flags,offset,buffer)\n\nwrite data to Wiimote"},
 	{NULL, NULL, 0, NULL}
@@ -753,6 +756,31 @@ static int
 	Py_RETURN_NONE;
 }
 */
+
+static PyObject *Wiimote_send_rpt(Wiimote *self, PyObject *args, PyObject *kwds)
+{
+	static char *kwlist[] = { "flags", "report", "buffer", NULL };
+	unsigned char flags, report;
+	void *buf;
+	int len;
+
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
+	if (!PyArg_ParseTupleAndKeywords(args, kwds, "BBt#:cwiid.Wiimote.send_rpt",
+	                                 kwlist, &flags, &report, &buf, &len)) {
+		return NULL;
+	}
+
+	if (cwiid_send_rpt(self->wiimote, flags, report, len, buf)) {
+		PyErr_SetString(PyExc_RuntimeError, "Error sending report");
+		return NULL;
+	}
+
+	Py_RETURN_NONE;
+}
 
 static PyObject *Wiimote_read(Wiimote *self, PyObject *args, PyObject *kwds)
 {

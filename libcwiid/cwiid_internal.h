@@ -132,9 +132,6 @@ enum write_seq_type {
 	WRITE_SEQ_MEM
 };
 
-/* send_report flags */
-#define SEND_RPT_NO_RUMBLE    0x01
-
 struct write_seq {
 	enum write_seq_type type;
 	uint32_t report_offset;
@@ -198,8 +195,6 @@ void *mesg_callback_thread(struct wiimote *wiimote);
 /* util.c */
 void cwiid_err(struct wiimote *wiimote, const char *str, ...);
 int verify_handshake(struct wiimote *wiimote);
-int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
-                size_t len, const void *data);
 int exec_write_seq(struct wiimote *wiimote, unsigned int len,
                    struct write_seq *seq);
 int full_read(int fd, void *buf, size_t len);

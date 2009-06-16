@@ -210,7 +210,7 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 	/* Send SET_REPORT */
 	buf[0] = (wiimote->flags & CWIID_FLAG_CONTINUOUS) ? 0x04 : 0;
 	buf[1] = rpt_type;
-	if (send_report(wiimote, 0, RPT_RPT_MODE, RPT_MODE_BUF_LEN, buf)) {
+	if (cwiid_send_rpt(wiimote, 0, RPT_RPT_MODE, RPT_MODE_BUF_LEN, buf)) {
 		cwiid_err(wiimote, "Send report error (report mode)");
 		return -1;
 	}

@@ -31,23 +31,23 @@
 #include <unistd.h>
 #include "cwiid_internal.h"
 
-int cwiid_get_id(struct wiimote *wiimote)
+int cwiid_get_id(cwiid_wiimote_t *wiimote)
 {
 	return wiimote->id;
 }
 
-int cwiid_set_data(struct wiimote *wiimote, const void *data)
+int cwiid_set_data(cwiid_wiimote_t *wiimote, const void *data)
 {
 	wiimote->data = data;
 	return 0;
 }
 
-const void *cwiid_get_data(struct wiimote *wiimote)
+const void *cwiid_get_data(cwiid_wiimote_t *wiimote)
 {
 	return wiimote->data;
 }
 
-int cwiid_enable(struct wiimote *wiimote, int flags)
+int cwiid_enable(cwiid_wiimote_t *wiimote, int flags)
 {
 	if ((flags & CWIID_FLAG_NONBLOCK) &&
 	  !(wiimote->flags & CWIID_FLAG_NONBLOCK)) {
@@ -60,7 +60,7 @@ int cwiid_enable(struct wiimote *wiimote, int flags)
 	return 0;
 }
 
-int cwiid_disable(struct wiimote *wiimote, int flags)
+int cwiid_disable(cwiid_wiimote_t *wiimote, int flags)
 {
 	if ((flags & CWIID_FLAG_NONBLOCK) &&
 	  (wiimote->flags & CWIID_FLAG_NONBLOCK)) {
@@ -73,7 +73,7 @@ int cwiid_disable(struct wiimote *wiimote, int flags)
 	return 0;
 }
 
-int cwiid_set_mesg_callback(struct wiimote *wiimote,
+int cwiid_set_mesg_callback(cwiid_wiimote_t *wiimote,
                             cwiid_mesg_callback_t *callback)
 {
 	if (wiimote->mesg_callback) {
@@ -96,7 +96,7 @@ int cwiid_set_mesg_callback(struct wiimote *wiimote,
 	return 0;
 }
 
-int cwiid_get_mesg(struct wiimote *wiimote, int *mesg_count,
+int cwiid_get_mesg(cwiid_wiimote_t *wiimote, int *mesg_count,
                    union cwiid_mesg *mesg[], struct timespec *timestamp)
 {
 	struct mesg_array ma;
@@ -124,7 +124,7 @@ int cwiid_get_mesg(struct wiimote *wiimote, int *mesg_count,
 	return 0;
 }
 
-int cwiid_get_state(struct wiimote *wiimote, struct cwiid_state *state)
+int cwiid_get_state(cwiid_wiimote_t *wiimote, struct cwiid_state *state)
 {
 	if (pthread_mutex_lock(&wiimote->state_mutex)) {
 		cwiid_err(wiimote, "Mutex lock error (state mutex)");
@@ -142,7 +142,7 @@ int cwiid_get_state(struct wiimote *wiimote, struct cwiid_state *state)
 	return 0;
 }
 
-int cwiid_get_acc_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
+int cwiid_get_acc_cal(cwiid_wiimote_t *wiimote, enum cwiid_ext_type ext_type,
                       struct acc_cal *acc_cal)
 {
 	uint8_t flags;
@@ -180,7 +180,7 @@ int cwiid_get_acc_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
 	return 0;
 }
 
-int cwiid_get_balance_cal(struct wiimote *wiimote,
+int cwiid_get_balance_cal(cwiid_wiimote_t *wiimote,
                           struct balance_cal *balance_cal)
 {
 	unsigned char buf[24];
