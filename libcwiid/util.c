@@ -107,33 +107,6 @@ int verify_handshake(struct wiimote *wiimote)
 	return 0;
 }
 
-#define SEND_RPT_BUF_LEN	23
-int send_report(struct wiimote *wiimote, uint8_t flags, uint8_t report,
-                size_t len, const void *data)
-{
-	unsigned char buf[SEND_RPT_BUF_LEN];
-
-	if ((len+2) > SEND_RPT_BUF_LEN) {
-		return -1;
-	}
-
-	buf[0] = BT_TRANS_SET_REPORT | BT_PARAM_OUTPUT;
-	buf[1] = report;
-	memcpy(buf+2, data, len);
-	if (!(flags & SEND_RPT_NO_RUMBLE)) {
-		buf[2] |= wiimote->state.rumble;
-	}
-
-	if (write(wiimote->ctl_socket, buf, len+2) != (ssize_t)(len+2)) {
-		return -1;
-	}
-	else if (verify_handshake(wiimote)) {
-		return -1;
-	}
-
-	return 0;
-}
-
 int exec_write_seq(struct wiimote *wiimote, unsigned int len,
                    struct write_seq *seq)
 {
@@ -142,8 +115,8 @@ int exec_write_seq(struct wiimote *wiimote, unsigned int len,
 	for (i=0; i < len; i++) {
 		switch (seq[i].type) {
 		case WRITE_SEQ_RPT:
-			if (send_report(wiimote, seq[i].flags, seq[i].report_offset,
-			                seq[i].len, seq[i].data)) {
+			if (cwiid_send_rpt(wiimote, seq[i].flags, seq[i].report_offset,
+			                   seq[i].len, seq[i].data)) {
 				return -1;
 			}
 			break;

@@ -285,7 +285,7 @@ ERR_HND:
 	return NULL;
 }
 
-int cwiid_close(struct wiimote *wiimote)
+int cwiid_close(cwiid_wiimote_t *wiimote)
 {
 	void *pthread_ret;
 

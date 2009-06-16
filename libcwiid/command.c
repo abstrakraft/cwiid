@@ -43,12 +43,13 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
 #include "cwiid_internal.h"
 
-int cwiid_command(struct wiimote *wiimote, enum cwiid_command command,
+int cwiid_command(cwiid_wiimote_t *wiimote, enum cwiid_command command,
                   int flags) {
 	int ret;
 
@@ -73,12 +74,43 @@ int cwiid_command(struct wiimote *wiimote, enum cwiid_command command,
 	return ret;
 }
 
+/* TODO: fix error reporting - this is public now and
+ * should report its own errors */
+int cwiid_send_rpt(cwiid_wiimote_t *wiimote, uint8_t flags, uint8_t report,
+                   size_t len, const void *data)
+{
+	unsigned char *buf;
+
+	if ((buf = malloc((len*2) * sizeof *buf)) == NULL) {
+		cwiid_err(wiimote, "Memory allocation error (mesg array)");
+		return -1;
+	}
+
+	buf[0] = BT_TRANS_SET_REPORT | BT_PARAM_OUTPUT;
+	buf[1] = report;
+	memcpy(buf+2, data, len);
+	if (!(flags & CWIID_SEND_RPT_NO_RUMBLE)) {
+		buf[2] |= wiimote->state.rumble;
+	}
+
+	if (write(wiimote->ctl_socket, buf, len+2) != (ssize_t)(len+2)) {
+		free(buf);
+		return -1;
+	}
+	else if (verify_handshake(wiimote)) {
+		free(buf);
+		return -1;
+	}
+
+	return 0;
+}
+
 int cwiid_request_status(cwiid_wiimote_t *wiimote)
 {
 	unsigned char data;
 
 	data = 0;
-	if (send_report(wiimote, 0, RPT_STATUS_REQ, 1, &data)) {
+	if (cwiid_send_rpt(wiimote, 0, RPT_STATUS_REQ, 1, &data)) {
 		cwiid_err(wiimote, "Status request error");
 		return -1;
 	}
@@ -93,7 +125,7 @@ int cwiid_set_led(cwiid_wiimote_t *wiimote, uint8_t led)
 	/* TODO: assumption: char assignments are atomic, no mutex lock needed */
 	wiimote->state.led = led & 0x0F;
 	data = wiimote->state.led << 4;
-	if (send_report(wiimote, 0, RPT_LED_RUMBLE, 1, &data)) {
+	if (cwiid_send_rpt(wiimote, 0, RPT_LED_RUMBLE, 1, &data)) {
 		cwiid_err(wiimote, "Report send error (led)");
 		return -1;
 	}
@@ -108,7 +140,7 @@ int cwiid_set_rumble(cwiid_wiimote_t *wiimote, uint8_t rumble)
 	/* TODO: assumption: char assignments are atomic, no mutex lock needed */
 	wiimote->state.rumble = rumble ? 1 : 0;
 	data = wiimote->state.led << 4;
-	if (send_report(wiimote, 0, RPT_LED_RUMBLE, 1, &data)) {
+	if (cwiid_send_rpt(wiimote, 0, RPT_LED_RUMBLE, 1, &data)) {
 		cwiid_err(wiimote, "Report send error (led)");
 		return -1;
 	}
@@ -122,7 +154,7 @@ int cwiid_set_rpt_mode(cwiid_wiimote_t *wiimote, uint8_t rpt_mode)
 }
 
 #define RPT_READ_REQ_LEN 6
-int cwiid_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
+int cwiid_read(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
                uint16_t len, void *data)
 {
 	unsigned char buf[RPT_READ_REQ_LEN];
@@ -151,7 +183,7 @@ int cwiid_read(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 	 * operations are not in flight while disconnecting.  Nothing serious,
 	 * just accesses to freed memory */
 	/* Send read request packet */
-	if (send_report(wiimote, 0, RPT_READ_REQ, RPT_READ_REQ_LEN, buf)) {
+	if (cwiid_send_rpt(wiimote, 0, RPT_READ_REQ, RPT_READ_REQ_LEN, buf)) {
 		cwiid_err(wiimote, "Report send error (read)");
 		ret = -1;
 		goto CODA;
@@ -199,7 +231,7 @@ CODA:
 }
 
 #define RPT_WRITE_LEN 21
-int cwiid_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
+int cwiid_write(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
                   uint16_t len, const void *data)
 {
 	unsigned char buf[RPT_WRITE_LEN];
@@ -231,7 +263,7 @@ int cwiid_write(struct wiimote *wiimote, uint8_t flags, uint32_t offset,
 		}
 		memcpy(buf+5, data+sent, buf[4]);
 
-		if (send_report(wiimote, 0, RPT_WRITE, RPT_WRITE_LEN, buf)) {
+		if (cwiid_send_rpt(wiimote, 0, RPT_WRITE, RPT_WRITE_LEN, buf)) {
 			cwiid_err(wiimote, "Report send error (write)");
 			ret = -1;
 			goto CODA;
@@ -319,7 +351,7 @@ int cwiid_beep(cwiid_wiimote_t *wiimote)
 		clock_gettime(CLOCK_REALTIME, &t);
 		t.tv_nsec += 10204081;
 		/* t.tv_nsec += 7000000; */
-		if (send_report(wiimote, 0, RPT_SPEAKER_DATA, SOUND_BUF_LEN, buf)) {
+		if (cwiid_send_rpt(wiimote, 0, RPT_SPEAKER_DATA, SOUND_BUF_LEN, buf)) {
 		 	printf("%d\n", i);
 			cwiid_err(wiimote, "Report send error (speaker data)");
 			ret = -1;
