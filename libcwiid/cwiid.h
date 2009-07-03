@@ -67,16 +67,19 @@
 #define CWIID_FLAG_CONTINUOUS	0x02
 #define CWIID_FLAG_REPEAT_BTN	0x04
 #define CWIID_FLAG_NONBLOCK		0x08
+#define CWIID_FLAG_MOTIONPLUS	0x10
 
 /* Report Mode Flags */
-#define CWIID_RPT_STATUS	0x01
-#define CWIID_RPT_BTN		0x02
-#define CWIID_RPT_ACC		0x04
-#define CWIID_RPT_IR		0x08
-#define CWIID_RPT_NUNCHUK	0x10
-#define CWIID_RPT_CLASSIC	0x20
-#define CWIID_RPT_BALANCE	0x40
-#define CWIID_RPT_EXT		(CWIID_RPT_NUNCHUK | CWIID_RPT_CLASSIC | CWIID_RPT_BALANCE)
+#define CWIID_RPT_STATUS		0x01
+#define CWIID_RPT_BTN			0x02
+#define CWIID_RPT_ACC			0x04
+#define CWIID_RPT_IR			0x08
+#define CWIID_RPT_NUNCHUK		0x10
+#define CWIID_RPT_CLASSIC		0x20
+#define CWIID_RPT_BALANCE		0x40
+#define CWIID_RPT_MOTIONPLUS	0x80
+#define CWIID_RPT_EXT		(CWIID_RPT_NUNCHUK | CWIID_RPT_CLASSIC | \
+                             CWIID_RPT_BALANCE | CWIID_RPT_MOTIONPLUS)
 
 /* LED flags */
 #define CWIID_LED1_ON	0x01
@@ -131,6 +134,9 @@
 #define CWIID_X		0
 #define CWIID_Y		1
 #define CWIID_Z		2
+#define CWIID_PHI	0
+#define CWIID_THETA	1
+#define CWIID_PSI	2
 
 /* Acc Defs */
 #define CWIID_ACC_MAX	0xFF
@@ -170,6 +176,7 @@ enum cwiid_mesg_type {
 	CWIID_MESG_NUNCHUK,
 	CWIID_MESG_CLASSIC,
 	CWIID_MESG_BALANCE,
+	CWIID_MESG_MOTIONPLUS,
 	CWIID_MESG_ERROR,
 	CWIID_MESG_UNKNOWN
 };
@@ -179,6 +186,7 @@ enum cwiid_ext_type {
 	CWIID_EXT_NUNCHUK,
 	CWIID_EXT_CLASSIC,
 	CWIID_EXT_BALANCE,
+	CWIID_EXT_MOTIONPLUS,
 	CWIID_EXT_UNKNOWN
 };
 
@@ -252,6 +260,11 @@ struct cwiid_balance_mesg {
 	uint16_t left_bottom;
 };
 
+struct cwiid_motionplus_mesg {
+	enum cwiid_mesg_type type;
+	uint16_t angle_rate[3];
+};
+
 struct cwiid_error_mesg {
 	enum cwiid_mesg_type type;
 	enum cwiid_error error;
@@ -266,6 +279,7 @@ union cwiid_mesg {
 	struct cwiid_nunchuk_mesg nunchuk_mesg;
 	struct cwiid_classic_mesg classic_mesg;
 	struct cwiid_balance_mesg balance_mesg;
+	struct cwiid_motionplus_mesg motionplus_mesg;
 	struct cwiid_error_mesg error_mesg;
 };
 
@@ -291,10 +305,15 @@ struct balance_state {
 	uint16_t left_bottom;
 };
 
+struct motionplus_state {
+	uint16_t angle_rate[3];
+};
+
 union ext_state {
 	struct nunchuk_state nunchuk;
 	struct classic_state classic;
 	struct balance_state balance;
+	struct motionplus_state motionplus;
 };
 
 struct cwiid_state {

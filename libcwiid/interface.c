@@ -49,6 +49,8 @@ const void *cwiid_get_data(cwiid_wiimote_t *wiimote)
 
 int cwiid_enable(cwiid_wiimote_t *wiimote, int flags)
 {
+	unsigned char data;
+
 	if ((flags & CWIID_FLAG_NONBLOCK) &&
 	  !(wiimote->flags & CWIID_FLAG_NONBLOCK)) {
 		if (fcntl(wiimote->mesg_pipe[0], F_SETFL, O_NONBLOCK)) {
@@ -56,18 +58,32 @@ int cwiid_enable(cwiid_wiimote_t *wiimote, int flags)
 			return -1;
 		}
 	}
+	if (flags & CWIID_FLAG_MOTIONPLUS) {
+		data = 0x04;
+		cwiid_write(wiimote, CWIID_RW_REG, 0xA600FE, 1, &data);
+		cwiid_request_status(wiimote);
+	}
 	wiimote->flags |= flags;
 	return 0;
 }
 
 int cwiid_disable(cwiid_wiimote_t *wiimote, int flags)
 {
+	unsigned char data;
+
 	if ((flags & CWIID_FLAG_NONBLOCK) &&
 	  (wiimote->flags & CWIID_FLAG_NONBLOCK)) {
 		if (fcntl(wiimote->mesg_pipe[0], F_SETFL, 0)) {
 			cwiid_err(wiimote, "File control error (mesg pipe)");
 			return -1;
 		}
+	}
+	if (flags & CWIID_FLAG_MOTIONPLUS) {
+		data = 0x55;
+		cwiid_write(wiimote, CWIID_RW_REG, 0xA400F0, 1, &data);
+		data = 0x00;
+		cwiid_write(wiimote, CWIID_RW_REG, 0xA400FB, 1, &data);
+		cwiid_request_status(wiimote);
 	}
 	wiimote->flags &= ~flags;
 	return 0;

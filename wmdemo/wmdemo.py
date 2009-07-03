@@ -9,6 +9,7 @@ menu = '''1: toggle LED 1
 5: toggle rumble
 a: toggle accelerometer reporting
 b: toggle button reporting
+c: enable motionplus, if connected
 e: toggle extension reporting
 i: toggle ir reporting
 m: toggle messages
@@ -60,6 +61,8 @@ def main():
 		elif c == 'b':
 			rpt_mode ^= cwiid.RPT_BTN
 			wiimote.rpt_mode = rpt_mode
+		elif c == 'c':
+			wiimote.enable(cwiid.FLAG_MOTIONPLUS)
 		elif c == 'e':
 			rpt_mode ^= cwiid.RPT_EXT
 			wiimote.rpt_mode = rpt_mode
@@ -92,7 +95,7 @@ def main():
 
 def print_state(state):
 	print 'Report Mode:',
-	for r in ['STATUS', 'BTN', 'ACC', 'IR', 'NUNCHUK', 'CLASSIC', 'BALANCE']:
+	for r in ['STATUS', 'BTN', 'ACC', 'IR', 'NUNCHUK', 'CLASSIC', 'BALANCE', 'MOTIONPLUS']:
 		if state['rpt_mode'] & eval('cwiid.RPT_' + r):
 			print r,
 	print
@@ -133,20 +136,26 @@ def print_state(state):
 	elif state['ext_type'] == cwiid.EXT_UNKNOWN:
 		print 'Unknown extension attached'
 	elif state['ext_type'] == cwiid.EXT_NUNCHUK:
-		print 'Nunchuk: btns=%.2X stick=%r acc.x=%d acc.y=%d acc.z=%d' % \
-		  (state['nunchuk']['buttons'], state['nunchuk']['stick'],
-		   state['nunchuk']['acc'][cwiid.X],
-		   state['nunchuk']['acc'][cwiid.Y],
-		   state['nunchuk']['acc'][cwiid.Z])
+		if state.has_key('nunchuk'):
+			print 'Nunchuk: btns=%.2X stick=%r acc.x=%d acc.y=%d acc.z=%d' % \
+			  (state['nunchuk']['buttons'], state['nunchuk']['stick'],
+			   state['nunchuk']['acc'][cwiid.X],
+			   state['nunchuk']['acc'][cwiid.Y],
+			   state['nunchuk']['acc'][cwiid.Z])
 	elif state['ext_type'] == cwiid.EXT_CLASSIC:
-		print 'Classic: btns=%.4X l_stick=%r r_stick=%r l=%d r=%d' % \
-		  (state['classic']['buttons'],
-		   state['classic']['l_stick'], state['classic']['r_stick'],
-		   state['classic']['l'], state['classic']['r'])
+		if state.has_key('classic'):
+			print 'Classic: btns=%.4X l_stick=%r r_stick=%r l=%d r=%d' % \
+			  (state['classic']['buttons'],
+			   state['classic']['l_stick'], state['classic']['r_stick'],
+			   state['classic']['l'], state['classic']['r'])
 	elif state['ext_type'] == cwiid.EXT_BALANCE:
-		print 'Balance: right_top=%d right_bottom=%d left_top=%d left_bottom=%d' % \
-		  (state['balance']['right_top'], state['balance']['right_bottom'],
-		   state['balance']['left_top'], state['balance']['left_bottom'])
+		if state.has_key('balance'):
+			print 'Balance: right_top=%d right_bottom=%d left_top=%d left_bottom=%d' % \
+			  (state['balance']['right_top'], state['balance']['right_bottom'],
+			   state['balance']['left_top'], state['balance']['left_bottom'])
+	elif state['ext_type'] == cwiid.EXT_MOTIONPLUS:
+		if state.has_key('motionplus'):
+			print 'MotionPlus: angle_rate=(%d,%d,%d)' % state['motionplus']['angle_rate']
 
 def callback(mesg_list, time):
 	print 'time: %f' % time
@@ -162,6 +171,8 @@ def callback(mesg_list, time):
 				print 'Classic Controller'
 			elif mesg[1]['ext_type'] == cwiid.EXT_BALANCE:
 				print 'Balance Board'
+			elif mesg[1]['ext_type'] == cwiid.EXT_MOTIONPLUS:
+				print 'MotionPlus'
 			else:
 				print 'Unknown Extension'
 
@@ -186,17 +197,24 @@ def callback(mesg_list, time):
 				print
 
 		elif mesg[0] == cwiid.MESG_NUNCHUK:
-			print 'Nunchuk Report: btns=%.2X stick=%r ' + \
-			      'acc.x=%d acc.y=%d acc.z=%d' % (state['nunchuk']['buttons'],
-			   state['nunchuk']['stick'],
-			   state['nunchuk']['acc'][cwiid.X],
-			   state['nunchuk']['acc'][cwiid.Y],
-			   state['nunchuk']['acc'][cwiid.Z])
+			print ('Nunchuk Report: btns=%.2X stick=%r ' + \
+			       'acc.x=%d acc.y=%d acc.z=%d') % \
+			      (mesg[1]['buttons'], mesg[1]['stick'],
+			       mesg[1]['acc'][cwiid.X], mesg[1]['acc'][cwiid.Y],
+			       mesg[1]['acc'][cwiid.Z])
 		elif mesg[0] == cwiid.MESG_CLASSIC:
-			print 'Classic Report: btns=%.4X l_stick=%r r_stick=%r' + \
-			      'l=%d r=%d' % (state['classic']['buttons'],
-			   state['classic']['l_stick'], state['classic']['r_stick'],
-			   state['classic']['l'], state['classic']['r'])
+			print ('Classic Report: btns=%.4X l_stick=%r ' + \
+			       'r_stick=%r l=%d r=%d') % \
+			      (mesg[1]['buttons'], mesg[1]['l_stick'],
+			       mesg[1]['r_stick'], mesg[1]['l'], mesg[1]['r'])
+		elif mesg[0] ==  cwiid.MESG_BALANCE:
+			print ('Balance Report: right_top=%d right_bottom=%d ' + \
+			       'left_top=%d left_bottom=%d') % \
+			      (mesg[1]['right_top'], mesg[1]['right_bottom'],
+			       mesg[1]['left_top'], mesg[1]['left_bottom'])
+		elif mesg[0] == cwiid.MESG_MOTIONPLUS:
+			print 'MotionPlus Report: angle_rate=(%d,%d,%d)' % \
+			      mesg[1]['angle_rate']
 		elif mesg[0] ==  cwiid.MESG_ERROR:
 			print "Error message received"
 			global wiimote

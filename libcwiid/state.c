@@ -81,6 +81,11 @@ int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 			wiimote->state.ext.balance.left_top = mesg->balance_mesg.left_top;
 			wiimote->state.ext.balance.left_bottom = mesg->balance_mesg.left_bottom;
 			break;
+		case CWIID_MESG_MOTIONPLUS:
+			memcpy(wiimote->state.ext.motionplus.angle_rate,
+			       mesg->motionplus_mesg.angle_rate,
+			       sizeof wiimote->state.ext.motionplus.angle_rate);
+			break;
 		case CWIID_MESG_ERROR:
 			wiimote->state.error = mesg->error_mesg.error;
 			break;
@@ -151,7 +156,8 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 	/* Pick a report mode based on report flags */
 	if ((rpt_mode & CWIID_RPT_EXT) &&
 	  ((wiimote->state.ext_type == CWIID_EXT_NUNCHUK) ||
-	   (wiimote->state.ext_type == CWIID_EXT_CLASSIC))) {
+	   (wiimote->state.ext_type == CWIID_EXT_CLASSIC) ||
+	   (wiimote->state.ext_type == CWIID_EXT_MOTIONPLUS))) {
 		if ((rpt_mode & CWIID_RPT_IR) && (rpt_mode & CWIID_RPT_ACC)) {
 			rpt_type = RPT_BTN_ACC_IR10_EXT6;
 			ir_enable_seq = ir_enable10_seq;
@@ -235,6 +241,10 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 	}
 	else if ((wiimote->state.ext_type == CWIID_EXT_BALANCE) &&
 	  (CWIID_RPT_BALANCE & ~rpt_mode & wiimote->state.rpt_mode)) {
+		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
+	}
+	else if ((wiimote->state.ext_type == CWIID_EXT_MOTIONPLUS) &&
+	  (CWIID_RPT_MOTIONPLUS & ~rpt_mode & wiimote->state.rpt_mode)) {
 		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
 	}
 

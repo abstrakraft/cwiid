@@ -669,6 +669,7 @@ void menuConnect_activate(void)
 		}
 		set_gui_state();
 		set_report_mode();
+		cwiid_enable(wiimote, CWIID_FLAG_MOTIONPLUS);
 		cwiid_request_status(wiimote);
 	}
 
@@ -1049,6 +1050,9 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 				break;
 			case CWIID_EXT_CLASSIC:
 				ext_str = "Classic controller";
+				break;
+			case CWIID_EXT_MOTIONPLUS:
+				ext_str = "MotionPlus";
 				break;
 			case CWIID_EXT_UNKNOWN:
 				ext_str = "Unknown extension";
