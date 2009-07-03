@@ -29,6 +29,7 @@ cwiid_mesg_callback_t cwiid_callback;
 	"5: toggle rumble\n" \
 	"a: toggle accelerometer reporting\n" \
 	"b: toggle button reporting\n" \
+	"c: enable motionplus, if connected\n" \
 	"e: toggle extension reporting\n" \
 	"i: toggle ir reporting\n" \
 	"m: toggle messages\n" \
@@ -121,6 +122,9 @@ int main(int argc, char *argv[])
 		case 'b':
 			toggle_bit(rpt_mode, CWIID_RPT_BTN);
 			set_rpt_mode(wiimote, rpt_mode);
+			break;
+		case 'c':
+			cwiid_enable(wiimote, CWIID_FLAG_MOTIONPLUS);
 			break;
 		case 'e':
 			/* CWIID_RPT_EXT is actually
@@ -216,6 +220,7 @@ void print_state(struct cwiid_state *state)
 	if (state->rpt_mode & CWIID_RPT_NUNCHUK) printf(" NUNCHUK");
 	if (state->rpt_mode & CWIID_RPT_CLASSIC) printf(" CLASSIC");
 	if (state->rpt_mode & CWIID_RPT_BALANCE) printf(" BALANCE");
+	if (state->rpt_mode & CWIID_RPT_MOTIONPLUS) printf(" MOTIONPLUS");
 	printf("\n");
 	
 	printf("Active LEDs:");
@@ -281,6 +286,12 @@ void print_state(struct cwiid_state *state)
 		       state->ext.balance.left_top,
 		       state->ext.balance.left_bottom);
 		break;
+	case CWIID_EXT_MOTIONPLUS:
+		printf("MotionPlus: angle_rate=(%d,%d,%d)\n",
+		       state->ext.motionplus.angle_rate[0],
+		       state->ext.motionplus.angle_rate[1],
+		       state->ext.motionplus.angle_rate[2]);
+		break;
 	}
 }
 
@@ -299,7 +310,6 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 {
 	int i, j;
 	int valid_source;
-	struct balance_cal balance_cal;
 
 	for (i=0; i < mesg_count; i++)
 	{
@@ -318,26 +328,10 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 				printf("Classic Controller");
 				break;
 			case CWIID_EXT_BALANCE:
-				if(cwiid_get_balance_cal(wiimote, &balance_cal)) {
-					printf("Balance board: Failed to fetch calibration data");
-				}
-				else {
-					printf("Balance board: right_top=(%d,%d,%d), "
-						   "right_bottom=(%d,%d,%d), left_top=(%d,%d,%d), "
-						   "left_bottom=(%d,%d,%d)",
-						   balance_cal.right_top[0],
-						   balance_cal.right_top[1],
-						   balance_cal.right_top[2],
-						   balance_cal.right_bottom[0],
-						   balance_cal.right_bottom[1],
-						   balance_cal.right_bottom[2],
-						   balance_cal.left_top[0],
-						   balance_cal.left_top[1],
-						   balance_cal.left_top[2],
-						   balance_cal.left_bottom[0],
-						   balance_cal.left_bottom[1],
-						   balance_cal.left_bottom[2]);
-				}
+				printf("Balance Board");
+				break;
+			case CWIID_EXT_MOTIONPLUS:
+				printf("MotionPlus");
 				break;
 			default:
 				printf("Unknown Extension");
@@ -394,6 +388,12 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			       mesg[i].balance_mesg.right_bottom,
 			       mesg[i].balance_mesg.left_top,
 			       mesg[i].balance_mesg.left_bottom);
+			break;
+		case CWIID_MESG_MOTIONPLUS:
+			printf("MotionPlus Report: angle_rate=(%d,%d,%d)\n",
+			       mesg[i].motionplus_mesg.angle_rate[0],
+			       mesg[i].motionplus_mesg.angle_rate[1],
+			       mesg[i].motionplus_mesg.angle_rate[2]);
 			break;
 		case CWIID_MESG_ERROR:
 			if (cwiid_close(wiimote)) {

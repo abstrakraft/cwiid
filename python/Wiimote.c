@@ -60,6 +60,14 @@
 #include <bluetooth/bluetooth.h>
 #include "cwiid.h"
 
+#if (PY_VERSION_HEX < 0x02050000)
+  #ifndef PY_SSIZE_T_MIN
+    typedef int Py_ssize_t;
+    #define PY_SSIZE_T_MAX INT_MAX
+    #define PY_SSIZE_T_MIN INT_MIN
+  #endif
+#endif
+
 typedef struct {
 	PyObject_HEAD
 	cwiid_wiimote_t *wiimote;
@@ -586,6 +594,28 @@ static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 			Py_DECREF(PyExt);
 		}
 		break;
+	case CWIID_EXT_MOTIONPLUS:
+		if (state.rpt_mode & CWIID_RPT_MOTIONPLUS) {
+			PyExt = Py_BuildValue("{s:(I,I,I)}",
+		                          "angle_rate",
+		                            state.ext.motionplus.angle_rate[CWIID_PHI],
+		                            state.ext.motionplus.angle_rate[CWIID_THETA],
+		                            state.ext.motionplus.angle_rate[CWIID_PSI]);
+
+			if (!PyExt) {
+				Py_DECREF(PyState);
+				return NULL;
+			}
+
+			if (PyDict_SetItemString(PyState, "motionplus", PyExt)) {
+				Py_DECREF(PyState);
+				Py_DECREF(PyExt);
+				return NULL;
+			}
+
+			Py_DECREF(PyExt);
+		}
+		break;
 	default:
 		break;
 	}
@@ -787,7 +817,7 @@ static PyObject *Wiimote_read(Wiimote *self, PyObject *args, PyObject *kwds)
 	static char *kwlist[] = { "flags", "offset", "len", NULL };
 	unsigned char flags;
 	unsigned int offset;
-	unsigned int len;
+	Py_ssize_t len;
 	void *buf;
 	PyObject *pyRetBuf;
 
@@ -804,7 +834,7 @@ static PyObject *Wiimote_read(Wiimote *self, PyObject *args, PyObject *kwds)
 	if (!(pyRetBuf = PyBuffer_New(len))) {
 		return NULL;
 	}
-	if (PyObject_AsWriteBuffer(pyRetBuf, &buf, (int *)&len)) {
+	if (PyObject_AsWriteBuffer(pyRetBuf, &buf, &len)) {
 		Py_DECREF(pyRetBuf);
 		return NULL;
 	}
@@ -888,6 +918,7 @@ static void CallbackBridge(cwiid_wiimote_t *wiimote, int mesg_count,
  *                               "right_bottom":right_bottom,
  *                               "left_top":left_top,
  *                               "left_bottom":left_bottom},
+ *          (cwiid.MOTIONPLUS_MESG,{"angle_rate":(psi,theta,phi)},
  *          (cwiid.ERROR_MESG,error)]
  */
 PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[])
@@ -1004,6 +1035,13 @@ PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[])
 			               mesg[i].balance_mesg.left_top,
 			             "left_bottom",
 			               mesg[i].balance_mesg.left_bottom);
+			break;
+		case CWIID_MESG_MOTIONPLUS:
+			mesgVal = Py_BuildValue("{s:(I,I,I)}",
+			                        "angle_rate",
+			                          mesg[i].motionplus_mesg.angle_rate[CWIID_PHI],
+			                          mesg[i].motionplus_mesg.angle_rate[CWIID_THETA],
+			                          mesg[i].motionplus_mesg.angle_rate[CWIID_PSI]);
 			break;
 		case CWIID_MESG_ERROR:
 			mesgVal = Py_BuildValue("i", mesg[i].error_mesg.error);

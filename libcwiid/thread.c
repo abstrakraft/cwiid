@@ -91,6 +91,10 @@ void *router_thread(struct wiimote *wiimote)
 			}
 
 			/* Main switch */
+			/* printf("%.2X %.2X %.2X %.2X  %.2X %.2X %.2X %.2X\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
+			printf("%.2X %.2X %.2X %.2X  %.2X %.2X %.2X %.2X\n", buf[8], buf[9], buf[10], buf[11], buf[12], buf[13], buf[14], buf[15]);
+			printf("%.2X %.2X %.2X %.2X  %.2X %.2X %.2X %.2X\n", buf[16], buf[17], buf[18], buf[19], buf[20], buf[21], buf[22], buf[23]);
+			printf("\n"); */
 			switch (buf[1]) {
 			case RPT_STATUS:
 				err = process_status(wiimote, &buf[2], &ma);
@@ -191,7 +195,31 @@ void *status_thread(struct wiimote *wiimote)
 		}
 
 		if (status_mesg->ext_type == CWIID_EXT_UNKNOWN) {
-			if (wiimote->state.ext_type == CWIID_EXT_NONE) {
+			/* Read extension ID */
+			if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 1, &buf[0])) {
+				cwiid_err(wiimote, "Read error (extension error)");
+				status_mesg->ext_type = CWIID_EXT_UNKNOWN;
+			}
+			/* If the extension didn't change, or if the extension is a
+			 * MotionPlus, no init necessary */
+			switch (buf[0]) {
+			case EXT_NONE:
+				status_mesg->ext_type = CWIID_EXT_NONE;
+				break;
+			case EXT_NUNCHUK:
+				status_mesg->ext_type = CWIID_EXT_NUNCHUK;
+				break;
+			case EXT_CLASSIC:
+				status_mesg->ext_type = CWIID_EXT_CLASSIC;
+				break;
+			case EXT_BALANCE:
+				status_mesg->ext_type = CWIID_EXT_BALANCE;
+				break;
+			case EXT_MOTIONPLUS:
+				status_mesg->ext_type = CWIID_EXT_MOTIONPLUS;
+				break;
+			case EXT_PARTIAL:
+				/* Everything (but MotionPlus) shows up as partial until initialized */
 				buf[0] = 0x55;
 				buf[1] = 0x00;
 				/* Initialize extension register space */
@@ -228,9 +256,7 @@ void *status_thread(struct wiimote *wiimote)
 						break;
 					}
 				}
-			}
-			else {
-				status_mesg->ext_type = wiimote->state.ext_type;
+				break;
 			}
 		}
 
