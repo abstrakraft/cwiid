@@ -407,7 +407,7 @@ static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 	}
 
 	if (state.rpt_mode & CWIID_RPT_ACC) {
-		PyObject *PyAcc = Py_BuildValue("(B,B,B)",
+		PyObject *PyAcc = Py_BuildValue("(I,I,I)",
 							            state.acc[CWIID_X],
 	                                    state.acc[CWIID_Y],
 	                                    state.acc[CWIID_Z]);
@@ -483,7 +483,7 @@ static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 		PyObject *PyExt;
 	case CWIID_EXT_NUNCHUK:
 		if (state.rpt_mode & CWIID_RPT_NUNCHUK) {
-			PyExt = Py_BuildValue("{s:(B,B),s:(B,B,B),s:I}",
+			PyExt = Py_BuildValue("{s:(B,B),s:(I,I,I),s:I}",
 			                      "stick",
 			                        state.ext.nunchuk.stick[CWIID_X],
 			                        state.ext.nunchuk.stick[CWIID_Y],
@@ -910,7 +910,7 @@ PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[])
 			mesgVal = Py_BuildValue("I", mesg[i].btn_mesg.buttons);
 			break;
 		case CWIID_MESG_ACC:
-			mesgVal = Py_BuildValue("(B,B,B)", mesg[i].acc_mesg.acc[CWIID_X],
+			mesgVal = Py_BuildValue("(I,I,I)", mesg[i].acc_mesg.acc[CWIID_X],
 			                                   mesg[i].acc_mesg.acc[CWIID_Y],
 			                                   mesg[i].acc_mesg.acc[CWIID_Z]);
 			break;
@@ -969,7 +969,7 @@ PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[])
 			mesgVal = PyIrList;
 			break;
 		case CWIID_MESG_NUNCHUK:
-			mesgVal = Py_BuildValue("{s:(B,B),s:(B,B,B),s:I}",
+			mesgVal = Py_BuildValue("{s:(B,B),s:(I,I,I),s:I}",
 			                        "stick",
 			                          mesg[i].nunchuk_mesg.stick[CWIID_X],
 			                          mesg[i].nunchuk_mesg.stick[CWIID_Y],

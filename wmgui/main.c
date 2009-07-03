@@ -1095,15 +1095,15 @@ void cwiid_acc(struct cwiid_acc_mesg *mesg)
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_X]);
 		gtk_label_set_text(GTK_LABEL(lblAccXVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccX),
-		                              (double)mesg->acc[CWIID_X]/0xFF);
+		                              (double)mesg->acc[CWIID_X]/CWIID_ACC_MAX);
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Y]);
 		gtk_label_set_text(GTK_LABEL(lblAccYVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccY),
-		                              (double)mesg->acc[CWIID_Y]/0xFF);
+		                              (double)mesg->acc[CWIID_Y]/CWIID_ACC_MAX);
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Z]);
 		gtk_label_set_text(GTK_LABEL(lblAccZVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccZ),
-		                              (double)mesg->acc[CWIID_Z]/0xFF);
+		                              (double)mesg->acc[CWIID_Z]/CWIID_ACC_MAX);
 
 		a_x = ((double)mesg->acc[CWIID_X] - wm_cal.zero[CWIID_X]) /
 		      (wm_cal.one[CWIID_X] - wm_cal.zero[CWIID_X]);
@@ -1159,15 +1159,15 @@ void cwiid_nunchuk(struct cwiid_nunchuk_mesg *mesg)
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_X]);
 		gtk_label_set_text(GTK_LABEL(lblNCAccXVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progNCAccX),
-		                              (double)mesg->acc[CWIID_X]/0xFF);
+		                              (double)mesg->acc[CWIID_X]/CWIID_ACC_MAX);
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Y]);
 		gtk_label_set_text(GTK_LABEL(lblNCAccYVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progNCAccY),
-		                              (double)mesg->acc[CWIID_Y]/0xFF);
+		                              (double)mesg->acc[CWIID_Y]/CWIID_ACC_MAX);
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Z]);
 		gtk_label_set_text(GTK_LABEL(lblNCAccZVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progNCAccZ),
-		                              (double)mesg->acc[CWIID_Z]/0xFF);
+		                              (double)mesg->acc[CWIID_Z]/CWIID_ACC_MAX);
 
 		/* TODO: get nunchuk calibration */
 		a_x = ((double)mesg->acc[CWIID_X] - nc_cal.zero[CWIID_X]) /

@@ -91,9 +91,12 @@ int process_acc(struct wiimote *wiimote, const unsigned char *data,
 	if (wiimote->state.rpt_mode & CWIID_RPT_ACC) {
 		acc_mesg = &ma->array[ma->count++].acc_mesg;
 		acc_mesg->type = CWIID_MESG_ACC;
-		acc_mesg->acc[CWIID_X] = data[0];
-		acc_mesg->acc[CWIID_Y] = data[1];
-		acc_mesg->acc[CWIID_Z] = data[2];
+		acc_mesg->acc[CWIID_X] = (uint16_t)data[2]<<2 |
+		                        ((uint16_t)data[0] & 0x60)>>5;
+		acc_mesg->acc[CWIID_Y] = (uint16_t)data[3]<<2 |
+		                        ((uint16_t)data[1] & 0x20)>>5;
+		acc_mesg->acc[CWIID_Z] = (uint16_t)data[4]<<2 |
+		                        ((uint16_t)data[1] & 0x40)>>6;
 	}
 
 	return 0;
@@ -192,9 +195,12 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 			nunchuk_mesg->type = CWIID_MESG_NUNCHUK;
 			nunchuk_mesg->stick[CWIID_X] = data[0];
 			nunchuk_mesg->stick[CWIID_Y] = data[1];
-			nunchuk_mesg->acc[CWIID_X] = data[2];
-			nunchuk_mesg->acc[CWIID_Y] = data[3];
-			nunchuk_mesg->acc[CWIID_Z] = data[4];
+			nunchuk_mesg->acc[CWIID_X] = (uint16_t)data[2]<<2 |
+			                            ((uint16_t)data[5] & 0x0C)>>2;
+			nunchuk_mesg->acc[CWIID_Y] = (uint16_t)data[3]<<2 |
+			                            ((uint16_t)data[5] & 0x30)>>4;
+			nunchuk_mesg->acc[CWIID_Z] = (uint16_t)data[4]<<2 |
+			                            ((uint16_t)data[5] & 0xC0)>>6;
 			nunchuk_mesg->buttons = ~data[5] & NUNCHUK_BTN_MASK;
 		}
 		break;

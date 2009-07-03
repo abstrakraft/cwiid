@@ -101,7 +101,7 @@
 #define CWIID_PSI	2
 
 /* Acc Defs */
-#define CWIID_ACC_MAX	0xFF
+#define CWIID_ACC_MAX	0x3FF
 
 /* IR Defs */
 #define CWIID_IR_SRC_COUNT	4
@@ -159,8 +159,8 @@ enum cwiid_error {
 };
 
 struct acc_cal {
-	uint8_t zero[3];
-	uint8_t one[3];
+	uint16_t zero[3];
+	uint16_t one[3];
 };
 
 struct balance_cal {
@@ -184,7 +184,7 @@ struct cwiid_btn_mesg {
 
 struct cwiid_acc_mesg {
 	enum cwiid_mesg_type type;
-	uint8_t acc[3];
+	uint16_t acc[3];
 };
 
 struct cwiid_ir_src {
@@ -248,7 +248,7 @@ union cwiid_mesg {
 /* State Structs */
 struct nunchuk_state {
 	uint8_t stick[2];
-	uint8_t acc[3];
+	uint16_t acc[3];
 	uint8_t buttons;
 };
 
@@ -284,7 +284,7 @@ struct cwiid_state {
 	uint8_t rumble;
 	uint8_t battery;
 	uint16_t buttons;
-	uint8_t acc[3];
+	uint16_t acc[3];
 	struct cwiid_ir_src ir_src[CWIID_IR_SRC_COUNT];
 	enum cwiid_ext_type ext_type;
 	union ext_state ext;

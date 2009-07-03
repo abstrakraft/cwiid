@@ -179,12 +179,13 @@ int cwiid_get_acc_cal(cwiid_wiimote_t *wiimote, enum cwiid_ext_type ext_type,
 		return -1;
 	}
 
-	acc_cal->zero[CWIID_X] = buf[0];
-	acc_cal->zero[CWIID_Y] = buf[1];
-	acc_cal->zero[CWIID_Z] = buf[2];
-	acc_cal->one[CWIID_X]  = buf[4];
-	acc_cal->one[CWIID_Y]  = buf[5];
-	acc_cal->one[CWIID_Z]  = buf[6];
+	/* TODO: find the lower bits */
+	acc_cal->zero[CWIID_X] = buf[0]<<2;
+	acc_cal->zero[CWIID_Y] = buf[1]<<2;
+	acc_cal->zero[CWIID_Z] = buf[2]<<2;
+	acc_cal->one[CWIID_X]  = buf[4]<<2;
+	acc_cal->one[CWIID_Y]  = buf[5]<<2;
+	acc_cal->one[CWIID_Z]  = buf[6]<<2;
 
 	return 0;
 }

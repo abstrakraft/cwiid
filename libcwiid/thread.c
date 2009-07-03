@@ -69,7 +69,7 @@ void *router_thread(struct wiimote *wiimote)
 				break;
 			case RPT_BTN_ACC:
 				err = process_btn(wiimote, &buf[2], &ma) ||
-				      process_acc(wiimote, &buf[4], &ma);
+				      process_acc(wiimote, &buf[2], &ma);
 				break;
 			case RPT_BTN_EXT8:
 				err = process_btn(wiimote, &buf[2], &ma) ||
@@ -77,7 +77,7 @@ void *router_thread(struct wiimote *wiimote)
 				break;
 			case RPT_BTN_ACC_IR12:
 				err = process_btn(wiimote, &buf[2], &ma) ||
-				      process_acc(wiimote, &buf[4], &ma) ||
+				      process_acc(wiimote, &buf[2], &ma) ||
 				      process_ir12(wiimote, &buf[7], &ma);
 				break;
 			case RPT_BTN_EXT19:
@@ -86,7 +86,7 @@ void *router_thread(struct wiimote *wiimote)
 				break;
 			case RPT_BTN_ACC_EXT16:
 				err = process_btn(wiimote, &buf[2], &ma) ||
-				      process_acc(wiimote, &buf[4], &ma) ||
+				      process_acc(wiimote, &buf[2], &ma) ||
 				      process_ext(wiimote, &buf[7], 16, &ma);
 				break;
 			case RPT_BTN_IR10_EXT9:
@@ -96,7 +96,7 @@ void *router_thread(struct wiimote *wiimote)
 				break;
 			case RPT_BTN_ACC_IR10_EXT6:
 				err = process_btn(wiimote, &buf[2], &ma)  ||
-				      process_acc(wiimote, &buf[4], &ma)  ||
+				      process_acc(wiimote, &buf[2], &ma)  ||
 				      process_ir10(wiimote, &buf[7], &ma) ||
 				      process_ext(wiimote, &buf[17], 6, &ma);
 				break;
