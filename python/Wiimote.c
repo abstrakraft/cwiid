@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Justin M. Tulloss <jmtulloss@gmail.com>
+ * Copyright (C) 2007 Justin M. Tulloss <jmtulloss@gmail.com>, L. Donnie Smith <donnie.smith@gatech.edu>
  *
  * Interface from Python to libcwiid
  *
@@ -18,40 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  *
- * ChangeLog:
- * 2008-01-19 L. Donnie Smith <cwiid@abstrakraft.org>
- * * print callback error tracebacks
- *
- * 2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
- * * revised error messages and doc strings
- *
- * 2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
- * * removed Wiimote_FromC function
- * * added bdaddr argument to Wiimote.init
- * * overloaded Wiimote.init to accept CObject (existing wiimote),
- *   and logic to avoid closing it on dealloc
- *
- * 2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
- * * added Wiimote_FromC
- * * added get_acc_cal
- *
- * 2007-05-27 Arthur Peters <amp@singingwizard.org>
- * * removed set_mesg_callback from methods table
- *
- * 2007-05-22 L. Donnie Smith <cwiid@abstrakraft.org>
- * * changed disconnect to close
- * * replaced command with attributes for rpt_mode, rumble, led,
- *   added request_status method
- * * fixed memory leak in get_mesg
- * * added function names to argument parsing errors
- * * changed to processMesg to ConvertMesgArray with global visibility
- *
- * 2007-05-15 L. Donnie Smith <cwiid@abstrakraft.org>
- * * revised message types
- * * revised argument/keylist parsing
- *
- * 2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
- * * moved Wiimote class to separate file
  */
 
 #include "Python.h"

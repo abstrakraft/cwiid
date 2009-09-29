@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,32 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added cwiid_request_status, cwiid_set_let, cwiid_set_rumble,
- *    cwiid_set_rpt_mode
- *
- *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * rewrite for API overhaul
- *  * added rw and beep functions from rw.c
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * renamed wiimote to libcwiid, renamed structures accordingly
- *
- *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated cwiid_read and cwiid_write to trigger and detect rw_error
- *
- *  2007-03-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * audited error checking (coda and error handler sections)
- *  * updated comments
- *  * cwiid_read - changed to obey decode flag only for register read
- *
- *  2007-03-06 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added wiimote parameter to cwiid_err calls
- *
- *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial ChangeLog
- *  * type audit (stdint, const, char booleans)
  */
 
 #include <stdint.h>

@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,12 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * process_err adds error_mesg to mesg_array
- *
- *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * created for API overhaul (moved from old event.c)
  */
 
 #include <unistd.h>

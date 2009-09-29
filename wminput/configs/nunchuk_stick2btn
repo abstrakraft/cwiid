@@ -1,7 +1,7 @@
 # Fps config for wminput by kyrlian
 # needs plugins ir_fps and nunchuk_kb
 # available from http://kyrlian.free.fr/binaries/cwiid/latest/
-# wminput source and info at http://abstrakraft.org/cwiid/
+# wminput source and info at http://cwiid.org
 
 include buttons
 

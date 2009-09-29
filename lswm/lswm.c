@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,22 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added config.h include
- *  * use PACKAGE_VERSION from config.h instead of CWIID_VERSION
- *
- *  2007-06-01 Nick <nickishappy@gmail.com>
- *  * reworked command-line options (added standard options, long options)
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated for libcwiid rename
- *
- *  2007-04-07 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * changed cwiid_info.class to btclass
- *
- *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * created file
  */
 
 #ifdef HAVE_CONFIG_H

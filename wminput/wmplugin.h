@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,20 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * changed wmplugin_exec prototype (pass mesg instead of &mesg)
- *  * changed param interface (pass pointers)
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated for libcwiid rename
- *
- *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added param structs
- *
- *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial ChangeLog
- *  * type audit (stdint, const, char booleans)
  */
 
 #ifndef WMPLUGIN_H

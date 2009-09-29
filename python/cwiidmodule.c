@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Justin M. Tulloss <jmtulloss@gmail.com>
+ * Copyright (C) 2007 Justin M. Tulloss <jmtulloss@gmail.com>, L. Donnie Smith <donnie.smith@gatech.edu>
  *
  * Interface from Python to libcwiid
  *
@@ -18,52 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  *
- * ChangeLog:
- * 2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
- * * removed Wiimote_FromC function
- *
- * 2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
- * * added CObjects for Wiimote_FromC and ConvertMesgArray
- *
- * 2007-05-22 L. Donnie Smith <cwiid@abstrakraft.org>
- * * clarified variable names
- *
- * 2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
- * * moved Wiimote class to separate files
- *
- * 2007-05-12 L. Donnie Smith <cwiid@abstrakraft.org>
- * * added keywords to read
- * * finished get_mesg
- * * cleaned up types in get_state
- * * finished processMesgs
- *
- * 2007-05-09 L. Donnie Smith <cwiid@abstrakraft.org>
- * * finished get_state
- * * fixed read buffer issue
- * * implemented write
- * * cleaned up types
- * * removed notImplemented (no longer needed)
- *
- * 2007-05-07 L. Donnie Smith <cwiid@abstrakraft.org>
- * * C-style comments
- * * changed struct name to Wiimote
- * * removed dlopen, unused includes
- * * spaces to tabs, misc stylistic changes to match CWiid code
- * * changed self types to Wiimote
- * * made bdaddr local
- * * improved error checking in Wiimote_init
- * * implemented disconnect, enable, disable
- * * partially implemented get_state
- *
- * 2007-05-07 Justin M. Tulloss <jmtulloss@gmail.com>
- * * Refactored according to dsmith's wishes, removed unnecessary locks
- * * implemented read
- *
- * 2007-04-26 Justin M. Tulloss <jmtulloss@gmail.com>
- * * Updated for new libcwiid API
- *
- * 2007-04-24 Justin M. Tulloss <jmtulloss@gmail.com>
- * * Initial Changelog
  */
 
 #include "Python.h"

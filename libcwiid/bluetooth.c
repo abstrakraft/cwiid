@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,27 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-04-24 L. Donnie Smith (cwiid@abstrakraft.org>
- *  * revised error messages
- *
- *  2007-04-12 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * streamlined wiimote filter
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * renamed wiimote to libcwiid, renamed structures accordingly
- *
- *  2007-04-07 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * changed cwiid_info.class to btclass
- *
- *  2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * fixed cwiid_find_wiimote seg fault
- *
- *  2007-04-02 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * exception handling bugs
- *
- *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * created file
  */
 
 #include <stdlib.h>

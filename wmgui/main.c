@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,37 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added config.h include
- *  * use PACKAGE_VERSION from config.h instead of CWIID_VERSION
- *
- *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * changed cwiid_{connect,disconnect,command} to
- *    cwiid_{open,close,request_status|set_led|set_rumble|set_rpt_mode}
- *
- *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added timestamp to message callback
- *  * use cwiid_get_acc_cal to get acc calibration values
- *
- *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated for API overhaul
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated for libcwiid rename
- *
- *  2007-04-08 L. Donnie Smith <cwiid@anstrakraft.org>
- *  * fixed signed/unsigned comparison warning in btnRead_clicked
- *
- *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * disconnect on cwiid_mesg_error
- *
- *  2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * commented custom cwiid_err (causing Xlib errors)
- *
- *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial Changelog
- *  * type audit (stdint, const, char booleans)
  */
 
 #ifdef HAVE_CONFIG_H
@@ -54,7 +23,7 @@
 #define APP_NAME		"CWiid wmgui"
 #define APP_VERSION		PACKAGE_VERSION
 #define APP_COPYRIGHT	"Copyright (C) 2007 L. Donnie Smith " \
-                        "<cwiid@abstrakraft.org>"
+                        "<donnie.smith@gatech.edu>"
 #define APP_COMMENTS	"Wiimote GUI"
 
 #include <ctype.h>

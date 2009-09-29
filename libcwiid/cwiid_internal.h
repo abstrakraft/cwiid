@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,32 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * remove error_pipe
- *  * add struct mesg_array to process_error
- *
- *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added timestamp to mesg_array
- *
- *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * rewrite for API overhaul
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * renamed wiimote to libcwiid, renamed structures accordingly
- *
- *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * moved RW error state to separate member
- *
- *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * removed CWIID_CMP_LEN macro and cwiid_findfirst prototype
- *
- *  2007-03-05 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added wiimote parameter to cwiid_err prototype
- *
- *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial ChangeLog
- *  * type audit (stdint, const, char booleans)
  */
 
 #ifndef CWIID_INTERNAL_H

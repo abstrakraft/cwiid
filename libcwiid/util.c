@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,38 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2008-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * make cwiid_err_default public
- *  * clean up cwiid_err
- *
- *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * rewrite for API overhaul
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * renamed wiimote to libcwiid, renamed structures accordingly
- *
- *  2007-04-08 Petter Reinholdtsen <pere@hungry.com>
- *  * fixed signed/unsigned comparison warning in send_report and
- *    exec_write_seq
- *
- *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * removed cwiid_findfirst (moved to bluetooth.c)
- *
- *  2007-03-27 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * moved cwiid_findfirst to bluetooth.c
- *
- *  2007-03-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * audited error checking (coda and error handler sections)
- *
- *  2007-03-05 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * created cwiid_err_func variable
- *  * created cwiid_err_default
- *  * added wiimote parameter to cwiid_err definition and calls
- *
- *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial ChangeLog
- *  * type audit (stdint, const, char booleans)
  */
 
 #include <errno.h>

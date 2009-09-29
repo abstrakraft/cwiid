@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,15 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added py_wiimote_deinit
- *
- *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * refactored to isolate plugin logic
- *
- *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial ChangeLog
  */
 
 #ifndef PY_PLUGIN_H

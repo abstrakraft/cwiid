@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiidabstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,36 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-06-28 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Converted to single source
- *  * Added deadspace at edges
- *
- *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated for wmplugin_exec prototype change (&mesg->mesg)
- *
- *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * changed cwiid_{connect,disconnect,command} to
- *    cwiid_{open,close,request_status|set_led|set_rumble|set_rpt_mode}
- *
- *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated for API overhaul
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated for libcwiid rename
- *
- *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * initialized param array
- *
- *  2007-04-08 Arthur Peters <amp@singingwizard.org>
- *  * added debounce and low pass filter
- *
- *  2007-03-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * type audit (stdint, const, char booleans)
- *
- *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial ChangeLog
- *  * made global variables static
  */
 
 #include "wmplugin.h"

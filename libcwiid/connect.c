@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,40 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2009-06-13 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * add cwiid_open_timeout function, call it with default from cwiid_open
- *
- *  2007-06-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added sleep after cwiid_find_wiimote call
- *
- *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * remove error_pipe init and destruct
- *  * renamed connect and disconnect to open and close
- *
- *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * rewrite for API overhaul
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * renamed wiimote to libcwiid, renamed structures accordingly
- *
- *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * cancel rw operations from cwiid_disconnect
- *
- *  2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * cwiid_connect now takes a pointer to bdaddr_t
- *  * changed cwiid_findfirst to cwiid_find_wiimote
- *
- *  2007-03-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * changed memcpy to bacmp
- *  * audited error checking (coda and error handler sections)
- *  * updated comments
- *
- *  2007-03-06 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added wiimote parameter to cwiid_err calls
- *
- *  2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial ChangeLog
  */
 
 #include <stdlib.h>

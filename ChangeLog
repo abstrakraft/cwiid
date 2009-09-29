@@ -1,12 +1,12 @@
-2007-08-26 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-08-26 L. Donnie Smith <donnie.smith@gatech.edu>
 	docs
 	* updated wminput man page
 
-2007-08-23 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-08-23 L. Donnie Smith <donnie.smith@gatech.edu>
 	python
 	* fixed libdir install bug
 
-2007-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-08-14 L. Donnie Smith <donnie.smith@gatech.edu>
 	libcwiid
 	* make cwiid_err_default public
 
@@ -14,11 +14,11 @@
 	* added {c,py}_wiimote_deinit functions
 	* added daemon, quiet, and reconnect options
 
-2007-07-29 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-07-29 L. Donnie Smith <donnie.smith@gatech.edu>
 	wminput
 	* fixed wait forever logic
 
-2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-07-28 L. Donnie Smith <donnie.smith@gatech.edu>
 	configure.ac
 	* added config.h header
 	* added with-python argument and associated logic
@@ -33,7 +33,7 @@
 	* added config.h include for sources requiring defs
 	* added HAVE_PYTHON tests around all python code
 
-2007-06-28 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-06-28 L. Donnie Smith <donnie.smith@gatech.edu>
 	libcwiid
 	* changed version
 
@@ -44,21 +44,21 @@
 	* rewrote ir_ptr plugin
 	* supress error for nonexistent python plugins
 
-2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-06-18 L. Donnie Smith <donnie.smith@gatech.edu>
 	wminput
 	* revised error messages
 
 	python
 	* revised error messages and doc strings
 
-2007-06-14 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-06-14 L. Donnie Smith <donnie.smith@gatech.edu>
 	libcwiid
 	* added sleep after cwiid_find_wiimote call
 
 	python
 	* added --prefix option to install script
 
-2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-06-05 L. Donnie Smith <donnie.smith@gatech.edu>
 	python
 	* removed Wiimote_FromC function
 	* added bdaddr argument to Wiimote.init
@@ -76,7 +76,7 @@
 	wminput
 	* reworked command-line options (added standard options, long options)
 
-2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-06-01 L. Donnie Smith <donnie.smith@gatech.edu>
 	python
 	* added Wiimote_FromC
 	* exported Wiimote_FromC and ConvertMesgArray as CObjects
@@ -88,7 +88,7 @@
 	* changed param format (pass pointers)
 	* added python plugin support (experimental)
 
-2007-05-30 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-05-30 L. Donnie Smith <donnie.smith@gatech.edu>
 	configure.ac
 	* added python/Makefile and PYTHON_VERSION variable
 
@@ -102,7 +102,7 @@
 	python
 	* removed set_mesg_callback from methods table
 
-2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-05-16 L. Donnie Smith <donnie.smith@gatech.edu>
 	libcwiid
 	* removed error_pipe
 	* fixed error message reporting
@@ -121,7 +121,7 @@
 	wminput
 	* updated for function name changes
 
-2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-05-14 L. Donnie Smith <donnie.smith@gatech.edu>
 	libcwiid
 	* added timestamp to message interfaces
 	* added cwiid_get_acc_cal
@@ -137,7 +137,7 @@
 	* updated for timestamp addition
 	* use cwiid_get_acc_cal to get acc calibration values (acc plugins)
 
-2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-04-24 L. Donnie Smith <donnie.smith@gatech.edu>
 	libcwiid
 	* rewrite (API overhaul)
 
@@ -154,7 +154,7 @@
 	wminput
 	* fixed classic controller configuration bug
 
-2007-04-12 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-04-12 L. Donnie Smith <donnie.smith@gatech.edu>
 	libcwiid
 	* streamlined wiimote filter
 
@@ -162,7 +162,7 @@
 	wmdemo
 	* added command-line WIIMOTE_BDADDR
 
-2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-04-09 L. Donnie Smith <donnie.smith@gatech.edu>
 	libcwiid
 	* renamed from libwiimote
 	* renamed external data structures
@@ -184,7 +184,7 @@
 	* added debounce and low-pass filter to ir_ptr plugin
 	* added low-pass filter to acc plugin
 
-2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-04-08 L. Donnie Smith <donnie.smith@gatech.edu>
 	defs.mak
 	* added DEBUGFLAGS variable
 
@@ -213,11 +213,11 @@
 	* fixed signed/unsigned comparison warning in int_listen, send_report, and
 	  exec_write_seq
 
-2007-04-07 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-04-07 L. Donnie Smith <donnie.smith@gatech.edu>
 	wiimote
 	* changed wiimote_info.class to btclass
 
-2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-04-03 L. Donnie Smith <donnie.smith@gatech.edu>
 	configure.ac
 	* removed --noyywrap from lex
 
@@ -241,7 +241,7 @@
 	wminput
 	* exit on wiimote_mesg_error
 
-2007-04-03 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-04-03 L. Donnie Smith <donnie.smith@gatech.edu>
 	wiimote
 	* fixed wiimote_find_wiimote seg fault
 
@@ -251,14 +251,14 @@
 	wminput
 	* added stdio.h include to conf.h
 
-2007-04-02 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-04-02 L. Donnie Smith <donnie.smith@gatech.edu>
 	wiimote
 	* fixed exception handling bugs in bluetooth.c
 
 	wminput
 	* added wait option
 
-2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-04-01 L. Donnie Smith <donnie.smith@gatech.edu>
 	* Moved defs.mak.in to top level directory
 	* Added directories to defs.mak.in
 	* Moved CFLAGS directories from defs.mak to Makefiles
@@ -286,22 +286,22 @@
 	* wrote wiimote_get_info_array
 	* wiimote_connect now takes a pointer to bdaddr_t
 
-2007-03-27 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-03-27 L. Donnie Smith <donnie.smith@gatech.edu>
 	* Added DESTDIR variable to make system
 
-2007-03-23 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-03-23 L. Donnie Smith <donnie.smith@gatech.edu>
 	* Corrected installation directory creation logic
 	* Added .NOTPARALLEL to top level Makefile
 
-2007-03-19 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-03-19 L. Donnie Smith <donnie.smith@gatech.edu>
 	* Added --disable-ldconfig option to configure
 	* Makefiles - append to rather than set compiler options
 
-2007-03-15 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-03-15 L. Donnie Smith <donnie.smith@gatech.edu>
 	wminput
 		* action_enum.awk - explicitly call awk rather than #! /usr/bin/awk
 
-2007-03-14 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-03-14 L. Donnie Smith <donnie.smith@gatech.edu>
 	wiimote
 		* audited error checking (coda and error handler sections)
 		* updated comments
@@ -310,7 +310,7 @@
 		* wiimote_read - changed to obey decode flag only for register read
 		* wiimote_connect - changed memcpy to bacmp
 
-2007-03-08 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-03-08 L. Donnie Smith <donnie.smith@gatech.edu>
 	* added explicit creation of installation directories to prevent
 	  installation errors
 
@@ -322,17 +322,17 @@
 	wmdemo
 		* added implementation of wiimote_err_t, wiimote_set_err
 
-2007-03-05 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-03-05 L. Donnie Smith <donnie.smith@gatech.edu>
 	* Type audit - boolean ints, const strings where appropriate, stdint.h
 	  wiimote types
-	* Changed email addresses to cwiid@abstrakraft.org
+	* Changed email addresses to donnie.smith@gatech.edu
 	* Added file ChangeLogs
 	* Fixed GTK_{CFLAGS,LIBS} in configure.ac and wmgui/Makefile.in
 
-2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-03-01 L. Donnie Smith <donnie.smith@gatech.edu>
 	* configure.ac - check for stdint.h
 
-2007-02-26 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-02-26 L. Donnie Smith <donnie.smith@gatech.edu>
 	* Changed installation directories to comply with FHS standard
 	* Added check for yypop_buffer_state in flex
 	* Various minor documentation changes
@@ -349,7 +349,7 @@
 	wminput
 	* fixed help message
 
-2007-02-18 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-02-18 L. Donnie Smith <donnie.smith@gatech.edu>
 	wiimote
 	* fixed wiimote_status_mesg allocation size
 	* changed wiimote_log to wiimote_err with format string and args
@@ -367,7 +367,7 @@
 	wminput
 	* rewrite: new configuration syntax, plugin architecture
 
-2007-01-25 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-01-25 L. Donnie Smith <donnie.smith@gatech.edu>
 	wiimote
 	* added rpt_mode_flag lock to prevent race condition
 	* extended write sequences to simplify multi-part operations
@@ -375,7 +375,7 @@
 	wmgui
 	* added status request at connect to populate status boxes
 
-2007-01-24 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-01-24 L. Donnie Smith <donnie.smith@gatech.edu>
 	Added uninstall make target
 
 	wiimote
@@ -393,11 +393,11 @@
 	* changes to plugin architecture - gives greater access to plugin
 	* added LED indicators to default (IR) tracking
 
-2007-01-16 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-01-16 L. Donnie Smith <donnie.smith@gatech.edu>
 	wminput
 	* fixed build error in plugins directory
 
-2007-01-15 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-01-15 L. Donnie Smith <donnie.smith@gatech.edu>
 	reworked build system, now using autoconf
 
 	wiimote
@@ -424,7 +424,7 @@
 	* added WIIMOTE_BDADDR environment variable lookup
 	* created plugin architecture and acc plugin
 
-2007-01-09 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-01-09 L. Donnie Smith <donnie.smith@gatech.edu>
 	reworked top-level Makefile
 	bins install to /usr/local/bin on make install
 	wiimote
@@ -442,7 +442,7 @@
 	* fixed --help bug
 	* added #ifdef tests around KEY_ macros in key_enum.{c,awk}
 
-2007-01-04 L. Donnie Smith <cwiid@abstrakraft.org>
+2007-01-04 L. Donnie Smith <donnie.smith@gatech.edu>
 	wiimote
 	* put mesg callback data in a union
 	* fixed write flood error (wait for ACK after each packet)
@@ -462,7 +462,7 @@
 	wminput
 	* added to package
 
-2006-12-31 L. Donnie Smith <cwiid@abstrakraft.org>
+2006-12-31 L. Donnie Smith <donnie.smith@gatech.edu>
 	wiimote
 	* changed various macro names and parameter types (mostly signed to unsigned)
 	* cleaned up LED & RUMBLE command logic
@@ -481,5 +481,5 @@
 	* added data read/write
 	* added IR data widgets (not yet enabled)
 
-2006-12-28 L. Donnie Smith <cwiid@abstrakraft.org>
+2006-12-28 L. Donnie Smith <donnie.smith@gatech.edu>
 	Initial release

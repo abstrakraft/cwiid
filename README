@@ -1,4 +1,4 @@
-Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,6 +35,11 @@ awk, bison, flex, bluez-libs, gtk+-2 dev libs, python 2.4 or greater, python dev
 
 INSTALLATION
 ------------------------------------------------------------------------------------------------
+If installing from SVN or Git, run the following commands.  Otherwise, or if you aren't sure, ignore them.
+aclocal
+autoconf
+
+All users should then run:
 ./configure
 make
 sudo make install
@@ -49,7 +54,7 @@ Many distributions do not have /usr/local/lib in the library search path, and on
 
 I prefer the second method since it keeps local software in the local directory where it should be, and it fixes the problem for every package using /usr/local/lib, not just CWiid.  Until someone offers a convincing argument for the omission of /usr/local/lib from /etc/ld.so.conf, I consider this to be a distribution bug, and method #2 above is the fix.
 
-Please report any compilation errors at http://www.abstrakraft.org/cwiid or to <cwiid@abstrakraft.org>, with preference for the former.
+Please report any compilation errors at http://cwiid.org.
 
 EXECUTION
 ------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <wiimote@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,50 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-08-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added daemon, quiet, and reconnect options
- *
- *  2007-07-29 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * fixed wait forever logic
- *
- *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added config.h include
- *  * use PACKAGE_VERSION from config.h instead of CWIID_VERSION
- *  * added HAVE_PYTHON tests around all python code
- *
- *  2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * revised error messages
- *
- *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * refactored to isolate plugin logic
- *
- *  2007-06-01 Nick <nickishappy@gmail.com>
- *  * reworked command-line options (added standard options, long options)
- *
- *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added python plugin support
- *  * pass mesg instead of &mesg to wmplugin_exec
- *
- *  2007-05-16 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * changed cwiid_{connect,disconnect,command} to
- *    cwiid_{open,close,request_status|set_led|set_rumble|set_rpt_mode}
- *
- *  2007-05-14 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added timestamp to message callback
- *
- *  2007-04-24 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * update for API overhaul
- *
- *  2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * updated for libcwiid rename
- *
- *  2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * exit on cwiid_error
- *
- *  2007-03-03 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial ChangeLog
- *  * type audit (stdint, const, char booleans)
  */
 
 #ifdef HAVE_CONFIG_H

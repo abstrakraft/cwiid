@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 L. Donnie Smith <cwiid@abstrakraft.org>
+/* Copyright (C) 2007 L. Donnie Smith <donnie.smith@gatech.edu>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,34 +14,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  ChangeLog:
- *  2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added config.h include
- *  * added HAVE_PYTHON tests around all python code
- *
- *  2007-06-18 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * revised error messages
- *
- *  2007-06-05 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * refactored to isolate plugin logic
- *
- *  2007-06-03 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * fixed plugin->data malloc bug
- *
- *  2007-06-01 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * added python plugin support
- *  * changed param interface (pass pointers)
- *
- *  2007-04-15 <work.eric@gmail.com>
- *  * fixed classic controller configuration bug
- *
- *  2007-04-08 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * fixed pointer qualifier warning in get_plugin
- *  * created conf_plugin_param_{int,float} functions
- *
- *  2007-03-03 L. Donnie Smith <cwiid@abstrakraft.org>
- *  * Initial ChangeLog
- *  * type audit (stdint, const, char booleans)
  */
 
 #ifdef HAVE_CONFIG_H

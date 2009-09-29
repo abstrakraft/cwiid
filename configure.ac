@@ -1,30 +1,4 @@
-# ChangeLog:
-# 2007-07-28 L. Donnie Smith <cwiid@abstrakraft.org>
-# * added config.h header
-# * added with-python argument and associated logic
-#
-# 2007-05-30 L. Donnie Smith <cwiid@abstrakraft.org>
-# * added python/Makefile
-# * added PYTHON_VERSION variable
-#
-# 2007-04-09 L. Donnie Smith <cwiid@abstrakraft.org>
-# * updated for libcwiid rename
-#
-# 2007-04-04 L. Donnie Smith <cwiid@abstrakraft.org>
-# * removed --noyywrap from lex
-#
-# 2007-04-01 L. Donnie Smith <cwiid@abstrakraft.org>
-# * added lswm/Makefile
-# * moved defs.mak
-#
-# 2007-03-19 L. Donnie Smith <cwiid@abstrakraft.org>
-# * added --disable-ldconfig
-#
-# 2007-03-01 L. Donnie Smith <cwiid@abstrakraft.org>
-# * Initial ChangeLog
-# * Check for stdint.h
-
-AC_INIT(CWiid,0.6.00,cwiid@abstrakraft.org)
+AC_INIT(CWiid,0.6.00,donnie.smith@gatech.edu)
 AC_CONFIG_HEADER(common/include/config.h)
 
 AC_PROG_CC
