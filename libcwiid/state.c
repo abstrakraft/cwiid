@@ -102,8 +102,8 @@ int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 }
 
 /* IR Sensitivity Block */
-unsigned char ir_block1[] = CLIFF_IR_BLOCK_1;
-unsigned char ir_block2[] = CLIFF_IR_BLOCK_2;
+unsigned char ir_block1[] = MAX_SENSITIVITY_IR_BLOCK_1;
+unsigned char ir_block2[] = MAX_SENSITIVITY_IR_BLOCK_2;
 
 struct write_seq ir_enable10_seq[] = {
 	{WRITE_SEQ_RPT, RPT_IR_ENABLE1, (const void *)"\x04", 1, 0},

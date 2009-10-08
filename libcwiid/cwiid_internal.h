@@ -96,10 +96,12 @@
 #define EXT_MOTIONPLUS	0x04
 
 /* IR Enable blocks */
-#define MARCAN_IR_BLOCK_1	"\x00\x00\x00\x00\x00\x00\x90\x00\xC0"
-#define MARCAN_IR_BLOCK_2	"\x40\x00"
-#define CLIFF_IR_BLOCK_1	"\x02\x00\x00\x71\x01\x00\xAA\x00\x64"
-#define CLIFF_IR_BLOCK_2	"\x63\x03"
+#define MARCAN_IR_BLOCK_1	       "\x00\x00\x00\x00\x00\x00\x90\x00\xC0"
+#define MARCAN_IR_BLOCK_2	       "\x40\x00"
+#define CLIFF_IR_BLOCK_1	       "\x02\x00\x00\x71\x01\x00\xAA\x00\x64"
+#define CLIFF_IR_BLOCK_2	       "\x63\x03"
+#define MAX_SENSITIVITY_IR_BLOCK_1 "\x00\x00\x00\x00\x00\x00\x90\x00\x41"
+#define MAX_SENSITIVITY_IR_BLOCK_2 "\x40\x00"
 
 /* Write Sequences */
 enum write_seq_type {
