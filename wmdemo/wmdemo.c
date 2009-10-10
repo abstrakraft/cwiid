@@ -288,10 +288,13 @@ void print_state(struct cwiid_state *state)
 		       state->ext.balance.left_bottom);
 		break;
 	case CWIID_EXT_MOTIONPLUS:
-		printf("MotionPlus: angle_rate=(%d,%d,%d)\n",
+		printf("MotionPlus: angle_rate=(%d,%d,%d) low_speed=(%d,%d,%d)\n",
 		       state->ext.motionplus.angle_rate[0],
 		       state->ext.motionplus.angle_rate[1],
-		       state->ext.motionplus.angle_rate[2]);
+		       state->ext.motionplus.angle_rate[2],
+		       state->ext.motionplus.low_speed[0],
+		       state->ext.motionplus.low_speed[1],
+		       state->ext.motionplus.low_speed[2]);
 		break;
 	}
 }
@@ -391,10 +394,13 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			       mesg[i].balance_mesg.left_bottom);
 			break;
 		case CWIID_MESG_MOTIONPLUS:
-			printf("MotionPlus Report: angle_rate=(%d,%d,%d)\n",
+			printf("MotionPlus Report: angle_rate=(%d,%d,%d) low_speed=(%d,%d,%d)\n",
 			       mesg[i].motionplus_mesg.angle_rate[0],
 			       mesg[i].motionplus_mesg.angle_rate[1],
-			       mesg[i].motionplus_mesg.angle_rate[2]);
+			       mesg[i].motionplus_mesg.angle_rate[2],
+			       mesg[i].motionplus_mesg.low_speed[0],
+			       mesg[i].motionplus_mesg.low_speed[1],
+			       mesg[i].motionplus_mesg.low_speed[2]);
 			break;
 		case CWIID_MESG_ERROR:
 			if (cwiid_close(wiimote)) {

@@ -225,6 +225,7 @@ struct cwiid_balance_mesg {
 struct cwiid_motionplus_mesg {
 	enum cwiid_mesg_type type;
 	uint16_t angle_rate[3];
+	uint8_t low_speed[3];
 };
 
 struct cwiid_error_mesg {
@@ -269,6 +270,7 @@ struct balance_state {
 
 struct motionplus_state {
 	uint16_t angle_rate[3];
+	uint8_t low_speed[3];
 };
 
 union ext_state {

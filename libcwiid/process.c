@@ -243,6 +243,9 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 			                                            (uint16_t)data[1];
 			motionplus_mesg->angle_rate[CWIID_PSI]   = ((uint16_t)data[3] & 0xFC)<<6 |
 			                                            (uint16_t)data[0];
+			motionplus_mesg->low_speed[CWIID_PHI]    = ((uint8_t)data[3] & 0x01);
+			motionplus_mesg->low_speed[CWIID_THETA]  = ((uint8_t)data[4] & 0x02)>>1;
+			motionplus_mesg->low_speed[CWIID_PSI]    = ((uint8_t)data[3] & 0x02)>>1;
 		}
 		break;
 	}

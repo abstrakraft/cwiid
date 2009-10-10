@@ -82,6 +82,9 @@ int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 			memcpy(wiimote->state.ext.motionplus.angle_rate,
 			       mesg->motionplus_mesg.angle_rate,
 			       sizeof wiimote->state.ext.motionplus.angle_rate);
+			memcpy(wiimote->state.ext.motionplus.low_speed,
+			       mesg->motionplus_mesg.low_speed,
+			       sizeof wiimote->state.ext.motionplus.low_speed);
 			break;
 		case CWIID_MESG_ERROR:
 			wiimote->state.error = mesg->error_mesg.error;
