@@ -99,6 +99,11 @@ GtkWidget *evCCL, *evCCR;
 GtkWidget *lblCCL, *lblCCR;
 GtkWidget *lblCCLVal, *lblCCRVal;
 GtkWidget *progCCL, *progCCR;
+GtkWidget *lblMPPhi, *lblMPTheta, *lblMPPsi;
+GtkWidget *lblMPPhiVal, *lblMPThetaVal, *lblMPPsiVal;
+GtkWidget *lblMPPhiSlow, *lblMPThetaSlow, *lblMPPsiSlow;
+GtkWidget *evMPPhiSlow, *evMPThetaSlow, *evMPPsiSlow;
+GtkWidget *progMPPhi, *progMPTheta, *progMPPsi;
 GtkWidget *statConnection, *statBattery, *statExtension;
 GtkWidget *txtReadOffset, *txtReadLen;
 GtkWidget *radReadEEPROM, *radReadReg;
@@ -121,6 +126,7 @@ void clear_acc_widgets();
 void clear_ir_data();
 void clear_nunchuk_widgets();
 void clear_classic_widgets();
+void clear_motionplus_widgets();
 void message(GtkMessageType type, const gchar *message, GtkWindow *parent);
 void status(const gchar *status);
 
@@ -155,6 +161,7 @@ void cwiid_acc(struct cwiid_acc_mesg *);
 void cwiid_ir(struct cwiid_ir_mesg *);
 void cwiid_nunchuk(struct cwiid_nunchuk_mesg *);
 void cwiid_classic(struct cwiid_classic_mesg *);
+void cwiid_motionplus(struct cwiid_motionplus_mesg *);
 
 /* GetOpt */
 #define OPTSTRING	"h"
@@ -341,6 +348,21 @@ int main (int argc, char *argv[])
 	lblCCRVal = lookup_widget(winMain, "lblCCRVal");
 	progCCL = lookup_widget(winMain, "progCCL");
 	progCCR = lookup_widget(winMain, "progCCR");
+	lblMPPhi = lookup_widget(winMain, "lblMPPhi");
+	lblMPTheta = lookup_widget(winMain, "lblMPTheta");
+	lblMPPsi = lookup_widget(winMain, "lblMPPsi");
+	lblMPPhiVal = lookup_widget(winMain, "lblMPPhiVal");
+	lblMPThetaVal = lookup_widget(winMain, "lblMPThetaVal");
+	lblMPPsiVal = lookup_widget(winMain, "lblMPPsiVal");
+	evMPPhiSlow = lookup_widget(winMain, "evMPPhiSlow");
+	evMPThetaSlow = lookup_widget(winMain, "evMPThetaSlow");
+	evMPPsiSlow = lookup_widget(winMain, "evMPPsiSlow");
+	lblMPPhiSlow = lookup_widget(winMain, "lblMPPhiSlow");
+	lblMPThetaSlow = lookup_widget(winMain, "lblMPThetaSlow");
+	lblMPPsiSlow = lookup_widget(winMain, "lblMPPsiSlow");
+	progMPPhi = lookup_widget(winMain, "progMPPhi");
+	progMPTheta = lookup_widget(winMain, "progMPTheta");
+	progMPPsi = lookup_widget(winMain, "progMPPsi");
 	statConnection = lookup_widget(winMain, "statConnection");
 	statBattery = lookup_widget(winMain, "statBattery");
 	statExtension = lookup_widget(winMain, "statExtension");
@@ -521,6 +543,18 @@ void set_gui_state()
 	gtk_widget_set_sensitive(lblCCRVal, ext_active);
 	gtk_widget_set_sensitive(progCCL, ext_active);
 	gtk_widget_set_sensitive(progCCR, ext_active);
+	gtk_widget_set_sensitive(lblMPPhi, ext_active);
+	gtk_widget_set_sensitive(lblMPTheta, ext_active);
+	gtk_widget_set_sensitive(lblMPPsi	, ext_active);
+	gtk_widget_set_sensitive(lblMPPhiVal, ext_active);
+	gtk_widget_set_sensitive(lblMPThetaVal, ext_active);
+	gtk_widget_set_sensitive(lblMPPsiVal, ext_active);
+	gtk_widget_set_sensitive(lblMPPhiSlow, ext_active);
+	gtk_widget_set_sensitive(lblMPThetaSlow, ext_active);
+	gtk_widget_set_sensitive(lblMPPsiSlow, ext_active);
+	gtk_widget_set_sensitive(progMPPhi, ext_active);
+	gtk_widget_set_sensitive(progMPTheta, ext_active);
+	gtk_widget_set_sensitive(progMPPsi, ext_active);
 }
 
 void clear_widgets()
@@ -538,6 +572,7 @@ void clear_widgets()
 	clear_ir_data();
 	clear_nunchuk_widgets();
 	clear_classic_widgets();
+	clear_motionplus_widgets();
 }
 
 void clear_acc_widgets()
@@ -592,6 +627,16 @@ void clear_classic_widgets()
 	gtk_label_set_text(GTK_LABEL(lblCCRVal), "0");
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progCCL), 0.0);
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progCCR), 0.0);
+}
+
+void clear_motionplus_widgets()
+{
+	gtk_label_set_text(GTK_LABEL(lblMPPhiVal), "0");
+	gtk_label_set_text(GTK_LABEL(lblMPThetaVal), "0");
+	gtk_label_set_text(GTK_LABEL(lblMPPsiVal), "0");
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progMPPhi), 0.0);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progMPTheta), 0.0);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progMPPsi), 0.0);
 }
 
 gboolean winMain_delete_event(void)
@@ -711,6 +756,7 @@ void chkExt_toggled(void)
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkExt))) {
 		clear_nunchuk_widgets();
 		clear_classic_widgets();
+		clear_motionplus_widgets();
 	}
 	set_gui_state();
 }
@@ -1030,6 +1076,7 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			gtk_statusbar_push(GTK_STATUSBAR(statExtension), 0, ext_str);
 			clear_nunchuk_widgets();
 			clear_classic_widgets();
+			clear_motionplus_widgets();
 			ext_type = mesg_array[i].status_mesg.ext_type;
 			break;
 		case CWIID_MESG_BTN:
@@ -1046,6 +1093,9 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			break;
 		case CWIID_MESG_CLASSIC:
 			cwiid_classic(&mesg_array[i].classic_mesg);
+			break;
+		case CWIID_MESG_MOTIONPLUS:
+			cwiid_motionplus(&mesg_array[i].motionplus_mesg);
 			break;
 		case CWIID_MESG_ERROR:
 			menuDisconnect_activate();
@@ -1248,6 +1298,33 @@ void cwiid_classic(struct cwiid_classic_mesg *mesg)
 		                              (double)mesg->r/CWIID_CLASSIC_LR_MAX);
 		gtk_widget_modify_bg(evCCR, GTK_STATE_NORMAL,
 		    (mesg->buttons & CWIID_CLASSIC_BTN_R) ? &btn_on : &btn_off);
+	}
+}
+
+void cwiid_motionplus(struct cwiid_motionplus_mesg *mesg)
+{
+	static gchar str[LBLVAL_LEN];
+	
+	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkExt))) {
+		gtk_widget_modify_bg(evMPPhiSlow, GTK_STATE_NORMAL,
+		    (mesg->low_speed[CWIID_PHI]) ? &btn_on : &btn_off);
+		gtk_widget_modify_bg(evMPThetaSlow, GTK_STATE_NORMAL,
+		    (mesg->low_speed[CWIID_THETA]) ? &btn_on : &btn_off);
+		gtk_widget_modify_bg(evMPPsiSlow, GTK_STATE_NORMAL,
+		    (mesg->low_speed[CWIID_PSI]) ? &btn_on : &btn_off);
+
+		g_snprintf(str, LBLVAL_LEN, "%X", mesg->angle_rate[CWIID_PHI]);
+		gtk_label_set_text(GTK_LABEL(lblMPPhiVal), str);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progMPPhi),
+		                              (double)mesg->angle_rate[CWIID_PHI]/0x4000);
+		g_snprintf(str, LBLVAL_LEN, "%X", mesg->angle_rate[CWIID_THETA]);
+		gtk_label_set_text(GTK_LABEL(lblMPThetaVal), str);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progMPTheta),
+		                              (double)mesg->angle_rate[CWIID_THETA]/0x4000);
+		g_snprintf(str, LBLVAL_LEN, "%X", mesg->angle_rate[CWIID_PSI]);
+		gtk_label_set_text(GTK_LABEL(lblMPPsiVal), str);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progMPPsi),
+		                              (double)mesg->angle_rate[CWIID_PSI]/0x4000);
 	}
 }
 
