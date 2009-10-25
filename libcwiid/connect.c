@@ -255,6 +255,14 @@ int cwiid_close(cwiid_wiimote_t *wiimote)
 {
 	void *pthread_ret;
 
+	/* Stop rumbling, otherwise wiimote continues to rumble for
+	   few seconds after closing the connection! There should be no
+	   need to check if stopping fails: we are closing the connection
+	   in any case. */
+	if (wiimote->state.rumble) {
+		cwiid_set_rumble(wiimote, 0);
+	}
+
 	/* Cancel and join router_thread and status_thread */
 	if (pthread_cancel(wiimote->router_thread)) {
 		/* if thread quit abnormally, would have printed it's own error */
