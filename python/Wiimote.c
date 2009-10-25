@@ -562,11 +562,15 @@ static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 		break;
 	case CWIID_EXT_MOTIONPLUS:
 		if (state.rpt_mode & CWIID_RPT_MOTIONPLUS) {
-			PyExt = Py_BuildValue("{s:(I,I,I)}",
+			PyExt = Py_BuildValue("{s:(I,I,I),s:(I,I,I)}",
 		                          "angle_rate",
-		                            state.ext.motionplus.angle_rate[CWIID_PHI],
-		                            state.ext.motionplus.angle_rate[CWIID_THETA],
-		                            state.ext.motionplus.angle_rate[CWIID_PSI]);
+                                  state.ext.motionplus.angle_rate[CWIID_PHI],
+                                  state.ext.motionplus.angle_rate[CWIID_THETA],
+                                  state.ext.motionplus.angle_rate[CWIID_PSI],
+                                  "low_speed",
+                                  state.ext.motionplus.low_speed[CWIID_PHI],
+                                  state.ext.motionplus.low_speed[CWIID_THETA],
+                                  state.ext.motionplus.low_speed[CWIID_PSI]);
 
 			if (!PyExt) {
 				Py_DECREF(PyState);
@@ -884,7 +888,8 @@ static void CallbackBridge(cwiid_wiimote_t *wiimote, int mesg_count,
  *                               "right_bottom":right_bottom,
  *                               "left_top":left_top,
  *                               "left_bottom":left_bottom},
- *          (cwiid.MOTIONPLUS_MESG,{"angle_rate":(psi,theta,phi)},
+ *          (cwiid.MOTIONPLUS_MESG,{"angle_rate":(psi,theta,phi),
+ *                                  "low_speed":(psi,theta,phi)},
  *          (cwiid.ERROR_MESG,error)]
  */
 PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[])
@@ -1003,11 +1008,16 @@ PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[])
 			               mesg[i].balance_mesg.left_bottom);
 			break;
 		case CWIID_MESG_MOTIONPLUS:
-			mesgVal = Py_BuildValue("{s:(I,I,I)}",
+			mesgVal = Py_BuildValue("{s:(I,I,I),s:(I,I,I)}",
 			                        "angle_rate",
-			                          mesg[i].motionplus_mesg.angle_rate[CWIID_PHI],
-			                          mesg[i].motionplus_mesg.angle_rate[CWIID_THETA],
-			                          mesg[i].motionplus_mesg.angle_rate[CWIID_PSI]);
+                                    mesg[i].motionplus_mesg.angle_rate[CWIID_PHI],
+                                    mesg[i].motionplus_mesg.angle_rate[CWIID_THETA],
+                                    mesg[i].motionplus_mesg.angle_rate[CWIID_PSI],
+                                    "low_speed",
+                                    mesg[i].motionplus_mesg.low_speed[CWIID_PHI],
+                                    mesg[i].motionplus_mesg.low_speed[CWIID_THETA],
+                                    mesg[i].motionplus_mesg.low_speed[CWIID_PSI]);
+                                    
 			break;
 		case CWIID_MESG_ERROR:
 			mesgVal = Py_BuildValue("i", mesg[i].error_mesg.error);
