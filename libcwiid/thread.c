@@ -161,13 +161,13 @@ void *status_thread(struct wiimote *wiimote)
 
 		if (status_mesg->ext_type == CWIID_EXT_UNKNOWN) {
 			/* Read extension ID */
-			if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 1, &buf[0])) {
+			if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 2, &buf)) {
 				cwiid_err(wiimote, "Read error (extension error)");
 				status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 			}
 			/* If the extension didn't change, or if the extension is a
 			 * MotionPlus, no init necessary */
-			switch (buf[0]) {
+			switch ((buf[0] << 8) | buf[1]) {
 			case EXT_NONE:
 				status_mesg->ext_type = CWIID_EXT_NONE;
 				break;
@@ -197,12 +197,12 @@ void *status_thread(struct wiimote *wiimote)
 						status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 				}
 				/* Read extension ID */
-				else if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 1, &buf[0])) {
+				else if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 2, &buf)) {
 					cwiid_err(wiimote, "Read error (extension error)");
 					status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 				}
 				else {
-					switch (buf[0]) {
+					switch ((buf[0] << 8) | buf[1]) {
 					case EXT_NONE:
 					case EXT_PARTIAL:
 						status_mesg->ext_type = CWIID_EXT_NONE;

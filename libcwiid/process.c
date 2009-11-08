@@ -233,6 +233,7 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 			balance_mesg->left_bottom = ((uint16_t)data[6]<<8 |
 			                             (uint16_t)data[7]);
 		}
+		break;
 	case CWIID_EXT_MOTIONPLUS:
 		if (wiimote->state.rpt_mode & CWIID_RPT_MOTIONPLUS) {
 			motionplus_mesg = &ma->array[ma->count++].motionplus_mesg;

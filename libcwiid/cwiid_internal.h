@@ -88,12 +88,12 @@
 #define NUNCHUK_BTN_MASK	0x03
 
 /* Extension Values */
-#define EXT_NONE		0x2E
-#define EXT_PARTIAL		0xFF
-#define EXT_NUNCHUK		0x00
-#define EXT_CLASSIC		0x01
-#define EXT_BALANCE		0x2A
-#define EXT_MOTIONPLUS	0x04
+#define EXT_NONE		0x2E2E
+#define EXT_PARTIAL		0xFFFF
+#define EXT_NUNCHUK		0x0000
+#define EXT_CLASSIC		0x0101
+#define EXT_BALANCE		0x0402
+#define EXT_MOTIONPLUS	0x0405
 
 /* IR Enable blocks */
 #define MARCAN_IR_BLOCK_1			"\x00\x00\x00\x00\x00\x00\x90\x00\xC0"
