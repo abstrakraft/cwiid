@@ -14,7 +14,7 @@ CFLAGS += -I@top_builddir@/libcwiid \
 	-DWMINPUT_CONFIG_DIR=\"$(WMINPUT_CONFIG_DIR)\" \
 	-DCWIID_PLUGINS_DIR=\"$(CWIID_PLUGINS_DIR)\"
 
-LDLIBS += -lcwiid -ldl
+LDLIBS += -lcwiid -lbluetooth -ldl -lpthread
 LDFLAGS += -L@top_builddir@/libcwiid -rdynamic
 INST_DIR = @bindir@
 

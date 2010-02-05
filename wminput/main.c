@@ -30,6 +30,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <bluetooth/bluetooth.h>
 
 #include <cwiid.h>
 

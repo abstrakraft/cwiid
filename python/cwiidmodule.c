@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 
-#include "cwiid.h"
+#include <cwiid.h>
 #include "structmember.h"
 
 /* externally defined types */

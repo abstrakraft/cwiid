@@ -10,7 +10,7 @@ DEST_INST_DIR = $(ROOTDIR)$(INST_DIR)
 all: $(APP_NAME)
 
 $(APP_NAME): $(OBJECTS)
-	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS)
 
 install: $(APP_NAME)
 	install -D $(APP_NAME) $(DEST_INST_DIR)/$(APP_NAME)

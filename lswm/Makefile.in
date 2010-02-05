@@ -8,7 +8,7 @@ SOURCES = lswm.c
 
 CFLAGS += -I@top_builddir@/libcwiid
 LDFLAGS += -L@top_builddir@/libcwiid
-LDLIBS += -lcwiid
+LDLIBS += -lcwiid -lbluetooth
 INST_DIR = @bindir@
 
 include $(COMMON)/include/app.mak

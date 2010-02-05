@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <bluetooth/bluetooth.h>
 #include <cwiid.h>
 
 /* This is a sample program written to demonstrate basic CWiid libwiimote

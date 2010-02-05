@@ -25,8 +25,8 @@ $(STATIC_LIB): $(OBJECTS)
 	ar rcs $(STATIC_LIB) $(OBJECTS)
 
 $(SHARED_LIB): $(OBJECTS)
-	$(CC) -shared -Wl,-soname,$(SO_NAME) $(LDFLAGS) $(LDLIBS) \
-	      -o $(SHARED_LIB) $(OBJECTS)
+	$(CC) -shared -Wl,-soname,$(SO_NAME) $(LDFLAGS) -o $(SHARED_LIB) \
+	      $(OBJECTS) $(LDLIBS)
 
 install: install_header install_static install_shared
 

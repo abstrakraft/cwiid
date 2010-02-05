@@ -16,7 +16,7 @@ DEST_INST_DIR = $(INST_DIR)
 all: $(LIB_NAME)
 
 $(LIB_NAME): $(OBJECTS)
-	$(CC) -shared $(LDFLAGS) $(LDLIBS) -o $(LIB_NAME) $(OBJECTS)
+	$(CC) -shared $(LDFLAGS) -o $(LIB_NAME) $(OBJECTS) $(LDLIBS)
 
 install: $(LIB_NAME)
 	install -D $(LIB_NAME) $(DEST_INST_DIR)/$(LIB_NAME)

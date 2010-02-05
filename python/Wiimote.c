@@ -24,7 +24,7 @@
 #include "structmember.h"
 #include <errno.h>
 #include <bluetooth/bluetooth.h>
-#include "cwiid.h"
+#include <cwiid.h>
 
 #if (PY_VERSION_HEX < 0x02050000)
   #ifndef PY_SSIZE_T_MIN
