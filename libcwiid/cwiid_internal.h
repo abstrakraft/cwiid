@@ -96,12 +96,22 @@
 #define EXT_MOTIONPLUS	0x04
 
 /* IR Enable blocks */
-#define MARCAN_IR_BLOCK_1	       "\x00\x00\x00\x00\x00\x00\x90\x00\xC0"
-#define MARCAN_IR_BLOCK_2	       "\x40\x00"
-#define CLIFF_IR_BLOCK_1	       "\x02\x00\x00\x71\x01\x00\xAA\x00\x64"
-#define CLIFF_IR_BLOCK_2	       "\x63\x03"
-#define MAX_SENSITIVITY_IR_BLOCK_1 "\x00\x00\x00\x00\x00\x00\x90\x00\x41"
-#define MAX_SENSITIVITY_IR_BLOCK_2 "\x40\x00"
+#define MARCAN_IR_BLOCK_1			"\x00\x00\x00\x00\x00\x00\x90\x00\xC0"
+#define MARCAN_IR_BLOCK_2			"\x40\x00"
+#define CLIFF_IR_BLOCK_1			"\x02\x00\x00\x71\x01\x00\xAA\x00\x64"
+#define CLIFF_IR_BLOCK_2			"\x63\x03"
+#define MAX_SENSITIVITY_IR_BLOCK_1	"\x00\x00\x00\x00\x00\x00\x90\x00\x41"
+#define MAX_SENSITIVITY_IR_BLOCK_2	"\x40\x00"
+#define WII_L1_IR_BLOCK_1			"\x02\x00\x00\x71\x01\x00\x64\x00\xFE"
+#define WII_L1_IR_BLOCK_2			"\xFD\x05"
+#define WII_L2_IR_BLOCK_1			"\x02\x00\x00\x71\x01\x00\x96\x00\xB4"
+#define WII_L2_IR_BLOCK_2			"\xB3\x04"
+#define WII_L3_IR_BLOCK_1			"\x02\x00\x00\x71\x01\x00\xAA\x00\x64"
+#define WII_L3_IR_BLOCK_2			"\x63\x03"
+#define WII_L4_IR_BLOCK_1			"\x02\x00\x00\x71\x01\x00\xC8\x00\x36"
+#define WII_L4_IR_BLOCK_2			"\x35\x03"
+#define WII_L5_IR_BLOCK_1			"\x02\x00\x00\x71\x01\x00\x72\x00\x20"
+#define WII_L5_IR_BLOCK_2			"\x1F\x03"
 
 /* Write Sequences */
 enum write_seq_type {
