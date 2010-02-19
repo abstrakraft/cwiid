@@ -323,6 +323,7 @@ void cwiid_err_default(struct wiimote *wiimote, const char *str, va_list ap);
 #define cwiid_disconnect cwiid_close
 cwiid_wiimote_t *cwiid_open(bdaddr_t *bdaddr, int flags);
 cwiid_wiimote_t *cwiid_open_timeout(bdaddr_t *bdaddr, int flags, int timeout);
+cwiid_wiimote_t *cwiid_listen(int flags);
 int cwiid_close(cwiid_wiimote_t *wiimote);
 
 int cwiid_get_id(cwiid_wiimote_t *wiimote);

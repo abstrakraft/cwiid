@@ -24,6 +24,8 @@
 #include <sys/types.h>	/* ssize_t */
 #include "cwiid.h"
 
+#define DEFAULT_TIMEOUT	5
+
 /* Bluetooth magic numbers */
 #define BT_TRANS_MASK		0xF0
 #define BT_TRANS_HANDSHAKE	0x00
@@ -174,6 +176,8 @@ struct wiimote {
 };
 
 /* prototypes */
+cwiid_wiimote_t *cwiid_new(int ctl_socket, int int_socket, int flags);
+
 /* thread.c */
 void *router_thread(struct wiimote *wiimote);
 void *status_thread(struct wiimote *wiimote);
