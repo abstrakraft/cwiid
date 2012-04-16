@@ -1,0 +1,7 @@
+# screwdriver
+Plugin.screwdriver.Right = KEY_VOLUMEUP
+Plugin.screwdriver.Left = KEY_VOLUMEDOWN
+Plugin.screwdriver.Up = KEY_FASTFORWARD
+Plugin.screwdriver.Down = KEY_REWIND
+Plugin.screwdriver.RollThreshold = 0.19
+Plugin.screwdriver.PitchThreshold = 0.19
