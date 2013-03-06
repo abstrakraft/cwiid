@@ -1,0 +1,9 @@
+#nunchuk_ptr
+
+include buttons
+
+Nunchuk.C               = BTN_LEFT
+Nunchuk.Z               = BTN_RIGHT
+
+Plugin.nunchuk_mouse.X		= REL_X
+Plugin.nunchuk_mouse.Y		= -REL_Y

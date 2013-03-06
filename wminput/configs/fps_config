@@ -1,0 +1,32 @@
+# Fps config for wminput by kyrlian
+# needs plugins ir_fps and nunchuk_kb
+# available from http://kyrlian.free.fr/binaries/cwiid/latest/
+# wminput source and info at http://abstrakraft.org/cwiid/
+
+# IR for mouse REL - fps style
+Plugin.ir_fps.X	= REL_X
+Plugin.ir_fps.Y	= REL_Y
+
+#custom buttons
+Wiimote.A               = BTN_LEFT
+Wiimote.B               = BTN_RIGHT
+Wiimote.Up              = KEY_UP
+Wiimote.Down    	= KEY_DOWN
+Wiimote.Left    	= KEY_LEFT
+Wiimote.Right   	= KEY_RIGHT
+Wiimote.Minus  		= KEY_PAGEDOWN
+Wiimote.Plus   		= KEY_PAGEUP
+Wiimote.Home  		= KEY_ESC
+
+Wiimote.1       	= KEY_TAB
+Wiimote.2       	= KEY_ESC
+
+Nunchuk.C               = KEY_C
+Nunchuk.Z               = KEY_SPACE
+
+#plugin for nunchuk stick
+Plugin.nunchuk_kb.Up	= KEY_W
+Plugin.nunchuk_kb.Down	= KEY_S
+Plugin.nunchuk_kb.Left	= KEY_A
+Plugin.nunchuk_kb.Right	= KEY_D
+

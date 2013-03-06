@@ -1,0 +1,16 @@
+#Copyright (C) 2009 Jonas Kölker <jonaskoelker@gnu.org>
+
+include @top_builddir@/defs.mak
+
+PLUGIN_NAME = nunchuk_mouse
+SOURCES = nunchuk_mouse.c
+CFLAGS += -I@top_builddir@/wminput -I@top_builddir@/libcwiid
+LDLIBS += -lm
+INST_DIR = $(CWIID_PLUGINS_DIR)
+
+include $(COMMON)/include/plugin.mak
+
+distclean: clean
+	rm Makefile
+
+.PHONY: distclean
