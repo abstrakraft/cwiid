@@ -55,7 +55,7 @@ int cwiid_send_rpt(cwiid_wiimote_t *wiimote, uint8_t flags, uint8_t report,
 {
 	unsigned char *buf;
 
-	if ((buf = malloc((len*2) * sizeof *buf)) == NULL) {
+	if ((buf = malloc((len+2) * sizeof *buf)) == NULL) {
 		cwiid_err(wiimote, "Memory allocation error (mesg array)");
 		return -1;
 	}
