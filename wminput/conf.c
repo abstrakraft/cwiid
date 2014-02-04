@@ -42,11 +42,17 @@ struct conf *cur_conf;
 struct plugin *get_plugin(struct conf *conf, const char *name);
 
 int conf_load(struct conf *conf, const char *conf_name,
-              char *config_search_dirs[], char *plugin_search_dirs[])
+              char *config_search_dirs[], char *plugin_search_dirs[],
+              const char *dev_name)
 {
 	conf_init(conf);
 	cur_conf = conf;
 
+	if (dev_name != NULL)
+	{
+		strncpy(cur_conf->dev.name, dev_name, sizeof(cur_conf->dev.name));
+	}
+	
 	cur_conf->config_search_dirs = config_search_dirs;
 	cur_conf->plugin_search_dirs = plugin_search_dirs;
 	if (!(yyin = conf_push_config(cur_conf, conf_name, NULL))) {

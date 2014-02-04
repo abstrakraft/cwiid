@@ -170,7 +170,8 @@ struct uinput_listen_data {
 };
 
 int conf_load(struct conf *conf, const char *conf_name,
-              char *config_search_dirs[], char *plugin_search_dirs[]);
+              char *config_search_dirs[], char *plugin_search_dirs[],
+              const char *dev_name);
 int conf_unload(struct conf *conf);
 
 int conf_ff(struct conf *conf, unsigned char enabled);

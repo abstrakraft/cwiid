@@ -73,6 +73,7 @@ void print_usage(void)
 	printf("\t-q, --quiet\t\tReduce output to errors\n");
 	printf("\t-r, --reconnect [wait]\tAutomatically try reconnect after wiimote disconnect.\n");
 	printf("\t-w, --wait\t\tWait indefinitely for wiimote to connect.\n");
+	printf("\t-n, --name [name]\tName for the created input device.\n");
 }
 
 void cwiid_err_connect(struct wiimote *wiimote, const char *str, va_list ap)
@@ -92,6 +93,7 @@ int main(int argc, char *argv[])
 	char home_config_dir[HOME_DIR_LEN];
 	char home_plugin_dir[HOME_DIR_LEN];
 	char *tmp;
+	const char *dev_name = NULL;
 	int c, i;
 	char *str_addr;
 	bdaddr_t bdaddr, current_bdaddr;
@@ -114,10 +116,11 @@ int main(int argc, char *argv[])
 			{"quiet", 0, 0, 'q'},
 			{"reconnect", 2, 0, 'r'},
 			{"wait", 0, 0, 'w'},
+			{"name", 1, 0, 'n'},
 			{0, 0, 0, 0}
 		};
 
-		c = getopt_long (argc, argv, "hvc:dqr::w", long_options, &option_index);
+		c = getopt_long (argc, argv, "hvc:dqr::wn:", long_options, &option_index);
 
 		if (c == -1) {
 			break;
@@ -155,6 +158,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'w':
 			wait_forever = 1;
+			break;
+		case 'n':
+			dev_name = optarg;
 			break;
 		case '?':
 			printf("Try `wminput --help` for more information\n");
@@ -195,7 +201,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (conf_load(&conf, config_filename, config_search_dirs,
-	  plugin_search_dirs)) {
+	  plugin_search_dirs, dev_name)) {
 		return -1;
 	}
 
