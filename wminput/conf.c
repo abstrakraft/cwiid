@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include "conf.h"
 #include "util.h"
@@ -35,15 +36,57 @@
 
 extern FILE *yyin;
 extern int yyparse();
+extern void yyrestart (FILE * input_file );
 
 extern struct lookup_enum action_enum[];
 struct conf *cur_conf;
 
 struct plugin *get_plugin(struct conf *conf, const char *name);
 
+
+static const char* stored_conf_name;
+
+static int first_time=1;
+
+static void reloadconf (int ignore) {
+	if (!(yyin = conf_push_config(cur_conf, stored_conf_name, NULL))) {
+		wminput_err("Can not reload configuration file");
+		exit(-1);
+	}
+
+	if (yyin == NULL) {
+		wminput_err("Can not reload configuration file");
+		conf_unload(cur_conf);
+		exit(-1);
+	}
+
+	yyrestart(yyin);
+  
+	if (yyparse()) {
+		if (fclose(yyin)) {
+			wminput_err("Error closing configuration file");
+		}
+		conf_unload(cur_conf);
+		exit(-1);
+	}
+	wminput_err("Configuration reloaded");
+}
+
 int conf_load(struct conf *conf, const char *conf_name,
               char *config_search_dirs[], char *plugin_search_dirs[])
 {
+	if (first_time) {
+		struct sigaction sa;
+		sa.sa_handler = reloadconf;
+		sigemptyset (&(sa.sa_mask));
+		sa.sa_flags = 0;
+
+		first_time = 0;
+		stored_conf_name = conf_name;
+
+		sigaction (SIGHUP, &sa, NULL);
+	}
+
 	conf_init(conf);
 	cur_conf = conf;
 
