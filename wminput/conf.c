@@ -159,8 +159,8 @@ int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
 	case CONF_NC_AXIS_STICK_Y:
 		conf->rpt_mode_flags |= CWIID_RPT_NUNCHUK;
 		if (axis_type == EV_ABS) {
-			conf->dev.absmax[action] = 0xFF;
-			conf->dev.absmin[action] = 0;
+			conf->dev.absmax[action] = 0xFF/2.0;
+			conf->dev.absmin[action] = -0xFF/2.0;
 			conf->dev.absfuzz[action] = 0;
 			conf->dev.absflat[action] = 0;
 		}
@@ -179,8 +179,8 @@ int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
 	case CONF_CC_AXIS_L_STICK_Y:
 		conf->rpt_mode_flags |= CWIID_RPT_CLASSIC;
 		if (axis_type == EV_ABS) {
-			conf->dev.absmax[action] = CWIID_CLASSIC_L_STICK_MAX;
-			conf->dev.absmin[action] = 0;
+			conf->dev.absmax[action] = CWIID_CLASSIC_L_STICK_MAX/2.0;
+			conf->dev.absmin[action] = -CWIID_CLASSIC_L_STICK_MAX/2.0;
 			conf->dev.absfuzz[action] = 0;
 			conf->dev.absflat[action] = 0;
 		}
@@ -189,8 +189,8 @@ int conf_axis(struct conf *conf, int axis, __u16 axis_type, __u16 action,
 	case CONF_CC_AXIS_R_STICK_Y:
 		conf->rpt_mode_flags |= CWIID_RPT_CLASSIC;
 		if (axis_type == EV_ABS) {
-			conf->dev.absmax[action] = CWIID_CLASSIC_R_STICK_MAX;
-			conf->dev.absmin[action] = 0;
+			conf->dev.absmax[action] = CWIID_CLASSIC_R_STICK_MAX/2.0;
+			conf->dev.absmin[action] = -CWIID_CLASSIC_R_STICK_MAX/2.0;
 			conf->dev.absfuzz[action] = 0;
 			conf->dev.absflat[action] = 0;
 		}

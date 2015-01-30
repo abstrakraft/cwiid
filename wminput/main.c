@@ -510,9 +510,9 @@ void process_nunchuk_mesg(struct cwiid_nunchuk_mesg *mesg)
 
 	/* Nunchuk.Stick.X */
 	if (conf.amap[CONF_NC_AXIS_STICK_X].active) {
-		axis_value = mesg->stick[CWIID_X];
+		axis_value = mesg->stick[CWIID_X]-0xFF/2.0;
 		if (conf.amap[CONF_NC_AXIS_STICK_X].flags & CONF_INVERT) {
-			axis_value = 0xFF - axis_value;
+			axis_value = -axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_NC_AXIS_STICK_X].axis_type,
 		           conf.amap[CONF_NC_AXIS_STICK_X].action, axis_value);
@@ -520,9 +520,9 @@ void process_nunchuk_mesg(struct cwiid_nunchuk_mesg *mesg)
 
 	/* Nunchuk.Stick.Y */
 	if (conf.amap[CONF_NC_AXIS_STICK_Y].active) {
-		axis_value = mesg->stick[CWIID_Y];
+		axis_value = mesg->stick[CWIID_Y]-0xFF/2.0;
 		if (conf.amap[CONF_NC_AXIS_STICK_Y].flags & CONF_INVERT) {
-			axis_value = 0xFF - axis_value;
+			axis_value = axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_NC_AXIS_STICK_Y].axis_type,
 		           conf.amap[CONF_NC_AXIS_STICK_Y].action, axis_value);
@@ -585,9 +585,9 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 
 	/* Classic.LStick.X */
 	if (conf.amap[CONF_CC_AXIS_L_STICK_X].active) {
-		axis_value = mesg->l_stick[CWIID_X];
+		axis_value = mesg->l_stick[CWIID_X]-CWIID_CLASSIC_L_STICK_MAX/2.0;
 		if (conf.amap[CONF_CC_AXIS_L_STICK_X].flags & CONF_INVERT) {
-			axis_value = CWIID_CLASSIC_L_STICK_MAX - axis_value;
+			axis_value = -axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_L_STICK_X].axis_type,
 		           conf.amap[CONF_CC_AXIS_L_STICK_X].action, axis_value);
@@ -595,9 +595,9 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 
 	/* Classic.LStick.Y */
 	if (conf.amap[CONF_CC_AXIS_L_STICK_Y].active) {
-		axis_value = mesg->l_stick[CWIID_Y];
+		axis_value = mesg->l_stick[CWIID_Y]-CWIID_CLASSIC_L_STICK_MAX/2.0;
 		if (conf.amap[CONF_CC_AXIS_L_STICK_Y].flags & CONF_INVERT) {
-			axis_value = CWIID_CLASSIC_L_STICK_MAX - axis_value;
+			axis_value = -axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_L_STICK_Y].axis_type,
 		           conf.amap[CONF_CC_AXIS_L_STICK_Y].action, axis_value);
@@ -605,9 +605,9 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 
 	/* Classic.RStick.X */
 	if (conf.amap[CONF_CC_AXIS_R_STICK_X].active) {
-		axis_value = mesg->r_stick[CWIID_X];
+		axis_value = mesg->r_stick[CWIID_X]-CWIID_CLASSIC_R_STICK_MAX/2.0;
 		if (conf.amap[CONF_CC_AXIS_R_STICK_X].flags & CONF_INVERT) {
-			axis_value = CWIID_CLASSIC_R_STICK_MAX - axis_value;
+			axis_value = -axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_R_STICK_X].axis_type,
 		           conf.amap[CONF_CC_AXIS_R_STICK_X].action, axis_value);
@@ -615,9 +615,9 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 
 	/* Classic.RStick.Y */
 	if (conf.amap[CONF_CC_AXIS_R_STICK_Y].active) {
-		axis_value = mesg->r_stick[CWIID_Y];
+		axis_value = mesg->r_stick[CWIID_Y]-CWIID_CLASSIC_R_STICK_MAX/2.0;
 		if (conf.amap[CONF_CC_AXIS_R_STICK_Y].flags & CONF_INVERT) {
-			axis_value = CWIID_CLASSIC_R_STICK_MAX - axis_value;
+			axis_value = -axis_value;
 		}
 		send_event(&conf, conf.amap[CONF_CC_AXIS_R_STICK_Y].axis_type,
 		           conf.amap[CONF_CC_AXIS_R_STICK_Y].action, axis_value);
