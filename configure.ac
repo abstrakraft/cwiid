@@ -89,7 +89,7 @@ else
 fi
 AC_SUBST(CWIID_PLUGINS_DIR)
 
-AC_ARG_WITH(ldconfig,AC_HELP_STRING([--disable-ldconfig],
+AC_ARG_ENABLE(ldconfig,AC_HELP_STRING([--disable-ldconfig],
 	[don't execute ldconfig after install]))
 if test "$enable_ldconfig" = "no"; then
 	LDCONFIG="#ldconfig"
