@@ -72,7 +72,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
 {
 	int i;
 	uint8_t button;
-	struct cwiid_btn_message *btn_mesg;
+	struct cwiid_btn_mesg *btn_mesg;
 
 	uint8_t led_state = (Led1 ? CWIID_LED1_ON : 0)
 	                  | (Led2 ? CWIID_LED2_ON : 0)
